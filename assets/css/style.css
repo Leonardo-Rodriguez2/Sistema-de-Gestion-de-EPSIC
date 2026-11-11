@@ -1,0 +1,85 @@
+/* ===== EPSIC DESIGN SYSTEM ===== */
+:root {
+  --epsic-ink: #17212b;
+  --epsic-muted: #657384;
+  --epsic-primary: #176b87;
+  --epsic-primary-dark: #0e4f68;
+  --epsic-accent: #d98b35;
+  --epsic-success: #2f806b;
+  --epsic-danger: #b34d4d;
+  --epsic-border: #d9e1e7;
+  --epsic-surface: #ffffff;
+  --epsic-background: #f3f6f8;
+}
+
+/* ===== RESPONSIVE UTILITIES ===== */
+*, *::before, *::after { box-sizing: border-box; }
+
+body { background: var(--epsic-background); color: var(--epsic-ink); }
+button, input, select, textarea { font: inherit; }
+a { color: var(--epsic-primary); }
+
+.section-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin: 28px 0 14px;
+}
+.section-heading h2, .section-heading h3 { margin: 0; color: var(--epsic-ink); }
+
+.progress-track {
+  height: 8px;
+  overflow: hidden;
+  background: #e8eef2;
+  border-radius: 0;
+}
+.progress-track > span {
+  display: block;
+  height: 100%;
+  background: var(--epsic-primary);
+  border-radius: 0;
+}
+
+/* Responsive tables - wrap any table with .table-wrap */
+.table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; margin-bottom: 1rem; }
+.table-wrap table { min-width: 500px; width: 100%; }
+
+/* Responsive images */
+img { max-width: 100%; height: auto; }
+
+/* Hide on mobile */
+@media (max-width: 768px) {
+  .hide-mobile { display: none !important; }
+}
+/* Hide on desktop */
+@media (min-width: 769px) {
+  .hide-desktop { display: none !important; }
+}
+
+/* Stack helper - makes flex rows stack on mobile */
+@media (max-width: 768px) {
+  .stack-mobile { flex-direction: column !important; }
+  .stack-mobile > * { width: 100% !important; }
+}
+
+/* Full width on mobile */
+@media (max-width: 768px) {
+  .w-full-mobile { width: 100% !important; }
+  .text-center-mobile { text-align: center !important; }
+}
+
+/* Gap helper */
+.gap-sm { gap: 8px; }
+.gap-md { gap: 16px; }
+.gap-lg { gap: 24px; }
+
+/* Touch-friendly minimum sizing */
+.touch-target { min-height: 44px; min-width: 44px; display: inline-flex; align-items: center; justify-content: center; }
+
+/* Card grid responsive */
+@media (max-width: 600px) {
+  .grid-2 { grid-template-columns: 1fr !important; }
+  .grid-3 { grid-template-columns: 1fr !important; }
+  .grid-4 { grid-template-columns: 1fr 1fr !important; }
+}
