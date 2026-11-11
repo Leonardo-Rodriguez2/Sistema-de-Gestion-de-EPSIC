@@ -105,7 +105,7 @@ ob_start();
                 <p style="color: var(--text-gray); font-size: 14px;">Facturación clara, sin cobros ocultos, visible en la plataforma.</p>
             </div>
         </div>
-
+// hola mundo
         <!-- Historia -->
         <div class="history-section">
             <h2 style="font-size: 32px; color: var(--primary-dark); margin-bottom: 20px;">Nuestra Historia</h2>
