@@ -79,6 +79,27 @@ class mainModel {
             }
         }
 
+        // --- Columnas en configuraciones_barrio ---
+        // fecha_limite_pago: fecha exigida por el encargado de barrio a los
+        // encargados de calle para realizar el pago del periodo.
+        $columnasConfigBarrio = [
+            ['fecha_limite_pago',   'DATE NULL'],
+            ['precio_comercio',     'DECIMAL(10,2) DEFAULT NULL'],
+            ['precio_tienda',       'DECIMAL(10,2) DEFAULT NULL'],
+            ['precio_empresa',      'DECIMAL(10,2) DEFAULT NULL'],
+            ['precio_urbanizacion', 'DECIMAL(10,2) DEFAULT NULL'],
+            ['precio_otro',         'DECIMAL(10,2) DEFAULT NULL'],
+        ];
+        foreach ($columnasConfigBarrio as [$col, $def]) {
+            $chk = $pdo->prepare("SHOW COLUMNS FROM configuraciones_barrio LIKE ?");
+            $chk->execute([$col]);
+            if ($chk->rowCount() === 0) {
+                $pdo->exec("ALTER TABLE configuraciones_barrio ADD COLUMN `{$col}` {$def}");
+            }
+        }
+        // Valor inicial para barrios que aún nunca guardaron la configuración.
+        $pdo->exec("UPDATE configuraciones_barrio SET fecha_limite_pago = LAST_DAY(CURDATE()) WHERE fecha_limite_pago IS NULL");
+
         // --- Columnas en cobros ---
         $columnasCobros = [
             ['tipo_cobro',              'VARCHAR(30) NOT NULL DEFAULT "Servicio"'],
@@ -398,6 +419,86 @@ class mainModel {
                 $pdo->exec("ALTER TABLE `$tabla` ADD COLUMN `otro_identificador` VARCHAR(100) DEFAULT NULL AFTER `cedula_tipo`");
             }
         }
+    }
+
+    /**
+     * Predios grandes (comercios, tiendas, empresas, urbanizaciones, etc.) se
+     * registran en `viviendas` con un tipo de predio. El precio se configura por
+     * barrio y tipo de predio en "Configuración de Pagos", no en el alta.
+     */
+    protected function asegurarTiposPredio() {
+        $pdo = $this->conectar();
+
+        $columnas = [
+            ['tipo_predio',    "ENUM('Vivienda','Comercio','Tienda','Empresa','Urbanizacion','Otro') NOT NULL DEFAULT 'Vivienda'"],
+            ['monto_mensual',  'DECIMAL(10,2) DEFAULT NULL'],
+            ['cantidad_casas', 'INT(11) NOT NULL DEFAULT 1'],
+        ];
+        foreach ($columnas as [$col, $def]) {
+            $chk = $pdo->prepare("SHOW COLUMNS FROM viviendas LIKE ?");
+            $chk->execute([$col]);
+            if ($chk->rowCount() === 0) {
+                $pdo->exec("ALTER TABLE viviendas ADD COLUMN `{$col}` {$def}");
+            }
+        }
+
+        // Las tarifas ahora viven en configuraciones_barrio; cualquier monto
+        // guardado antes por predio dejaría de tener efecto.
+        $pdo->exec("UPDATE viviendas SET monto_mensual = NULL WHERE monto_mensual IS NOT NULL");
+    }
+
+    /**
+     * Expresión SQL reutilizable que calcula el monto mensual de un predio:
+     * tarifa configurada para su tipo en el barrio, y en urbanizaciones la
+     * tarifa por casa multiplicada por la cantidad de casas declarada.
+     * Requiere los alias v (viviendas) y cb (configuraciones_barrio).
+     */
+    public static function sqlMontoPredio($v = 'v', $cb = 'cb') {
+        return "(CASE
+            WHEN {$v}.tipo_predio = 'Comercio' THEN COALESCE({$cb}.precio_comercio, {$cb}.cuota_mensual, 10.00)
+            WHEN {$v}.tipo_predio = 'Tienda' THEN COALESCE({$cb}.precio_tienda, {$cb}.cuota_mensual, 10.00)
+            WHEN {$v}.tipo_predio = 'Empresa' THEN COALESCE({$cb}.precio_empresa, {$cb}.cuota_mensual, 10.00)
+            WHEN {$v}.tipo_predio = 'Urbanizacion' THEN COALESCE({$cb}.precio_urbanizacion, {$cb}.cuota_mensual, 10.00) * GREATEST(COALESCE({$v}.cantidad_casas, 1), 1)
+            WHEN {$v}.tipo_predio = 'Otro' THEN COALESCE({$cb}.precio_otro, {$cb}.cuota_mensual, 10.00)
+            ELSE COALESCE({$cb}.cuota_mensual, 10.00)
+        END)";
+    }
+
+    /** Tipo de predio: por defecto Vivienda si no viene o no es reconocido. */
+    protected function normalizarTipoPredio($valor) {
+        $valor = trim((string)$valor);
+        $permitidos = defined('TIPOS_PREDIO') ? TIPOS_PREDIO : ['Vivienda'];
+        return in_array($valor, $permitidos, true) ? $valor : 'Vivienda';
+    }
+
+    /**
+     * Cantidad de casas que agrupa una urbanización. El resto de predios usa 1.
+     */
+    protected function normalizarCantidadCasas($valor, $tipoPredio) {
+        $valor = trim((string)$valor);
+        if ($valor === '') {
+            if ($tipoPredio === 'Urbanizacion') {
+                throw new \InvalidArgumentException('Indica la cantidad de casas de la urbanización.');
+            }
+            return 1;
+        }
+        if (!ctype_digit($valor) || (int)$valor < 1 || (int)$valor > 100000) {
+            throw new \InvalidArgumentException('La cantidad de casas debe ser un número entero entre 1 y 100000.');
+        }
+        return (int)$valor;
+    }
+
+    /**
+     * Monto que se cobra al predio según la tarifa configurada para su tipo.
+     * En urbanizaciones la tarifa es por casa y se multiplica por su cantidad.
+     */
+    protected function montoMensualEfectivo($vivienda_id) {
+        $sql = "SELECT " . self::sqlMontoPredio() . "
+                  FROM viviendas v
+                  LEFT JOIN configuraciones_barrio cb ON cb.barrio_id = v.barrio_id
+                 WHERE v.id = ?";
+        $monto = $this->ejecutarConsulta($sql, [(int)$vivienda_id])->fetchColumn();
+        return $monto === false ? 10.00 : (float)$monto;
     }
 
     // --- Normaliza y valida la cédula: solo se almacenan números ---

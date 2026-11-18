@@ -23,6 +23,33 @@ $exencionesStmt = $pdo->prepare("
 $exencionesStmt->execute([$calle_id]);
 $exenciones = $exencionesStmt->fetchAll(PDO::FETCH_ASSOC);
 
+// Vista dentro del cuadro de exenciones: solicitudes enviadas o casas ya exoneradas.
+$vistaExencion = trim((string)($_GET['vista'] ?? 'solicitudes'));
+if (!in_array($vistaExencion, ['solicitudes', 'exoneradas'], true)) {
+    $vistaExencion = 'solicitudes';
+}
+
+$exoneradas = array_values(array_filter($viviendas, static function ($v) {
+    return !empty($v['exento_cobro']);
+}));
+
+// Datos de la exención aprobada más reciente por vivienda (si existe).
+$aprobadasPorVivienda = [];
+foreach ($exenciones as $ex) {
+    $vid = (int)($ex['vivienda_id'] ?? 0);
+    if ($vid && $ex['estado'] === 'Aprobado' && !isset($aprobadasPorVivienda[$vid])) {
+        $aprobadasPorVivienda[$vid] = $ex;
+    }
+}
+
+$tiposExencion = [
+    'pobreza'        => 'Pobreza / Dificultad económica',
+    'adulto_mayor'   => 'Adulto mayor / Jubilado',
+    'empleado'       => 'Empleado de la empresa',
+    'espacio_publico' => 'Espacio público',
+    'otro'           => 'Otro',
+];
+
 $title = "Solicitar Exoneración - EcoCusco";
 $header_title = "Exoneraciones de Cobro";
 $header_subtitle = "Solicita que una vivienda quede exonerada del pago mensual.";
@@ -82,42 +109,123 @@ ob_start();
             <p style="color:#6B7280; font-size:13px; margin-bottom:16px;">
                 Historial de solicitudes enviadas al encargado de barrio.
             </p>
-            <?php if(empty($exenciones)): ?>
-                <div style="text-align:center; padding:30px; color:#9CA3AF;">Aún no has realizado solicitudes de exoneración.</div>
+
+            <style>
+            .exn-tabs { display:flex; gap:4px; padding:4px; margin-bottom:16px; background:#F4F6F8; border:1px solid #E5E7EB; border-radius:8px; }
+            .exn-tab { flex:1; display:flex; align-items:center; justify-content:center; gap:6px; padding:9px 10px; border-radius:6px; color:#6B7280; font-size:12px; font-weight:700; text-decoration:none; text-align:center; transition:background .15s, color .15s, box-shadow .15s; }
+            .exn-tab:hover { color:#1F2937; background:#fff; transform:none; }
+            .exn-tab.active { color:#1F2937; background:#fff; box-shadow:0 1px 3px rgba(17,24,39,.12); }
+            .exn-count { padding:1px 7px; border-radius:10px; background:#E5E7EB; color:#4B5563; font-size:10px; font-weight:700; line-height:1.5; }
+            .exn-tab.active .exn-count { background:#203d4b; color:#fff; }
+            .exn-list { display:flex; flex-direction:column; gap:10px; }
+            .exn-item { padding:12px; border:1px solid #E5E7EB; border-left:3px solid #D6E1EA; border-radius:8px; background:#fff; }
+            .exn-item.exn-exenta { border-left-color:#5A6B7D; background:#F9FAFB; }
+            .exn-item-head { display:flex; justify-content:space-between; align-items:center; gap:8px; margin-bottom:6px; }
+            .exn-item-title { font-weight:700; font-size:13px; color:#1F2937; }
+            .exn-meta { font-size:11px; color:#6B7280; line-height:1.5; }
+            .exn-desc { margin-top:5px; font-size:11px; color:#9CA3AF; font-style:italic; }
+            .exn-date { margin-top:4px; font-size:10px; color:#9CA3AF; }
+            .exn-empty { padding:34px 20px; text-align:center; color:#9CA3AF; }
+            .exn-empty .exn-empty-icon { font-size:38px; line-height:1; margin-bottom:8px; }
+            @media(max-width:520px) {
+                .exn-tabs { flex-direction:column; }
+                .exn-tab { justify-content:flex-start; }
+            }
+            </style>
+
+            <div class="exn-tabs">
+                <a href="router.php?page=solicitar_exoneracion&vista=solicitudes"
+                   class="exn-tab <?= $vistaExencion === 'solicitudes' ? 'active' : '' ?>">
+                    📩 Mis Solicitudes
+                    <span class="exn-count"><?= count($exenciones) ?></span>
+                </a>
+                <a href="router.php?page=solicitar_exoneracion&vista=exoneradas"
+                   class="exn-tab <?= $vistaExencion === 'exoneradas' ? 'active' : '' ?>">
+                    🛡️ Casas Exoneradas
+                    <span class="exn-count"><?= count($exoneradas) ?></span>
+                </a>
+            </div>
+
+            <?php if ($vistaExencion === 'solicitudes'): ?>
+                <?php if (empty($exenciones)): ?>
+                    <div class="exn-empty">
+                        <div class="exn-empty-icon">📩</div>
+                        Aún no has realizado solicitudes de exoneración.
+                    </div>
+                <?php else: ?>
+                    <div class="exn-list">
+                        <?php foreach ($exenciones as $ex): ?>
+                            <div class="exn-item">
+                                <div class="exn-item-head">
+                                    <span class="exn-item-title">
+                                        Casa #<?= htmlspecialchars($ex['numero_casa'] ?: '?') ?>
+                                    </span>
+                                    <?php if ($ex['estado'] == 'Pendiente'): ?>
+                                        <span class="badge" style="background:#F2EEE7; color:#6E5F45; border:none;">PENDIENTE</span>
+                                    <?php elseif ($ex['estado'] == 'Aprobado'): ?>
+                                        <span class="badge" style="background:#E9EFF4; color:#33485C; border:none;">APROBADO</span>
+                                    <?php else: ?>
+                                        <span class="badge" style="background:#F4EDED; color:#7A4F4F; border:none;">RECHAZADO</span>
+                                    <?php endif; ?>
+                                </div>
+                                <div class="exn-meta">
+                                    <?= htmlspecialchars($ex['propietario']) ?> —
+                                    <?php $identificacion = formato_identificacion($ex['v_cedula'] ?? '', $ex['v_cedula_tipo'] ?? 'V', $ex['v_otro_identificador'] ?? ''); ?>
+                                    <?php if ($identificacion !== ''): ?><?= htmlspecialchars($identificacion) ?> — <?php endif; ?>
+                                    Tipo: <?= htmlspecialchars($tiposExencion[$ex['tipo_exencion']] ?? $ex['tipo_exencion']) ?>
+                                </div>
+                                <?php if ($ex['descripcion']): ?>
+                                    <div class="exn-desc">
+                                        <?= htmlspecialchars($ex['descripcion']) ?>
+                                    </div>
+                                <?php endif; ?>
+                                <div class="exn-date">
+                                    <?= date('d/m/Y', strtotime($ex['fecha_creacion'])) ?>
+                                    <?php if ($ex['motivo_rechazo']): ?> — Motivo: <?= htmlspecialchars($ex['motivo_rechazo']) ?><?php endif; ?>
+                                </div>
+                            </div>
+                        <?php endforeach; ?>
+                    </div>
+                <?php endif; ?>
             <?php else: ?>
-                <div style="display:flex; flex-direction:column; gap:10px;">
-                    <?php foreach($exenciones as $ex): ?>
-                        <div style="border:1px solid #E5E7EB; border-radius:8px; padding:12px;">
-                            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
-                                <span style="font-weight:700; font-size:13px;">
-                                    Casa #<?= htmlspecialchars($ex['numero_casa'] ?: '?') ?>
-                                </span>
-                                <?php if($ex['estado'] == 'Pendiente'): ?>
-                                    <span class="badge" style="background:#F2EEE7; color:#6E5F45; border:none;">PENDIENTE</span>
-                                <?php elseif($ex['estado'] == 'Aprobado'): ?>
-                                    <span class="badge" style="background:#E9EFF4; color:#33485C; border:none;">APROBADO</span>
+                <?php if (empty($exoneradas)): ?>
+                    <div class="exn-empty">
+                        <div class="exn-empty-icon">🛡️</div>
+                        No hay casas exoneradas en tu calle.
+                    </div>
+                <?php else: ?>
+                    <div class="exn-list">
+                        <?php foreach ($exoneradas as $v): ?>
+                            <?php $det = $aprobadasPorVivienda[(int)$v['id']] ?? null; ?>
+                            <div class="exn-item exn-exenta">
+                                <div class="exn-item-head">
+                                    <span class="exn-item-title">
+                                        🏠 Casa #<?= htmlspecialchars($v['numero_casa'] ?: '?') ?>
+                                    </span>
+                                    <span class="badge" style="background:#E7EDF3; color:#4A5568; border:none;">EXONERADA</span>
+                                </div>
+                                <div class="exn-meta">
+                                    <?= htmlspecialchars($v['propietario']) ?>
+                                    <?php $identificacion = formato_identificacion($v['cedula'] ?? '', $v['cedula_tipo'] ?? 'V', $v['otro_identificador'] ?? ''); ?>
+                                    <?php if ($identificacion !== ''): ?> — <?= htmlspecialchars($identificacion) ?><?php endif; ?>
+                                </div>
+                                <?php if ($det): ?>
+                                    <div class="exn-meta">
+                                        Motivo: <?= htmlspecialchars($tiposExencion[$det['tipo_exencion']] ?? $det['tipo_exencion']) ?>
+                                    </div>
+                                    <?php if ($det['descripcion']): ?>
+                                        <div class="exn-desc"><?= htmlspecialchars($det['descripcion']) ?></div>
+                                    <?php endif; ?>
+                                    <div class="exn-date">
+                                        Exonerada desde <?= date('d/m/Y', strtotime($det['fecha_revision'] ?: $det['fecha_creacion'])) ?>
+                                    </div>
                                 <?php else: ?>
-                                    <span class="badge" style="background:#F4EDED; color:#7A4F4F; border:none;">RECHAZADO</span>
+                                    <div class="exn-date">Exenta del pago mensual.</div>
                                 <?php endif; ?>
                             </div>
-                            <div style="font-size:11px; color:#6B7280;">
-                                <?= htmlspecialchars($ex['propietario']) ?> — 
-                                <?php $identificacion = formato_identificacion($ex['v_cedula'] ?? '', $ex['v_cedula_tipo'] ?? 'V', $ex['v_otro_identificador'] ?? ''); ?>
-                                <?php if ($identificacion !== ''): ?><?= htmlspecialchars($identificacion) ?> — <?php endif; ?>
-                                Tipo: <?= htmlspecialchars($ex['tipo_exencion']) ?>
-                            </div>
-                            <?php if($ex['descripcion']): ?>
-                                <div style="font-size:11px; color:#9CA3AF; margin-top:4px; font-style:italic;">
-                                    <?= htmlspecialchars($ex['descripcion']) ?>
-                                </div>
-                            <?php endif; ?>
-                            <div style="font-size:10px; color:#9CA3AF; margin-top:4px;">
-                                <?= date('d/m/Y', strtotime($ex['fecha_creacion'])) ?>
-                                <?php if($ex['motivo_rechazo']): ?> — Motivo: <?= htmlspecialchars($ex['motivo_rechazo']) ?><?php endif; ?>
-                            </div>
-                        </div>
-                    <?php endforeach; ?>
-                </div>
+                        <?php endforeach; ?>
+                    </div>
+                <?php endif; ?>
             <?php endif; ?>
         </div>
     </div>

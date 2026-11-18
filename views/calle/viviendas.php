@@ -9,6 +9,7 @@ use app\models\mainModel;
 if (empty($pdo)) $pdo = (new mainModel())->conectar();
 
 $user = check_dashboard_access([6]);
+$title = 'Mis Viviendas - EPSIC';
 $sid = $_SESSION['active_sid'] ?? '';
 
 // Obtener la calle asignada
@@ -32,7 +33,7 @@ $lote_data = $loteStmt->fetch(PDO::FETCH_ASSOC);
 $lote_estado = $lote_data['estado'] ?? 'Abierto';
 
 // Contar casas activas (excluye bajas aprobadas y exentas)
-$total_activas = $pdo->prepare("SELECT COUNT(*) FROM viviendas WHERE calle_id=? AND estado_servicio='Activo' AND exento_cobro=0 AND id NOT IN (SELECT vivienda_id FROM solicitudes_vivienda WHERE tipo='Baja' AND estado='Aprobado')");
+$total_activas = $pdo->prepare("SELECT COUNT(*) FROM viviendas WHERE calle_id=? AND estado_servicio='Activo' AND exento_cobro=0");
 $total_activas->execute([$calle_id]);
 $total_casas = (int)$total_activas->fetchColumn();
 
@@ -63,7 +64,6 @@ if ($f_search !== '') {
             JOIN calles c ON v.calle_id = c.id
             LEFT JOIN cobros cb ON v.id = cb.vivienda_id AND cb.mes = ? AND cb.anio = ? AND cb.estado != 'Anulado'
             WHERE v.calle_id = ?
-            AND v.id NOT IN (SELECT sv.vivienda_id FROM solicitudes_vivienda sv WHERE sv.tipo = 'Baja' AND sv.estado = 'Aprobado')
             AND (v.propietario LIKE ? OR v.cedula LIKE ? OR v.numero_casa LIKE ?)
             ORDER BY CAST(v.numero_casa AS UNSIGNED) ASC, v.numero_casa ASC";
     $stmt = $pdo->prepare($sql);
@@ -77,7 +77,6 @@ if ($f_search !== '') {
             JOIN calles c ON v.calle_id = c.id
             LEFT JOIN cobros cb ON v.id = cb.vivienda_id AND cb.mes = ? AND cb.anio = ? AND cb.estado != 'Anulado'
             WHERE v.calle_id = ?
-            AND v.id NOT IN (SELECT sv.vivienda_id FROM solicitudes_vivienda sv WHERE sv.tipo = 'Baja' AND sv.estado = 'Aprobado')
             ORDER BY CAST(v.numero_casa AS UNSIGNED) ASC, v.numero_casa ASC";
     $stmt = $pdo->prepare($sql);
     $stmt->execute([$mes_actual, $anio_actual, $calle_id]);
@@ -105,6 +104,8 @@ foreach ($viviendas as $v) {
         $v['propietario'] ?? '',
         formato_identificacion($v['cedula'] ?? '', $v['cedula_tipo'] ?? 'V', $v['otro_identificador'] ?? ''),
         $v['direccion'] ?? '',
+        tipo_predio_etiqueta($v['tipo_predio'] ?? 'Vivienda'),
+        number_format(monto_predio_efectivo($v['tipo_predio'] ?? 'Vivienda', $v['cantidad_casas'] ?? 1, tarifas_barrio($pdo, $v['barrio_id'])), 2, '.', ''),
         $v['estado_servicio'] ?? '',
         !empty($v['exento_cobro']) ? 'Exenta' : 'No',
         $v['pago_mes_estado'] ?? 'Sin registro',
@@ -115,7 +116,7 @@ foreach ($viviendas as $v) {
 reporte_exportar_si_solicitado(
     'viviendas_calle',
     'Viviendas de la calle',
-    ['Casa', 'Propietario', 'Identificación', 'Dirección', 'Estado del servicio', 'Exenta', 'Pago del mes', 'Verificación', 'Deuda acumulada'],
+    ['Casa', 'Propietario', 'Identificación', 'Dirección', 'Tipo de predio', 'Monto mensual', 'Estado del servicio', 'Exenta', 'Pago del mes', 'Verificación', 'Deuda acumulada'],
     $filasViviendas,
     array_merge($metaViviendas, ['Total viviendas' => count($filasViviendas)]),
     'Nómina de viviendas y control de pagos de la calle'
@@ -183,6 +184,7 @@ ob_start();
                 <thead>
                     <tr style="background: #F9FAFB; border-bottom: 1px solid #E5E7EB; color: #374151;">
                         <th style="padding: 10px 12px;">Casa</th>
+                        <th style="padding: 10px 12px;">Tipo / Cuota</th>
                         <th style="padding: 10px 12px;">Propietario</th>
                         <th style="padding: 10px 12px;">Deuda</th>
                         <th style="padding: 10px 12px;">Estado</th>
@@ -205,6 +207,10 @@ ob_start();
                         ?>
                         <tr id="vivienda-<?= (int)$v['id'] ?>" style="<?= $v['exento_cobro'] ? 'background:#EEF2F6;' : '' ?><?= (int)($_GET['vivienda_id'] ?? 0) === (int)$v['id'] ? ' outline:2px solid #C9A9A9; outline-offset:-2px;' : '' ?>">
                             <td style="padding: 10px 12px;">#<?= htmlspecialchars($v['numero_casa']) ?></td>
+                            <td style="padding: 10px 12px;">
+                                <div style="font-weight:600; color:#374151;"><?= htmlspecialchars(tipo_predio_etiqueta($v['tipo_predio'] ?? 'Vivienda')) ?></div>
+                                <div style="font-size:10px; color:#6B7280;"><?= htmlspecialchars(etiqueta_monto_predio($v['tipo_predio'] ?? 'Vivienda', $v['cantidad_casas'] ?? 1, tarifas_barrio($pdo, $v['barrio_id']))) ?></div>
+                            </td>
                             <td style="padding: 10px 12px;">
                                 <?= htmlspecialchars($v['propietario']) ?>
                                 <?php $identificacion = formato_identificacion($v['cedula'] ?? '', $v['cedula_tipo'] ?? 'V', $v['otro_identificador'] ?? ''); ?>
@@ -290,7 +296,7 @@ ob_start();
                         </tr>
                     <?php endforeach; ?>
                     <?php if (empty($viviendas)): ?>
-                        <tr><td colspan="5" style="padding:40px; text-align:center; color:#9CA3AF;">
+                        <tr><td colspan="6" style="padding:40px; text-align:center; color:#9CA3AF;">
                             <div style="font-size:36px; margin-bottom:12px;">🏘️</div>
                             <div style="font-weight:600; color:#374151; margin-bottom:4px;">No hay viviendas registradas</div>
                             <div style="font-size:12px;">No se encontraron viviendas en esta calle</div>

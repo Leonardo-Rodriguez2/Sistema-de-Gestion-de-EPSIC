@@ -19,6 +19,11 @@ $calle = $pdo->prepare("SELECT * FROM calles WHERE id=?");
 $calle->execute([$calle_id]);
 $calle = $calle->fetch(PDO::FETCH_ASSOC);
 
+// Fecha límite de pago fijada por el encargado de barrio para esta calle
+$fechaLimiteStmt = $pdo->prepare("SELECT fecha_limite_pago FROM configuraciones_barrio WHERE barrio_id = ?");
+$fechaLimiteStmt->execute([$calle['barrio_id'] ?? 0]);
+$fecha_limite_pago = $fechaLimiteStmt->fetchColumn() ?: '';
+
 $meses_nombres = ['','Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
 
 // Facturas recibidas (enviadas por el barrio)
@@ -63,6 +68,7 @@ if (!empty($facturas)) {
     }
 }
 
+$title = 'Mis Facturas - EPSIC';
 $header_title = 'Mis Facturas';
 $header_subtitle = 'Calle: ' . htmlspecialchars($calle['nombre']);
 $extra_css = '
@@ -91,6 +97,13 @@ ob_start();
 <div style="margin-bottom:20px;">
     <p style="font-size:13px; color:#6B7280; margin:0;">Facturas enviadas para tu calle.</p>
 </div>
+
+<?php if (!empty($fecha_limite_pago)): ?>
+<div style="margin-bottom:20px; padding:12px 16px; background:#F2EEE7; border-left:4px solid #8A5A5A; border-radius:6px; font-size:13px; color:#6E5F45;">
+    📅 <strong>Fecha límite de pago:</strong> <?= date('d/m/Y', strtotime($fecha_limite_pago)) ?>
+    <span style="font-size:11px;">— definida por el encargado de barrio para los encargados de calle.</span>
+</div>
+<?php endif; ?>
 
 <?php if (empty($facturas)): ?>
 <div class="empty-state">

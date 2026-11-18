@@ -150,10 +150,8 @@ ob_start();
             <?php
             $callesStmt = $pdo->prepare(
                 "SELECT lc.*, c.nombre as calle_nombre, u.nombre as enc_nombre, u.apellido as enc_apellido,
-                        (SELECT COUNT(*) FROM viviendas v WHERE v.calle_id = lc.calle_id AND v.estado_servicio = 'Activo' 
-                         AND v.id NOT IN (SELECT vivienda_id FROM solicitudes_vivienda WHERE tipo='Baja' AND estado='Aprobado')) as total_viviendas,
-                        (SELECT COUNT(*) FROM viviendas v WHERE v.calle_id = lc.calle_id AND v.estado_servicio = 'Activo' AND v.exento_cobro = 1
-                         AND v.id NOT IN (SELECT vivienda_id FROM solicitudes_vivienda WHERE tipo='Baja' AND estado='Aprobado')) as viviendas_exentas
+                        (SELECT COUNT(*) FROM viviendas v WHERE v.calle_id = lc.calle_id AND v.estado_servicio = 'Activo') as total_viviendas,
+                        (SELECT COUNT(*) FROM viviendas v WHERE v.calle_id = lc.calle_id AND v.estado_servicio = 'Activo' AND v.exento_cobro = 1) as viviendas_exentas
                  FROM lotes_calle lc 
                  JOIN calles c ON lc.calle_id = c.id 
                  JOIN usuarios u ON lc.encargado_calle_id = u.id
@@ -222,11 +220,10 @@ ob_start();
                     $casasStmt = $pdo->prepare(
                         "SELECT v.numero_casa, v.propietario, v.cedula, v.cedula_tipo, v.otro_identificador,
                                 v.exento_cobro, v.estado_servicio,
-                                c.monto, c.estado, c.referencia_pago, c.comprobante_calle
+                                c.monto, c.estado, c.referencia_pago, c.comprobante_calle, c.comprobante_barrio
                          FROM viviendas v
                          LEFT JOIN cobros c ON c.vivienda_id = v.id AND c.mes = ? AND c.anio = ? AND c.estado != 'Anulado'
                          WHERE v.calle_id = ?
-                         AND v.id NOT IN (SELECT vivienda_id FROM solicitudes_vivienda WHERE tipo='Baja' AND estado='Aprobado')
                          ORDER BY CAST(v.numero_casa AS UNSIGNED), v.numero_casa"
                     );
                     $casasStmt->execute([$lb['periodo_mes'], $lb['periodo_anio'], $cl['calle_id']]);
@@ -248,6 +245,8 @@ ob_start();
                                 $pagado = $cs['estado'] === 'Pagado';
                                 $exenta = $cs['exento_cobro'] == 1;
                                 $suspendida = $cs['estado_servicio'] === 'Suspendido';
+                                $comprobanteCasa = trim((string)($cs['comprobante_barrio'] ?? ''));
+                                if ($comprobanteCasa === '') $comprobanteCasa = trim((string)($cs['comprobante_calle'] ?? ''));
                             ?>
                             <tr style="border-bottom:1px solid #F3F4F6; background:<?= $suspendida?'#F9FAFB':($exenta?'#EEF2F6':($pagado?'#F4F6F8':'#F7F2F2')) ?>; opacity:<?= $suspendida?'0.5':'1' ?>;">
                                 <td style="padding:5px 8px; font-weight:600;">#<?= htmlspecialchars($cs['numero_casa']) ?></td>
@@ -269,10 +268,10 @@ ob_start();
                                 </td>
                                 <td style="padding:5px 8px; font-weight:600; font-size:10px;"><?= htmlspecialchars($cs['referencia_pago'] ?? '—') ?></td>
                                 <td style="padding:5px 8px; text-align:center;">
-                                    <?php if(!empty($cs['comprobante_calle']) && preg_match('/\.(jpe?g|png|gif|webp|bmp)(\?.*)?$/i', $cs['comprobante_calle'])): ?>
-                                        <img src="<?= htmlspecialchars($cs['comprobante_calle']) ?>" style="width:28px; height:28px; border-radius:3px; object-fit:cover; cursor:pointer; border:1px solid #E5E7EB;" onclick="openComprobanteModal(this)" data-url="<?= htmlspecialchars($cs['comprobante_calle']) ?>">
-                                    <?php elseif(!empty($cs['comprobante_calle'])): ?>
-                                        <a href="#" data-url="<?= htmlspecialchars($cs['comprobante_calle']) ?>" onclick="return openComprobanteModal(this)" style="color:#3E5C76; font-size:10px;">📎</a>
+                                    <?php if($comprobanteCasa !== '' && preg_match('/\.(jpe?g|png|gif|webp|bmp)(\?.*)?$/i', $comprobanteCasa)): ?>
+                                        <img src="<?= htmlspecialchars($comprobanteCasa) ?>" style="width:28px; height:28px; border-radius:3px; object-fit:cover; cursor:pointer; border:1px solid #E5E7EB;" onclick="openComprobanteModal(this)" data-url="<?= htmlspecialchars($comprobanteCasa) ?>">
+                                    <?php elseif($comprobanteCasa !== ''): ?>
+                                        <a href="#" data-url="<?= htmlspecialchars($comprobanteCasa) ?>" onclick="return openComprobanteModal(this)" style="color:#3E5C76; font-size:10px;">📎</a>
                                     <?php else: ?>
                                         <span style="color:#D1D5DB;">—</span>
                                     <?php endif; ?>

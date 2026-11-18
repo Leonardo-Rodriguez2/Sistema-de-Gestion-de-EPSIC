@@ -81,6 +81,7 @@ class viewsController extends viewsModel {
         $this->asegurarColumnasPagos();
         $this->asegurarExenciones();
         $this->asegurarCedula();
+        $this->asegurarTiposPredio();
         $this->asegurarSolicitudesGestion();
         $this->asegurarRecepcionesResiduos();
 
@@ -195,6 +196,16 @@ class viewsController extends viewsModel {
         // Reportes ciudadanos: acción compartida por admin, gestor y personal.
         if ($action === 'actualizar_reporte') {
             $controllerClass = "app\\controllers\\adminController";
+        }
+
+        // Solicitudes de servicio del portal público: bandeja compartida.
+        if ($action === 'actualizar_solicitud_servicio') {
+            $controllerClass = "app\\controllers\\adminController";
+        }
+
+        // Recepción de residuos: el módulo vive fuera de las carpetas por rol.
+        if ($page === 'recepcion_residuos' || in_array($action, ['registrar_recepcion_residuo', 'anular_recepcion_residuo'], true)) {
+            $controllerClass = "app\\controllers\\recepcionController";
         }
 
         if (class_exists($controllerClass)) {

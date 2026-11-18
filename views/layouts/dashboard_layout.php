@@ -7,6 +7,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title><?php echo $title ?? 'Dashboard - EPSIC'; ?></title>
+  <link rel="icon" href="/reciclaje/img/logo.png?v=4" type="image/png">
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/reciclaje/assets/css/style.css">
   <link rel="stylesheet" href="/reciclaje/assets/css/system-modal.css">
@@ -122,6 +123,10 @@
     .form-group input, .form-group select, .form-group textarea { width:100%; min-height:42px; border:1px solid var(--border); padding:10px 12px; background:#fff; color:#344454; outline:none; }
     .form-group input:focus, .form-group select:focus, .form-group textarea:focus { border-color:var(--primary); box-shadow:0 0 0 3px rgba(23,107,135,.12); }
     .status-pill { display:inline-flex; align-items:center; gap:6px; padding:5px 9px; border:1px solid currentColor; font-size:10px; font-weight:700; text-transform:uppercase; }
+
+    /* Iconos de línea monocromos: heredan el color del texto, sin relleno */
+    .sys-icon { display:inline-flex; width:1em; height:1em; align-items:center; justify-content:center; vertical-align:-0.15em; line-height:1; flex:0 0 auto; }
+    .sys-icon svg { width:100%; height:100%; display:block; fill:none; stroke:currentColor; }
     .gestion-form-panel { display:none; }
     .gestion-form-panel.active { display:block; }
     .gestion-form-tab { cursor:pointer; font:inherit; }
@@ -705,5 +710,6 @@
     })();
   </script>
   <script src="/reciclaje/assets/js/form-validation.js"></script>
+  <script src="/reciclaje/assets/js/system-icons.js"></script>
 </body>
 </html>

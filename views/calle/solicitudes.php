@@ -148,7 +148,8 @@ ob_start();
             <table class="table-mini" style="width: 100%; border-collapse: collapse;">
                 <thead>
                     <tr style="text-align: left; border-bottom: 2px solid #F3F4F6;">
-                        <th style="padding: 12px;">Fecha / Tipo</th>
+                        <th style="padding: 12px;">Fecha</th>
+                        <th style="padding: 12px;">Tipo</th>
                         <th style="padding: 12px;">Vivienda</th>
                         <th style="padding: 12px;">Estado</th>
                         <th style="padding: 12px;">Detalles / Deuda</th>
@@ -156,14 +157,24 @@ ob_start();
                 </thead>
                 <tbody>
                     <?php if(empty($solicitudes)): ?>
-                        <tr><td colspan="4" style="text-align: center; color: #9CA3AF; padding: 40px;">Aún no has realizado ninguna solicitud.</td></tr>
+                        <tr><td colspan="5" style="text-align: center; color: #9CA3AF; padding: 40px;">Aún no has realizado ninguna solicitud.</td></tr>
                     <?php endif; ?>
                     <?php foreach($solicitudes as $s): ?>
+                        <?php
+                            $tipoSolicitud = (string)($s['tipo'] ?? '');
+                            $tipoEtiqueta = ['Alta' => 'ALTA', 'Baja' => 'BAJA', 'Renovacion' => 'RENOVACIÓN'][$tipoSolicitud] ?? strtoupper($tipoSolicitud);
+                            $tipoBg = $tipoSolicitud === 'Alta' ? '#E9EFF4' : ($tipoSolicitud === 'Baja' ? '#F4EDED' : '#EEF2F6');
+                            $tipoColor = $tipoSolicitud === 'Alta' ? '#33485C' : ($tipoSolicitud === 'Baja' ? '#7A4F4F' : '#3E5C76');
+                            $montoDeuda = (float)($s['monto_deuda'] ?? 0);
+                            $detallesDeuda = trim((string)($s['detalles_deuda'] ?? ''));
+                        ?>
                         <tr style="border-bottom: 1px solid #F3F4F6;">
-                            <td style="padding: 12px;">
+                            <td style="padding: 12px; white-space: nowrap;">
                                 <div style="font-size: 11px; color: #6B7280;"><?= date('d/m/Y', strtotime($s['fecha_creacion'])) ?></div>
-                                <span class="badge" style="background: <?= $s['tipo'] == 'Alta' ? '#E9EFF4' : ($s['tipo'] == 'Baja' ? '#F4EDED' : '#E9EFF4') ?>; color: <?= $s['tipo'] == 'Alta' ? '#33485C' : ($s['tipo'] == 'Baja' ? '#7A4F4F' : '#3E5C76') ?>; border: none; font-size: 10px; font-weight: 700;">
-                                    <?= strtoupper($s['tipo']) ?>
+                            </td>
+                            <td style="padding: 12px;">
+                                <span class="badge" style="background: <?= $tipoBg ?>; color: <?= $tipoColor ?>; border: none; font-size: 10px; font-weight: 700;">
+                                    <?= htmlspecialchars($tipoEtiqueta) ?>
                                 </span>
                             </td>
                             <td style="padding: 12px;">
@@ -186,11 +197,15 @@ ob_start();
                                 <?php endif; ?>
                             </td>
                             <td style="padding: 12px;">
-                                <?php if($s['tipo'] == 'Baja'): ?>
-                                    <div style="font-weight: 800; color: #7A4F4F; font-size: 12px;">S/ <?= number_format($s['monto_deuda'], 2) ?></div>
-                                    <div style="font-size: 10px; color: #6B7280;"><?= htmlspecialchars($s['detalles_deuda']) ?></div>
+                                <?php if(in_array($tipoSolicitud, ['Baja', 'Renovacion'], true)): ?>
+                                    <div style="font-weight: 800; color: <?= $tipoSolicitud === 'Baja' ? '#7A4F4F' : '#3E5C76' ?>; font-size: 12px;">S/ <?= number_format($montoDeuda, 2) ?></div>
+                                    <?php if ($detallesDeuda !== ''): ?>
+                                        <div style="font-size: 10px; color: #6B7280;"><?= htmlspecialchars($detallesDeuda) ?></div>
+                                    <?php endif; ?>
+                                <?php elseif ($detallesDeuda !== ''): ?>
+                                    <div style="font-size: 10px; color: #6B7280;"><?= htmlspecialchars($detallesDeuda) ?></div>
                                 <?php else: ?>
-                                    <span style="color: #9CA3AF; font-size: 11px;">-</span>
+                                    <span style="color: #9CA3AF; font-size: 11px;">Registro de vivienda</span>
                                 <?php endif; ?>
                             </td>
                         </tr>

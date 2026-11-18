@@ -33,6 +33,16 @@ try {
     $calleData = $calleStmt->fetch(PDO::FETCH_ASSOC);
     $calle_id = $calleData['calle_id'] ?? null;
 
+    // Fecha límite de pago exigida por el encargado de barrio
+    $fechaLimiteStmt = $pdo->prepare(
+        "SELECT cb.fecha_limite_pago
+           FROM calles c
+           LEFT JOIN configuraciones_barrio cb ON cb.barrio_id = c.barrio_id
+          WHERE c.id = ?"
+    );
+    $fechaLimiteStmt->execute([$calle_id]);
+    $fecha_limite_pago = $fechaLimiteStmt->fetchColumn() ?: '';
+
     if (!$calle_id) {
         $title = "Error - EcoCusco";
         $header_title = "Sin asignación";
@@ -61,8 +71,8 @@ try {
     $lote = $loteStmt->fetch(PDO::FETCH_ASSOC);
     $lote_estado = $lote['estado'] ?? 'No Creado';
 
-    // Contar viviendas activas (excluye bajas aprobadas)
-    $activasStmt = $pdo->prepare("SELECT COUNT(*) FROM viviendas WHERE calle_id=? AND estado_servicio='Activo' AND id NOT IN (SELECT vivienda_id FROM solicitudes_vivienda WHERE tipo='Baja' AND estado='Aprobado')");
+    // Contar viviendas activas
+    $activasStmt = $pdo->prepare("SELECT COUNT(*) FROM viviendas WHERE calle_id=? AND estado_servicio='Activo'");
     $activasStmt->execute([$calle_id]);
     $total_activas = (int)$activasStmt->fetchColumn();
 
@@ -113,6 +123,13 @@ ob_start();
 ?>
 
 <?php render_dashboard_alerts($mensaje_exito ?? null, $mensaje_error ?? null); ?>
+
+<?php if (!empty($fecha_limite_pago)): ?>
+<div style="margin-bottom:16px; padding:12px 16px; background:#F2EEE7; border-left:4px solid #8A5A5A; border-radius:6px; font-size:13px; color:#6E5F45;">
+    📅 <strong>Fecha límite de pago:</strong> <?= date('d/m/Y', strtotime($fecha_limite_pago)) ?>
+    <span style="font-size:11px;">— definida por el encargado de barrio para los encargados de calle.</span>
+</div>
+<?php endif; ?>
 
 <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 20px; align-items: start;">
     
@@ -261,7 +278,6 @@ ob_start();
              WHERE v.calle_id = ? 
              AND v.estado_servicio = 'Activo' 
              AND v.exento_cobro = 0
-             AND v.id NOT IN (SELECT vivienda_id FROM solicitudes_vivienda WHERE tipo='Baja' AND estado='Aprobado')
              AND v.id NOT IN (SELECT vivienda_id FROM cobros WHERE mes = ? AND anio = ? AND estado = 'Pagado')
              ORDER BY CAST(v.numero_casa AS UNSIGNED) ASC, v.numero_casa ASC"
         );

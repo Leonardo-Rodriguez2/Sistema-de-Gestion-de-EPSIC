@@ -73,6 +73,8 @@ foreach ($viviendas as $v) {
         $v['propietario'] ?? '',
         formato_identificacion($v['cedula'] ?? '', $v['cedula_tipo'] ?? 'V', $v['otro_identificador'] ?? ''),
         $v['direccion'] ?? '',
+        tipo_predio_etiqueta($v['tipo_predio'] ?? 'Vivienda'),
+        number_format(monto_predio_efectivo($v['tipo_predio'] ?? 'Vivienda', $v['cantidad_casas'] ?? 1, tarifas_barrio($pdo, $v['barrio_id'])), 2, '.', ''),
         $v['barrio_nombre'] ?? '',
         $v['calle_nombre'] ?? 'Sin calle',
         trim(($v['enc_nombre'] ?? '') . ' ' . ($v['enc_apellido'] ?? '')),
@@ -83,7 +85,7 @@ foreach ($viviendas as $v) {
 reporte_exportar_si_solicitado(
     'viviendas',
     'Viviendas registradas',
-    ['Casa', 'Propietario', 'Identificación', 'Dirección', 'Barrio', 'Calle', 'Encargado de calle', 'Estado del servicio', 'Exenta de cobro'],
+    ['Casa', 'Propietario', 'Identificación', 'Dirección', 'Tipo de predio', 'Monto mensual', 'Barrio', 'Calle', 'Encargado de calle', 'Estado del servicio', 'Exenta de cobro'],
     $filasViviendas,
     array_merge($metaViviendas, ['Total viviendas' => count($filasViviendas)]),
     'Listado administrativo de viviendas'
@@ -146,6 +148,7 @@ ob_start();
             <div style="display:flex; gap:8px; flex-wrap:wrap;">
                 <a href="router.php?page=reporte_calle<?= $f_calle > 0 ? '&calle_id=' . $f_calle : '' ?><?= $f_barrio > 0 ? '&barrio_id=' . $f_barrio : '' ?>" class="btn-primary" style="text-decoration: none; padding: 8px 16px; background:#33485C;">🖨️ Reporte por Calle</a>
                 <a href="router.php?page=registrar_vivienda" class="btn-primary" style="text-decoration: none; padding: 8px 16px;">+ Registrar Nueva</a>
+                <a href="router.php?page=registrar_vivienda&tipo=Comercio" class="btn-primary" style="text-decoration: none; padding: 8px 16px; background:#0F766E;">+ Registrar Comercio / Tienda</a>
             </div>
         </div>
         
@@ -154,6 +157,7 @@ ob_start();
                 <thead>
                     <tr style="background: #F9FAFB; text-align: left;">
                         <th style="padding: 12px 20px; color: #6B7280; font-weight: 600;">Propietario / Familia</th>
+                        <th style="padding: 12px; color: #6B7280; font-weight: 600;">Tipo / Cuota</th>
                         <th style="padding: 12px; color: #6B7280; font-weight: 600;">Dirección / Nro Casa</th>
                         <th style="padding: 12px; color: #6B7280; font-weight: 600;">Zona</th>
                         <th style="padding: 12px; color: #6B7280; font-weight: 600;">Encargado Responsable</th>
@@ -163,7 +167,7 @@ ob_start();
                 <tbody>
                     <?php if (empty($viviendas)): ?>
                         <tr>
-                            <td colspan="5" style="padding: 40px; text-align: center; color: #9CA3AF;">No se encontraron viviendas con los filtros aplicados.</td>
+                            <td colspan="6" style="padding: 40px; text-align: center; color: #9CA3AF;">No se encontraron predios con los filtros aplicados.</td>
                         </tr>
                     <?php endif; ?>
                     <?php foreach($viviendas as $v): ?>
@@ -175,6 +179,12 @@ ob_start();
                                     <div style="font-size: 11px; color: #6B7280;">Identificación: <?= htmlspecialchars($identificacion) ?></div>
                                 <?php endif; ?>
                                 <div style="font-size: 11px; color: #6B7280;">ID: #<?= $v['id'] ?></div>
+                            </td>
+                            <td style="padding: 12px;">
+                                <div style="font-weight: 600; color: #374151;"><?= htmlspecialchars(tipo_predio_etiqueta($v['tipo_predio'] ?? 'Vivienda')) ?></div>
+                                <div style="font-size: 11px; color: #6B7280;">
+                                    <?= htmlspecialchars(etiqueta_monto_predio($v['tipo_predio'] ?? 'Vivienda', $v['cantidad_casas'] ?? 1, tarifas_barrio($pdo, $v['barrio_id']))) ?>
+                                </div>
                             </td>
                             <td style="padding: 12px;">
                                 <div><?= htmlspecialchars($v['direccion']) ?></div>

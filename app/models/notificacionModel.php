@@ -476,10 +476,6 @@ class notificacionModel extends mainModel {
              FROM viviendas v
              WHERE v.calle_id = ? AND v.estado_servicio = 'Activo' AND v.exento_cobro = 0
                AND NOT EXISTS (
-                   SELECT 1 FROM solicitudes_vivienda s
-                   WHERE s.vivienda_id = v.id AND s.tipo = 'Baja' AND s.estado = 'Aprobado'
-               )
-               AND NOT EXISTS (
                    SELECT 1 FROM cobros co
                    WHERE co.vivienda_id = v.id AND co.mes = ? AND co.anio = ? AND co.estado = 'Pagado'
                )

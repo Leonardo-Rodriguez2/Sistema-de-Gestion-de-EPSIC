@@ -12,9 +12,16 @@ $calles = $pdo->prepare("SELECT id, nombre FROM calles WHERE barrio_id = ? ORDER
 $calles->execute([$vivienda['barrio_id']]);
 $calles_list = $calles->fetchAll(PDO::FETCH_ASSOC);
 
-$title = "Editar Vivienda - EcoCusco";
-$header_title = "Editar Vivienda";
-$header_subtitle = "Modifica los datos de la vivienda #" . $vivienda['id'];
+$tipoPredioActual = in_array($vivienda['tipo_predio'] ?? 'Vivienda', TIPOS_PREDIO, true)
+    ? $vivienda['tipo_predio']
+    : 'Vivienda';
+$cantidadCasasActual = max(1, (int)($vivienda['cantidad_casas'] ?? 1));
+$esEstablecimiento = $tipoPredioActual !== 'Vivienda';
+$etiquetaPredio = tipo_predio_etiqueta($tipoPredioActual);
+
+$title = "Editar {$etiquetaPredio} - EcoCusco";
+$header_title = "Editar {$etiquetaPredio}";
+$header_subtitle = "Modifica los datos del predio #" . $vivienda['id'];
 
 ob_start();
 ?>
@@ -49,6 +56,26 @@ ob_start();
                     <input type="text" name="otro_identificador" value="<?= htmlspecialchars($vivienda['otro_identificador'] ?? '') ?>" placeholder="Pasaporte, cédula extranjera, RIF...">
                 </div>
             </div>
+        </div>
+
+        <div class="form-section">
+            <h3><span class="icon">🏪</span> Tipo de predio</h3>
+            <div class="form-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                <div class="form-group">
+                    <label>Tipo de predio</label>
+                    <select name="tipo_predio" id="tipo_predio_select" required>
+                        <?php foreach (TIPOS_PREDIO as $tipo): ?>
+                            <option value="<?= $tipo ?>" <?= $tipo === $tipoPredioActual ? 'selected' : '' ?>><?= tipo_predio_etiqueta($tipo) ?></option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+                <div class="form-group" id="campo_cantidad_casas" style="<?= $tipoPredioActual === 'Urbanizacion' ? '' : 'display:none;' ?>">
+                    <label>Cantidad de casas</label>
+                    <input type="number" name="cantidad_casas" id="cantidad_casas_field" step="1" min="1" max="100000" value="<?= $cantidadCasasActual ?>" <?= $tipoPredioActual === 'Urbanizacion' ? '' : 'disabled' ?>>
+                    <small style="font-size:10px; color:#9CA3AF; font-weight:600;">Una tarifa por casa en un solo pago mensual. Ej.: 4 casas × Bs. 3 = Bs. 12.</small>
+                </div>
+            </div>
+            <small style="font-size:10px; color:#6B7280;">El precio de cada tipo de predio se define en <strong>Configuración de Pagos</strong> del barrio.</small>
         </div>
 
         <div class="form-section">
@@ -99,6 +126,21 @@ ob_start();
 </div>
 
 <script>
+document.addEventListener('DOMContentLoaded', function () {
+    const tipo = document.getElementById('tipo_predio_select');
+    const bloque = document.getElementById('campo_cantidad_casas');
+    const casas = document.getElementById('cantidad_casas_field');
+    if (!tipo || !bloque || !casas) return;
+    const actualizar = function () {
+        const esUrbanizacion = tipo.value === 'Urbanizacion';
+        bloque.style.display = esUrbanizacion ? '' : 'none';
+        casas.disabled = !esUrbanizacion;
+        casas.required = esUrbanizacion;
+    };
+    tipo.addEventListener('change', actualizar);
+    actualizar();
+});
+
 async function updateStreets(barrioId) {
     const calleSelect = document.getElementById('calle_select');
     calleSelect.innerHTML = '<option value="">Cargando...</option>';

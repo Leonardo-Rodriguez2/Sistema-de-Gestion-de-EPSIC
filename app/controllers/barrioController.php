@@ -25,6 +25,7 @@ class barrioController extends mainModel {
                 $calle_id = (int)($_POST['calle_id'] ?? 0);
                 $nombre = trim($_POST['nombre'] ?? '');
                 $apellido = trim($_POST['apellido'] ?? '');
+                $email = trim($_POST['email'] ?? '');
 
                 if ($tipo === 'NuevaCalle') {
                     $nombreCalle = trim($_POST['nombre_calle'] ?? '');
@@ -64,9 +65,23 @@ class barrioController extends mainModel {
                     )->fetchColumn()) {
                         throw new \Exception("Ya existe una solicitud pendiente para esa calle.");
                     }
+                    if ($email !== '') {
+                        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+                            throw new \Exception("El correo electrónico no tiene un formato válido.");
+                        }
+                        if ($this->ejecutarConsulta("SELECT id FROM usuarios WHERE email=? LIMIT 1", [$email])->fetchColumn()) {
+                            throw new \Exception("El correo electrónico ya está registrado.");
+                        }
+                        if ($this->ejecutarConsulta(
+                            "SELECT id FROM solicitudes_gestion WHERE email=? AND estado='Pendiente' LIMIT 1",
+                            [$email]
+                        )->fetchColumn()) {
+                            throw new \Exception("Ya existe una solicitud pendiente con ese correo.");
+                        }
+                    }
                     $params = [
                         'NuevoEncargadoCalle', $barrio_id, $calle_id, $user['id'], null, null, null,
-                        $nombre, $apellido, null, trim($_POST['dni'] ?? ''), trim($_POST['telefono'] ?? '')
+                        $nombre, $apellido, ($email !== '' ? $email : null), trim($_POST['dni'] ?? ''), trim($_POST['telefono'] ?? '')
                     ];
                 }
 
@@ -94,6 +109,14 @@ class barrioController extends mainModel {
                 if (!$solicitud) throw new \Exception("Solicitud no encontrada.");
                 if ($solicitud['estado'] !== 'Pendiente') {
                     throw new \Exception("La solicitud ya fue procesada.");
+                }
+                $barrio_id = $this->obtenerBarrioId($user['id']);
+                $solicitudBarrio = $this->ejecutarConsulta(
+                    "SELECT id FROM calles WHERE id = ? AND barrio_id = ? LIMIT 1",
+                    [(int)$solicitud['calle_id'], $barrio_id]
+                )->fetchColumn();
+                if (!$solicitudBarrio) {
+                    throw new \Exception("La solicitud no pertenece a tu barrio.");
                 }
 
                 if ($estado === 'Aprobado') {
@@ -198,6 +221,8 @@ class barrioController extends mainModel {
                 $cedula = $this->normalizarCedula($_POST['cedula'] ?? '');
                 $cedulaTipo = $this->normalizarTipoCedula($_POST['cedula_tipo'] ?? 'V');
                 $otroIdentificador = $this->normalizarOtroIdentificador($_POST['otro_identificador'] ?? '');
+                $tipoPredio = $this->normalizarTipoPredio($_POST['tipo_predio'] ?? 'Vivienda');
+                $cantidadCasas = $this->normalizarCantidadCasas($_POST['cantidad_casas'] ?? '', $tipoPredio);
                 $numeroCasa = trim($_POST['numero'] ?? '');
                 if ($cedula !== null) {
                     $duplicadoSql = "SELECT id FROM viviendas WHERE calle_id = ? AND cedula = ? AND cedula_tipo = ? LIMIT 1";
@@ -219,8 +244,8 @@ class barrioController extends mainModel {
                 $pdo->beginTransaction();
 
                 $this->ejecutarConsulta(
-                    "INSERT INTO viviendas (propietario, cedula, cedula_tipo, otro_identificador, barrio_id, calle_id, direccion, numero_casa, estado_servicio) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'Activo')",
-                    [$propietario, $cedula, $cedulaTipo, $otroIdentificador, $barrio_id, $calle_id, $_POST['direccion'], $numeroCasa ?: null]
+                    "INSERT INTO viviendas (propietario, cedula, cedula_tipo, otro_identificador, barrio_id, calle_id, direccion, numero_casa, tipo_predio, cantidad_casas, estado_servicio) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'Activo')",
+                    [$propietario, $cedula, $cedulaTipo, $otroIdentificador, $barrio_id, $calle_id, $_POST['direccion'], $numeroCasa ?: null, $tipoPredio, $cantidadCasas]
                 );
                 $new_vivienda_id = $pdo->lastInsertId();
 
@@ -233,7 +258,9 @@ class barrioController extends mainModel {
                 }
 
                 $pdo->commit();
-                $mensaje_exito = "Vivienda registrada correctamente.";
+                $mensaje_exito = $tipoPredio === 'Vivienda'
+                    ? "Vivienda registrada correctamente."
+                    : "Establecimiento registrado correctamente.";
             } catch (\Exception $e) {
                 if (isset($pdo) && $pdo->inTransaction()) $pdo->rollBack();
                 $mensaje_error = "Error: " . $e->getMessage();
@@ -249,25 +276,181 @@ class barrioController extends mainModel {
 
                 $barrio_id = $this->obtenerBarrioId($user['id']);
                 $cobro = $this->ejecutarConsulta(
-                    "SELECT c.id FROM cobros c 
-                     JOIN viviendas v ON c.vivienda_id = v.id 
-                     WHERE c.id = ? AND v.barrio_id = ?",
+                    "SELECT c.id, c.estado FROM cobros c
+                     JOIN viviendas v ON c.vivienda_id = v.id
+                     JOIN calles ca ON ca.id = v.calle_id
+                     WHERE c.id = ? AND ca.barrio_id = ?",
                     [$cobro_id, $barrio_id]
-                )->fetch();
+                )->fetch(\PDO::FETCH_ASSOC);
                 if (!$cobro) throw new \Exception("Acceso denegado: este cobro no pertenece a tu barrio.");
+                if ($cobro['estado'] !== 'Pagado') {
+                    throw new \Exception("Solo se pueden verificar cobros que hayan sido reportados como pagados.");
+                }
 
-                // El ENUM de cobros.estado no incluye 'Rechazado': guardamos la decisión
-                // en estado_verificacion y solo marcamos 'Pagado' cuando se verifica.
                 if ($decision === 'Rechazado') {
-                    $this->ejecutarConsulta("UPDATE cobros SET estado_verificacion='Rechazado', verificado_por=?, verificado_en=NOW(), motivo_rechazo=? WHERE id=?",
-                        [$user['id'], $motivo, $cobro_id]);
+                    if ($motivo === '') throw new \Exception("Debe indicar el motivo del rechazo.");
+                    // Al rechazar, el cobro vuelve a Pendiente para que la calle pueda
+                    // corregir la referencia o el comprobante y reportarlo de nuevo.
+                    $this->ejecutarConsulta(
+                        "UPDATE cobros
+                         SET estado='Pendiente', estado_verificacion='Rechazado',
+                             verificado_por=?, verificado_en=NOW(), motivo_rechazo=?
+                         WHERE id=?",
+                        [$user['id'], $motivo, $cobro_id]
+                    );
                 } else {
-                    $this->ejecutarConsulta("UPDATE cobros SET estado='Pagado', estado_verificacion='Verificado', verificado_por=?, verificado_en=NOW(), motivo_rechazo=NULL WHERE id=?",
-                        [$user['id'], $cobro_id]);
+                    $this->ejecutarConsulta(
+                        "UPDATE cobros
+                         SET estado='Pagado', estado_verificacion='Verificado',
+                             verificado_por=?, verificado_en=NOW(), motivo_rechazo=NULL
+                         WHERE id=?",
+                        [$user['id'], $cobro_id]
+                    );
                 }
                 
                 $mensaje_exito = "Pago marcado como: $decision.";
             } catch (\Exception $e) { $mensaje_error = "Error: " . $e->getMessage(); }
+        }
+
+        // 3b. Registrar pago de una vivienda del barrio (cualquier calle)
+        if ($action === 'marcar_pago_barrio') {
+            try {
+                $vivienda_id = (int)($_POST['vivienda_id'] ?? 0);
+                $mes = (int)($_POST['mes'] ?? date('n'));
+                $anio = (int)($_POST['anio'] ?? date('Y'));
+                $ref = trim($_POST['referencia_pago'] ?? '');
+
+                if ($vivienda_id <= 0) throw new \Exception("Seleccione una vivienda válida.");
+                if ($mes < 1 || $mes > 12) throw new \Exception("El mes seleccionado no es válido.");
+                if ($anio < 2000 || $anio > 2100) throw new \Exception("El año seleccionado no es válido.");
+                if ($ref === '') throw new \Exception("La referencia de pago es obligatoria.");
+
+                $barrio_id = $this->obtenerBarrioId($user['id']);
+                if (!$barrio_id) throw new \Exception("No tienes un barrio asignado.");
+
+                $pdo = $this->conectar();
+                $pdo->beginTransaction();
+                $vivienda = $this->ejecutarConsulta(
+                    "SELECT v.id, v.calle_id, v.estado_servicio, v.exento_cobro
+                     FROM viviendas v
+                     JOIN calles c ON c.id = v.calle_id
+                     WHERE v.id = ? AND c.barrio_id = ?
+                     LIMIT 1 FOR UPDATE",
+                    [$vivienda_id, $barrio_id]
+                )->fetch(\PDO::FETCH_ASSOC);
+
+                if (!$vivienda) throw new \Exception("La vivienda no pertenece a tu barrio.");
+                if (($vivienda['estado_servicio'] ?? '') !== 'Activo') {
+                    throw new \Exception("La vivienda no está activa.");
+                }
+                if ((int)($vivienda['exento_cobro'] ?? 0) === 1) {
+                    throw new \Exception("Esta vivienda está exonerada y no requiere pago.");
+                }
+
+                // Si la calle ya tiene un lote del periodo, vincular el pago para
+                // que aparezca en la revisión del lote sin importar el momento.
+                $loteCalle = $this->ejecutarConsulta(
+                    "SELECT id, total_casas, monto_esperado FROM lotes_calle
+                     WHERE calle_id = ?
+                       AND COALESCE(NULLIF(periodo_mes,0), mes) = ?
+                       AND COALESCE(NULLIF(periodo_anio,0), anio) = ?
+                     LIMIT 1",
+                    [$vivienda['calle_id'], $mes, $anio]
+                )->fetch(\PDO::FETCH_ASSOC);
+                $loteCalleId = $loteCalle ? (int)$loteCalle['id'] : null;
+
+                $cuota = $this->montoMensualEfectivo($vivienda_id);
+                if ($cuota <= 0) $cuota = 10.00;
+
+                $chk = $this->ejecutarConsulta(
+                    "SELECT id, estado FROM cobros
+                     WHERE vivienda_id = ? AND mes = ? AND anio = ? AND estado != 'Anulado'
+                     ORDER BY id DESC LIMIT 1",
+                    [$vivienda_id, $mes, $anio]
+                )->fetch(\PDO::FETCH_ASSOC);
+
+                if ($chk && $chk['estado'] === 'Pagado') {
+                    throw new \Exception("Esta vivienda ya tiene un pago registrado para este periodo.");
+                }
+
+                // Comprobante opcional (imagen o PDF)
+                $comprobantePath = null;
+                if (isset($_FILES['comprobante_pago'])) {
+                    if ($_FILES['comprobante_pago']['error'] === UPLOAD_ERR_OK) {
+                        $comprobantePath = $this->guardarArchivoPago($_FILES['comprobante_pago'], 'comprobantes');
+                    } elseif ($_FILES['comprobante_pago']['error'] !== UPLOAD_ERR_NO_FILE) {
+                        $errorCodes = [
+                            UPLOAD_ERR_INI_SIZE => 'El archivo excede el tamaño máximo (2MB)',
+                            UPLOAD_ERR_FORM_SIZE => 'El archivo excede el tamaño máximo del formulario',
+                            UPLOAD_ERR_PARTIAL => 'El archivo solo se subió parcialmente',
+                            UPLOAD_ERR_NO_TMP_DIR => 'Falta la carpeta temporal del servidor',
+                            UPLOAD_ERR_CANT_WRITE => 'Error al escribir el archivo en disco',
+                        ];
+                        $errMsg = $errorCodes[$_FILES['comprobante_pago']['error']] ?? 'Código de error: ' . $_FILES['comprobante_pago']['error'];
+                        throw new \Exception("Error al subir comprobante: " . $errMsg);
+                    }
+                }
+
+                if ($chk) {
+                    $this->ejecutarConsulta(
+                        "UPDATE cobros
+                         SET monto = ?, referencia_pago = ?,
+                             comprobante_barrio = COALESCE(?, comprobante_barrio),
+                             lote_calle_id = COALESCE(?, lote_calle_id),
+                             estado = 'Pagado', estado_verificacion = 'Pendiente',
+                             verificado_por = NULL, verificado_en = NULL,
+                             motivo_rechazo = NULL, fecha_confirmacion_barrio = CURRENT_DATE()
+                         WHERE id = ?",
+                        [$cuota, $ref, $comprobantePath, $loteCalleId, $chk['id']]
+                    );
+                } else {
+                    $this->ejecutarConsulta(
+                        "INSERT INTO cobros
+                            (vivienda_id, mes, anio, monto, fecha_emision, fecha_vencimiento,
+                             referencia_pago, comprobante_barrio, lote_calle_id, estado, estado_verificacion,
+                             tipo_cobro, fecha_confirmacion_barrio)
+                         VALUES (?, ?, ?, ?, CURRENT_DATE(), CURRENT_DATE(), ?, ?, ?, 'Pagado', 'Pendiente', 'Servicio', CURRENT_DATE())",
+                        [$vivienda_id, $mes, $anio, $cuota, $ref, $comprobantePath, $loteCalleId]
+                    );
+                }
+
+                // Mantener sincronizados los totales del lote de calle si ya existe.
+                try {
+                    if ($loteCalle) {
+                        $casasPagadasLote = (int)$this->ejecutarConsulta(
+                            "SELECT COUNT(DISTINCT c.vivienda_id) FROM cobros c
+                             JOIN viviendas v ON v.id = c.vivienda_id
+                             WHERE v.calle_id = ? AND v.estado_servicio = 'Activo' AND COALESCE(v.exento_cobro,0) = 0
+                               AND c.mes = ? AND c.anio = ? AND c.estado = 'Pagado'",
+                            [$vivienda['calle_id'], $mes, $anio]
+                        )->fetchColumn();
+                        $montoRecolectadoLote = (float)$this->ejecutarConsulta(
+                            "SELECT COALESCE(SUM(c.monto),0) FROM cobros c
+                             JOIN viviendas v ON v.id = c.vivienda_id
+                             WHERE v.calle_id = ? AND v.estado_servicio = 'Activo' AND COALESCE(v.exento_cobro,0) = 0
+                               AND c.mes = ? AND c.anio = ? AND c.estado = 'Pagado'",
+                            [$vivienda['calle_id'], $mes, $anio]
+                        )->fetchColumn();
+                        $casasMorosasLote = max(0, (int)$loteCalle['total_casas'] - $casasPagadasLote);
+                        $alertaLote = ($montoRecolectadoLote < (float)$loteCalle['monto_esperado']) ? 1 : 0;
+
+                        $this->ejecutarConsulta(
+                            "UPDATE lotes_calle
+                             SET monto_recolectado = ?, casas_pagadas = ?, casas_morosas = ?, alerta_deuda = ?
+                             WHERE id = ?",
+                            [$montoRecolectadoLote, $casasPagadasLote, $casasMorosasLote, $alertaLote, $loteCalle['id']]
+                        );
+                    }
+                } catch (\Throwable $e) {
+                    // La actualización de totales no debe impedir el registro del pago.
+                }
+
+                $pdo->commit();
+                $mensaje_exito = "Pago registrado y enviado a verificación de pagos." . ($comprobantePath ? " Comprobante adjuntado." : "");
+            } catch (\Throwable $e) {
+                if (isset($pdo) && $pdo->inTransaction()) $pdo->rollBack();
+                $mensaje_error = "Error: " . $e->getMessage();
+            }
         }
 
         // 4 y 5. Gestión de Lotes de Calle
@@ -276,15 +459,29 @@ class barrioController extends mainModel {
             $motivo  = trim($_POST['motivo_rechazo'] ?? '');
             try {
                 $this->validarBarrioLoteCalle($lote_id, $user['id']);
+                $estadoLote = $this->ejecutarConsulta("SELECT estado FROM lotes_calle WHERE id=?", [$lote_id])->fetchColumn();
+                if ($estadoLote !== 'Enviado') {
+                    throw new \Exception("Solo se pueden revisar lotes en estado 'Enviado'.");
+                }
                 
                 if ($action === 'aprobar_lote_calle') {
                     $this->ejecutarConsulta("UPDATE lotes_calle SET estado='Aprobado', fecha_revision=NOW() WHERE id=?", [$lote_id]);
-                    $this->ejecutarConsulta("UPDATE cobros SET estado_verificacion='Verificado', verificado_por=?, verificado_en=NOW() WHERE lote_calle_id=?", [$user['id'], $lote_id]);
+                    $this->ejecutarConsulta(
+                        "UPDATE cobros SET estado_verificacion='Verificado', verificado_por=?, verificado_en=NOW()
+                         WHERE lote_calle_id=? AND estado='Pagado'",
+                        [$user['id'], $lote_id]
+                    );
                     $mensaje_exito = "Lote de calle aprobado.";
                 } else {
                     if (empty($motivo)) throw new \Exception("Indique motivo de rechazo.");
                     $this->ejecutarConsulta("UPDATE lotes_calle SET estado='Rechazado', observaciones_barrio=?, fecha_revision=NOW() WHERE id=?", [$motivo, $lote_id]);
-                    $this->ejecutarConsulta("UPDATE cobros SET lote_calle_id=NULL, estado_verificacion='Pendiente' WHERE lote_calle_id=?", [$lote_id]);
+                    $this->ejecutarConsulta(
+                        "UPDATE cobros
+                         SET lote_calle_id=NULL, estado_verificacion='Pendiente',
+                             verificado_por=NULL, verificado_en=NULL
+                         WHERE lote_calle_id=?",
+                        [$lote_id]
+                    );
                     $mensaje_exito = "Lote rechazado.";
                 }
             } catch (\Exception $e) { $mensaje_error = $e->getMessage(); }
@@ -295,14 +492,45 @@ class barrioController extends mainModel {
             $this->procesarEnvioLoteBarrio($_POST, $_FILES);
         }
 
-        // 7. Configurar Cuota y Multa
+        // 7. Configurar tarifas por tipo de predio, multa y fecha límite de pago
         if ($action === 'actualizar_configuracion_barrio') {
             try {
+                $barrio_id = $this->obtenerBarrioId($user['id']);
+                $fecha_limite_pago = trim((string)($_POST['fecha_limite_pago'] ?? ''));
+                if ($fecha_limite_pago === '') {
+                    throw new \Exception("Indica la fecha límite de pago para los encargados de calle.");
+                }
+                $tarifa = function ($campo) {
+                    return (float)($_POST[$campo] ?? $_POST['cuota_mensual'] ?? 10.00);
+                };
                 $this->ejecutarConsulta(
-                    "INSERT INTO configuraciones_barrio (barrio_id, cuota_mensual, multa_renovacion, actualizado_por) VALUES (?,?,?,?) ON DUPLICATE KEY UPDATE cuota_mensual=VALUES(cuota_mensual), multa_renovacion=VALUES(multa_renovacion), actualizado_por=VALUES(actualizado_por)",
-                    [$this->obtenerBarrioId($user['id']), (float)$_POST['cuota_mensual'], (float)$_POST['multa_renovacion'], $user['id']]
+                    "INSERT INTO configuraciones_barrio
+                        (barrio_id, cuota_mensual, precio_comercio, precio_tienda, precio_empresa, precio_urbanizacion, precio_otro, multa_renovacion, fecha_limite_pago, actualizado_por)
+                     VALUES (?,?,?,?,?,?,?,?,?,?)
+                     ON DUPLICATE KEY UPDATE
+                        cuota_mensual = VALUES(cuota_mensual),
+                        precio_comercio = VALUES(precio_comercio),
+                        precio_tienda = VALUES(precio_tienda),
+                        precio_empresa = VALUES(precio_empresa),
+                        precio_urbanizacion = VALUES(precio_urbanizacion),
+                        precio_otro = VALUES(precio_otro),
+                        multa_renovacion = VALUES(multa_renovacion),
+                        fecha_limite_pago = VALUES(fecha_limite_pago),
+                        actualizado_por = VALUES(actualizado_por)",
+                    [
+                        $barrio_id,
+                        (float)$_POST['cuota_mensual'],
+                        $tarifa('precio_comercio'),
+                        $tarifa('precio_tienda'),
+                        $tarifa('precio_empresa'),
+                        $tarifa('precio_urbanizacion'),
+                        $tarifa('precio_otro'),
+                        (float)$_POST['multa_renovacion'],
+                        $fecha_limite_pago,
+                        $user['id']
+                    ]
                 );
-                $mensaje_exito = "Configuración actualizada.";
+                $mensaje_exito = "Configuración de pagos actualizada.";
             } catch (\Exception $e) { $mensaje_error = "Error: " . $e->getMessage(); }
         }
 
@@ -485,18 +713,27 @@ class barrioController extends mainModel {
         if ($action === 'ordenar_baja') {
             try {
                 $v_id = (int)$_POST['vivienda_id'];
+                $barrio_id = $this->obtenerBarrioId($user['id']);
+                $v = $this->ejecutarConsulta(
+                    "SELECT id, calle_id, estado_servicio FROM viviendas WHERE id = ? AND barrio_id = ?",
+                    [$v_id, $barrio_id]
+                )->fetch(\PDO::FETCH_ASSOC);
+                if (!$v) throw new \Exception("La vivienda no pertenece a tu barrio.");
+                if ($v['estado_servicio'] !== 'Activo') {
+                    throw new \Exception("El servicio de esta vivienda ya está inactivo.");
+                }
+
                 $pendiente = $this->ejecutarConsulta(
                     "SELECT id FROM solicitudes_vivienda
                      WHERE vivienda_id = ? AND tipo = 'Baja' AND estado = 'Pendiente'
                      LIMIT 1",
                     [$v_id]
                 )->fetchColumn();
-                if ($pendiente) throw new \Exception("Esta vivienda ya tiene una baja registrada.");
+                if ($pendiente) throw new \Exception("Esta vivienda ya tiene una baja pendiente.");
+
                 [$monto, $detalles] = $this->calcularDeudaBarrio($v_id);
-                $calle_id = $this->ejecutarConsulta("SELECT calle_id FROM viviendas WHERE id=?", [$v_id])->fetchColumn();
-                
                 $this->ejecutarConsulta("INSERT INTO solicitudes_vivienda (tipo, calle_id, vivienda_id, creado_por, estado, monto_deuda, detalles_deuda) VALUES ('Baja', ?, ?, ?, 'Aprobado', ?, ?)",
-                    [$calle_id, $v_id, $user['id'], $monto, $detalles]);
+                    [$v['calle_id'], $v_id, $user['id'], $monto, $detalles]);
                 $this->ejecutarConsulta("UPDATE viviendas SET estado_servicio='Anulado' WHERE id=?", [$v_id]);
                 $mensaje_exito = "Servicio anulado correctamente.";
             } catch (\Exception $e) { $mensaje_error = $e->getMessage(); }

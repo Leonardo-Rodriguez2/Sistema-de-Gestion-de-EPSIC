@@ -5,9 +5,16 @@ $user = check_dashboard_access([1, 2]);
 // Get all neighborhoods for selection
 $barrios = $pdo->query("SELECT id, nombre FROM barrios ORDER BY nombre")->fetchAll(PDO::FETCH_ASSOC);
 
-$title = "Registrar Vivienda (Admin) - EcoCusco";
-$header_title = "Nueva Vivienda";
-$header_subtitle = "Registro administrativo directo de predios en el sistema.";
+$tipoSolicitado = trim((string)($_GET['tipo'] ?? ''));
+$tipoPredioInicial = in_array($tipoSolicitado, TIPOS_PREDIO, true) ? $tipoSolicitado : 'Vivienda';
+$esEstablecimiento = $tipoPredioInicial !== 'Vivienda';
+$etiquetaPredio = tipo_predio_etiqueta($tipoPredioInicial);
+
+$title = $esEstablecimiento ? "Registrar {$etiquetaPredio} - EcoCusco" : "Registrar Vivienda (Admin) - EcoCusco";
+$header_title = $esEstablecimiento ? "Nuevo {$etiquetaPredio}" : "Nueva Vivienda";
+$header_subtitle = $esEstablecimiento
+    ? "Registro de establecimientos. La tarifa se define en Configuración de Pagos."
+    : "Registro administrativo directo de predios en el sistema.";
 
 ob_start();
 ?>
@@ -44,6 +51,26 @@ ob_start();
         </div>
 
         <div class="form-section">
+            <h3><span class="icon">🏪</span> Tipo de predio</h3>
+            <div class="form-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                <div class="form-group">
+                    <label>Tipo de predio</label>
+                    <select name="tipo_predio" id="tipo_predio_select" required>
+                        <?php foreach (TIPOS_PREDIO as $tipo): ?>
+                            <option value="<?= $tipo ?>" <?= $tipo === $tipoPredioInicial ? 'selected' : '' ?>><?= tipo_predio_etiqueta($tipo) ?></option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+                <div class="form-group" id="campo_cantidad_casas" style="<?= $tipoPredioInicial === 'Urbanizacion' ? '' : 'display:none;' ?>">
+                    <label>Cantidad de casas</label>
+                    <input type="number" name="cantidad_casas" id="cantidad_casas_field" step="1" min="1" max="100000" placeholder="Ej. 4" value="1" <?= $tipoPredioInicial === 'Urbanizacion' ? '' : 'disabled' ?>>
+                    <small style="font-size:10px; color:#9CA3AF; font-weight:600;">Se cobra una tarifa por casa, pero en un solo pago mensual. Ej.: 4 casas × Bs. 3 = Bs. 12.</small>
+                </div>
+            </div>
+            <small style="font-size:10px; color:#6B7280;">El precio de cada tipo de predio se define en <strong>Configuración de Pagos</strong> del barrio.</small>
+        </div>
+
+        <div class="form-section">
             <h3><span class="icon">📍</span> Ubicación</h3>
             <div class="form-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
                 <div class="form-group">
@@ -76,12 +103,27 @@ ob_start();
 
         <div class="form-actions">
             <a href="router.php?page=gestor_viviendas" class="btn-cancel">Volver al listado</a>
-            <button type="submit" class="btn-submit">Registrar Vivienda</button>
+            <button type="submit" class="btn-submit">Registrar <?= $esEstablecimiento ? $etiquetaPredio : 'Vivienda' ?></button>
         </div>
     </form>
 </div>
 
 <script>
+document.addEventListener('DOMContentLoaded', function () {
+    const tipo = document.getElementById('tipo_predio_select');
+    const bloque = document.getElementById('campo_cantidad_casas');
+    const casas = document.getElementById('cantidad_casas_field');
+    if (!tipo || !bloque || !casas) return;
+    const actualizar = function () {
+        const esUrbanizacion = tipo.value === 'Urbanizacion';
+        bloque.style.display = esUrbanizacion ? '' : 'none';
+        casas.disabled = !esUrbanizacion;
+        casas.required = esUrbanizacion;
+    };
+    tipo.addEventListener('change', actualizar);
+    actualizar();
+});
+
 async function updateStreets(barrioId) {
     const calleSelect = document.getElementById('calle_select');
     calleSelect.innerHTML = '<option value="">Cargando...</option>';

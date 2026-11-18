@@ -97,6 +97,8 @@ foreach ($viviendas as $v) {
         '#' . ($v['numero_casa'] ?? ''),
         $v['propietario'] ?? '',
         formato_identificacion($v['cedula'] ?? '', $v['cedula_tipo'] ?? 'V', $v['otro_identificador'] ?? ''),
+        tipo_predio_etiqueta($v['tipo_predio'] ?? 'Vivienda'),
+        number_format(monto_predio_efectivo($v['tipo_predio'] ?? 'Vivienda', $v['cantidad_casas'] ?? 1, tarifas_barrio($pdo, $v['barrio_id'])), 2, '.', ''),
         $v['calle_nombre'] ?? 'Sin calle',
         $v['barrio_nombre'] ?? '',
         $v['pago_mes_estado'] ?? 'Sin registro',
@@ -108,7 +110,7 @@ foreach ($viviendas as $v) {
 reporte_exportar_si_solicitado(
     'consulta_viviendas',
     'Consulta de viviendas',
-    ['Casa', 'Propietario', 'Identificación', 'Calle', 'Barrio', 'Estado del mes', 'Deudas pendientes', 'Deuda total', 'Exenta'],
+    ['Casa', 'Propietario', 'Identificación', 'Tipo de predio', 'Monto mensual', 'Calle', 'Barrio', 'Estado del mes', 'Deudas pendientes', 'Deuda total', 'Exenta'],
     $filasViviendas,
     array_merge($metaViviendas, ['Total viviendas' => count($filasViviendas)]),
     'Revisión técnica de predios para control de pagos'
@@ -175,6 +177,7 @@ ob_start();
             <thead>
                 <tr style="background: #F9FAFB; text-align: left; color:#374151;">
                     <th style="padding: 10px 14px;">Propietario</th>
+                    <th style="padding: 10px;">Tipo / Cuota</th>
                     <th style="padding: 10px;">Ubicación</th>
                     <th style="padding: 10px;">Barrio</th>
                     <th style="padding: 10px; text-align: center;">Estado</th>
@@ -194,6 +197,10 @@ ob_start();
                         <?php if ($v['exento_cobro']): ?>
                             <span style="background:#E7EDF3; color:#4A5568; padding:1px 6px; border-radius:4px; font-size:9px; font-weight:700; margin-left:4px;">EXENTA</span>
                         <?php endif; ?>
+                    </td>
+                    <td style="padding: 10px;">
+                        <div style="font-weight:600; color:#374151;"><?= htmlspecialchars(tipo_predio_etiqueta($v['tipo_predio'] ?? 'Vivienda')) ?></div>
+                        <div style="font-size:10px; color:#6B7280;"><?= htmlspecialchars(etiqueta_monto_predio($v['tipo_predio'] ?? 'Vivienda', $v['cantidad_casas'] ?? 1, tarifas_barrio($pdo, $v['barrio_id']))) ?></div>
                     </td>
                     <td style="padding: 10px; color: #6B7280;"><?= htmlspecialchars($v['calle_nombre'] ?? 'Sin calle') ?> #<?= htmlspecialchars($v['numero_casa']) ?></td>
                     <td style="padding: 10px;"><?= htmlspecialchars($v['barrio_nombre']) ?></td>
@@ -255,7 +262,7 @@ ob_start();
                 </tr>
                 <?php endforeach; ?>
                 <?php if (empty($viviendas)): ?>
-                <tr><td colspan="6" style="padding:30px; text-align:center; color:#9CA3AF;">No se encontraron viviendas.</td></tr>
+                <tr><td colspan="7" style="padding:30px; text-align:center; color:#9CA3AF;">No se encontraron predios.</td></tr>
                 <?php endif; ?>
             </tbody>
         </table>

@@ -55,6 +55,7 @@ ob_start();
             <div class="form-group"><label>Apellido</label><input name="apellido" required></div>
             <div class="form-group"><label>CI</label><input type="text" name="dni" inputmode="numeric" pattern="[0-9]{8}" maxlength="8" minlength="8" title="Ingrese exactamente 8 números"></div>
             <div class="form-group"><label>Teléfono</label><input type="text" name="telefono" inputmode="numeric" pattern="[0-9]{7,11}" maxlength="11" minlength="7" title="Ingrese entre 7 y 11 números"></div>
+            <div class="form-group" style="grid-column:1/-1"><label>Correo electrónico</label><input type="email" name="email" placeholder="encargado@ejemplo.com"><small style="color:#6B7280;">Opcional. Si lo omites, el sistema generará uno al aprobar la solicitud.</small></div>
             <button class="btn-primary" type="submit">Enviar solicitud de encargado</button>
         </form>
 </section>

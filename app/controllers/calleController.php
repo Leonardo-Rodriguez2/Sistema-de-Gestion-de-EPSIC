@@ -34,15 +34,15 @@ class calleController extends mainModel {
                 }
 
                 if ($cedula !== null) {
-                    $duplicadoSql = "SELECT id FROM viviendas WHERE calle_id = ? AND cedula = ? AND cedula_tipo = ? LIMIT 1";
+                    $duplicadoSql = "SELECT id FROM viviendas WHERE calle_id = ? AND cedula = ? AND cedula_tipo = ? AND estado_servicio = 'Activo' LIMIT 1";
                     $duplicadoParams = [$calle['calle_id'], $cedula, $cedulaTipo];
                 } elseif ($otroIdentificador !== null) {
-                    $duplicadoSql = "SELECT id FROM viviendas WHERE calle_id = ? AND otro_identificador = ? LIMIT 1";
+                    $duplicadoSql = "SELECT id FROM viviendas WHERE calle_id = ? AND otro_identificador = ? AND estado_servicio = 'Activo' LIMIT 1";
                     $duplicadoParams = [$calle['calle_id'], $otroIdentificador];
                 } else {
                     $duplicadoSql = "SELECT id FROM viviendas
                        WHERE calle_id = ? AND numero_casa = ?
-                         AND LOWER(TRIM(propietario)) = LOWER(TRIM(?)) LIMIT 1";
+                         AND LOWER(TRIM(propietario)) = LOWER(TRIM(?)) AND estado_servicio = 'Activo' LIMIT 1";
                     $duplicadoParams = [$calle['calle_id'], $numeroCasa, $propietario];
                 }
                 if ($this->ejecutarConsulta($duplicadoSql, $duplicadoParams)->fetchColumn()) {
@@ -96,8 +96,14 @@ class calleController extends mainModel {
                 $vivienda_id = (int)$_POST['vivienda_id'];
                 $calle = $this->obtenerCalleAsignada($user['id']);
 
-                $v = $this->ejecutarConsulta("SELECT id FROM viviendas WHERE id = ? AND calle_id = ?", [$vivienda_id, $calle['calle_id']])->fetch();
+                $v = $this->ejecutarConsulta(
+                    "SELECT id, estado_servicio FROM viviendas WHERE id = ? AND calle_id = ?",
+                    [$vivienda_id, $calle['calle_id']]
+                )->fetch(\PDO::FETCH_ASSOC);
                 if (!$v) throw new \Exception("Vivienda no válida o no pertenece a tu calle.");
+                if ($v['estado_servicio'] !== 'Activo') {
+                    throw new \Exception("El servicio de esta vivienda ya está inactivo.");
+                }
 
                 $chk = $this->ejecutarConsulta("SELECT id FROM solicitudes_vivienda WHERE vivienda_id = ? AND tipo = 'Baja' AND estado = 'Pendiente'", [$vivienda_id])->fetch();
                 if ($chk) throw new \Exception("Ya existe una solicitud de baja pendiente para esta vivienda.");
@@ -195,17 +201,14 @@ class calleController extends mainModel {
 
                 if (!$vivienda) throw new \Exception("La vivienda no pertenece a tu sector.");
 
-                $cuota = (float)$this->ejecutarConsulta(
-                    "SELECT cuota_mensual FROM configuraciones_barrio WHERE barrio_id = ?",
-                    [$vivienda['barrio_id']]
-                )->fetchColumn() ?: 5.00;
+                $cuota = $this->montoMensualEfectivo($vivienda_id);
 
                 $chk = $this->ejecutarConsulta(
-                    "SELECT id FROM cobros WHERE vivienda_id = ? AND mes = ? AND anio = ?",
+                    "SELECT id, estado FROM cobros
+                     WHERE vivienda_id = ? AND mes = ? AND anio = ? AND estado != 'Anulado'
+                     ORDER BY id DESC LIMIT 1",
                     [$vivienda_id, $mes, $anio]
-                )->fetch();
-
-                if ($chk) throw new \Exception("Esta vivienda ya registra un pago o cobro para este mes.");
+                )->fetch(\PDO::FETCH_ASSOC);
 
                 $lote_estado = $this->ejecutarConsulta(
                     "SELECT estado FROM lotes_calle WHERE calle_id=? AND mes=? AND anio=?",
@@ -216,18 +219,35 @@ class calleController extends mainModel {
                     throw new \Exception("No puedes registrar pagos. El lote mensual ya fue cerrado o enviado.");
                 }
 
+                if ($chk && $chk['estado'] === 'Pagado') {
+                    throw new \Exception("Esta vivienda ya registra un pago para este mes.");
+                }
+
                 // Manejar subida de imagen de comprobante
                 $comprobantePath = null;
                 if (isset($_FILES['comprobante_pago']) && $_FILES['comprobante_pago']['error'] === UPLOAD_ERR_OK) {
                     $comprobantePath = $this->guardarArchivoPago($_FILES['comprobante_pago'], 'comprobantes');
                 }
 
-                // Guardar cobro con comprobante
-                $this->ejecutarConsulta(
-                    "INSERT INTO cobros (vivienda_id, mes, anio, monto, fecha_emision, fecha_vencimiento, referencia_pago, comprobante_calle, estado, estado_verificacion, tipo_cobro) 
-                     VALUES (?, ?, ?, ?, CURRENT_DATE(), CURRENT_DATE(), ?, ?, 'Pagado', 'Pendiente', 'Servicio')",
-                    [$vivienda_id, $mes, $anio, $cuota, $ref, $comprobantePath]
-                );
+                if ($chk) {
+                    // Convertir el cobro pendiente/rechazado del periodo en pago recibido.
+                    $this->ejecutarConsulta(
+                        "UPDATE cobros
+                         SET monto = ?, referencia_pago = ?,
+                             comprobante_calle = COALESCE(?, comprobante_calle),
+                             estado = 'Pagado', estado_verificacion = 'Pendiente',
+                             motivo_rechazo = NULL
+                         WHERE id = ?",
+                        [$cuota, $ref, $comprobantePath, $chk['id']]
+                    );
+                } else {
+                    // Guardar cobro con comprobante
+                    $this->ejecutarConsulta(
+                        "INSERT INTO cobros (vivienda_id, mes, anio, monto, fecha_emision, fecha_vencimiento, referencia_pago, comprobante_calle, estado, estado_verificacion, tipo_cobro) 
+                         VALUES (?, ?, ?, ?, CURRENT_DATE(), CURRENT_DATE(), ?, ?, 'Pagado', 'Pendiente', 'Servicio')",
+                        [$vivienda_id, $mes, $anio, $cuota, $ref, $comprobantePath]
+                    );
+                }
 
                 $mensaje_exito = "¡Pago registrado con éxito!" . ($comprobantePath ? " (con comprobante)" : "");
             } catch (\Exception $e) {
@@ -251,17 +271,14 @@ class calleController extends mainModel {
 
                 if (!$vivienda) throw new \Exception("La vivienda no pertenece a tu sector.");
 
-                $cuota = (float)$this->ejecutarConsulta(
-                    "SELECT cuota_mensual FROM configuraciones_barrio WHERE barrio_id = ?",
-                    [$vivienda['barrio_id']]
-                )->fetchColumn() ?: 5.00;
+                $cuota = $this->montoMensualEfectivo($vivienda_id);
 
                 $chk = $this->ejecutarConsulta(
-                    "SELECT id FROM cobros WHERE vivienda_id = ? AND mes = ? AND anio = ? AND estado != 'Anulado'",
+                    "SELECT id, estado FROM cobros
+                     WHERE vivienda_id = ? AND mes = ? AND anio = ? AND estado != 'Anulado'
+                     ORDER BY id DESC LIMIT 1",
                     [$vivienda_id, $mes, $anio]
-                )->fetch();
-
-                if ($chk) throw new \Exception("Esta vivienda ya tiene registro para este mes.");
+                )->fetch(\PDO::FETCH_ASSOC);
 
                 $lote_estado = $this->ejecutarConsulta(
                     "SELECT estado FROM lotes_calle WHERE calle_id=? AND mes=? AND anio=?",
@@ -270,6 +287,10 @@ class calleController extends mainModel {
 
                 if (in_array($lote_estado, ['Enviado', 'Aprobado'])) {
                     throw new \Exception("El lote ya fue enviado.");
+                }
+
+                if ($chk && $chk['estado'] === 'Pagado') {
+                    throw new \Exception("Esta vivienda ya tiene un pago registrado para este mes.");
                 }
 
                 // Manejar comprobante
@@ -293,11 +314,24 @@ class calleController extends mainModel {
                 $ref = trim($_POST['referencia_pago'] ?? '');
                 if ($ref === '') throw new \Exception("La referencia de pago es obligatoria.");
 
-                $this->ejecutarConsulta(
-                    "INSERT INTO cobros (vivienda_id, mes, anio, monto, fecha_emision, fecha_vencimiento, referencia_pago, comprobante_calle, estado, estado_verificacion, tipo_cobro) 
-                     VALUES (?, ?, ?, ?, CURRENT_DATE(), CURRENT_DATE(), ?, ?, 'Pagado', 'Pendiente', 'Servicio')",
-                    [$vivienda_id, $mes, $anio, $cuota, $ref, $comprobantePath]
-                );
+                if ($chk) {
+                    // Completar el cobro pendiente del periodo en lugar de rechazarlo.
+                    $this->ejecutarConsulta(
+                        "UPDATE cobros
+                         SET monto = ?, referencia_pago = ?,
+                             comprobante_calle = COALESCE(?, comprobante_calle),
+                             estado = 'Pagado', estado_verificacion = 'Pendiente',
+                             motivo_rechazo = NULL
+                         WHERE id = ?",
+                        [$cuota, $ref, $comprobantePath, $chk['id']]
+                    );
+                } else {
+                    $this->ejecutarConsulta(
+                        "INSERT INTO cobros (vivienda_id, mes, anio, monto, fecha_emision, fecha_vencimiento, referencia_pago, comprobante_calle, estado, estado_verificacion, tipo_cobro) 
+                         VALUES (?, ?, ?, ?, CURRENT_DATE(), CURRENT_DATE(), ?, ?, 'Pagado', 'Pendiente', 'Servicio')",
+                        [$vivienda_id, $mes, $anio, $cuota, $ref, $comprobantePath]
+                    );
+                }
 
                 $mensaje_exito = "Pago registrado correctamente." . ($comprobantePath ? " Con comprobante." : "");
             } catch (\Exception $e) {
@@ -364,7 +398,11 @@ class calleController extends mainModel {
 
                 $motivo = trim($_POST['motivo_anulacion'] ?? 'Sin motivo');
                 $this->ejecutarConsulta(
-                    "UPDATE cobros SET estado='Anulado', observaciones=CONCAT(COALESCE(observaciones,''), ' | ANULADO: ', ?) WHERE id=?",
+                    "UPDATE cobros
+                     SET estado='Anulado', estado_verificacion='Pendiente',
+                         verificado_por=NULL, verificado_en=NULL, motivo_rechazo=NULL,
+                         observaciones=CONCAT(COALESCE(observaciones,''), ' | ANULADO: ', ?)
+                     WHERE id=?",
                     [$motivo, $cobro_id]
                 );
                 $mensaje_exito = "Pago anulado correctamente. Motivo: " . htmlspecialchars($motivo);
@@ -429,40 +467,71 @@ class calleController extends mainModel {
                 $calle_id = $calle['calle_id'];
                 $barrio_id = $calle['barrio_id'];
 
-                $total_casas = (int)$this->ejecutarConsulta("SELECT COUNT(*) FROM viviendas WHERE calle_id = ? AND estado_servicio='Activo' AND exento_cobro = 0", [$calle_id])->fetchColumn();
-                $cuota = (float)$this->ejecutarConsulta("SELECT cuota_mensual FROM configuraciones_barrio WHERE barrio_id = ?", [$barrio_id])->fetchColumn() ?: 5.00;
-                $monto_esperado = $total_casas * $cuota;
-
-                // Crear cobros Pendientes para viviendas que aun no tienen cobro este mes
-                $viviendasSinCobro = $this->ejecutarConsulta(
-                    "SELECT v.id FROM viviendas v 
-                     WHERE v.calle_id = ? AND v.estado_servicio = 'Activo' AND v.exento_cobro = 0
-                     AND v.id NOT IN (SELECT vivienda_id FROM cobros WHERE mes = ? AND anio = ? AND estado != 'Anulado')
-                     AND v.id NOT IN (SELECT vivienda_id FROM solicitudes_vivienda WHERE tipo='Baja' AND estado='Aprobado')",
+                // Un lote ya enviado o aprobado no puede volver a abrirse desde la calle.
+                $estadoLoteActual = $this->ejecutarConsulta(
+                    "SELECT estado FROM lotes_calle WHERE calle_id=? AND periodo_mes=? AND periodo_anio=? LIMIT 1",
                     [$calle_id, $mes, $anio]
-                )->fetchAll(\PDO::FETCH_COLUMN);
+                )->fetchColumn();
+                if (in_array($estadoLoteActual, ['Enviado', 'Aprobado'], true)) {
+                    throw new \Exception("El lote de este periodo ya fue cerrado o aprobado.");
+                }
+
+                $montoSql = self::sqlMontoPredio();
+                // Una urbanización agrupa varias casas en un solo cobro, por eso
+                // el total de casas se suma y no se cuenta como un solo predio.
+                $total_casas = (int)$this->ejecutarConsulta(
+                    "SELECT COALESCE(SUM(GREATEST(COALESCE(cantidad_casas, 1), 1)), 0)
+                       FROM viviendas
+                      WHERE calle_id = ? AND estado_servicio='Activo' AND exento_cobro = 0",
+                    [$calle_id]
+                )->fetchColumn();
+
+                $monto_esperado = (float)$this->ejecutarConsulta(
+                    "SELECT COALESCE(SUM({$montoSql}), 0)
+                       FROM viviendas v
+                       LEFT JOIN configuraciones_barrio cb ON cb.barrio_id = v.barrio_id
+                      WHERE v.calle_id = ? AND v.estado_servicio = 'Activo' AND v.exento_cobro = 0",
+                    [$calle_id]
+                )->fetchColumn();
+
+                // Crear cobros Pendientes para predios que aún no tienen cobro este mes
+                $viviendasSinCobro = $this->ejecutarConsulta(
+                    "SELECT v.id, {$montoSql} AS monto
+                       FROM viviendas v
+                       LEFT JOIN configuraciones_barrio cb ON cb.barrio_id = v.barrio_id
+                      WHERE v.calle_id = ? AND v.estado_servicio = 'Activo' AND v.exento_cobro = 0
+                        AND v.id NOT IN (SELECT vivienda_id FROM cobros WHERE mes = ? AND anio = ? AND estado != 'Anulado')",
+                    [$calle_id, $mes, $anio]
+                )->fetchAll(\PDO::FETCH_ASSOC);
 
                 $fechaEmision = date('Y-m-d');
                 $fechaVenc = date('Y-m-d', strtotime('+15 days'));
-                foreach ($viviendasSinCobro as $vid) {
+                foreach ($viviendasSinCobro as $predio) {
                     $this->ejecutarConsulta(
                         "INSERT INTO cobros (vivienda_id, mes, anio, monto, fecha_emision, fecha_vencimiento, estado, tipo_cobro)
                          VALUES (?, ?, ?, ?, ?, ?, 'Pendiente', 'Servicio')",
-                        [$vid, $mes, $anio, $cuota, $fechaEmision, $fechaVenc]
+                        [$predio['id'], $mes, $anio, (float)$predio['monto'], $fechaEmision, $fechaVenc]
                     );
                 }
 
+                // Solo se contabilizan las viviendas que forman parte del lote:
+                // activas y no exentas, igual que el total de casas.
                 $casas_pagadas = (int)$this->ejecutarConsulta(
-                    "SELECT COUNT(DISTINCT vivienda_id) FROM cobros c 
-                     JOIN viviendas v ON c.vivienda_id = v.id 
-                     WHERE v.calle_id = ? AND c.mes = ? AND c.anio = ? AND c.estado = 'Pagado'",
+                    "SELECT COALESCE(SUM(casas), 0) FROM (
+                        SELECT DISTINCT v.id, GREATEST(COALESCE(v.cantidad_casas, 1), 1) AS casas
+                          FROM cobros c
+                          JOIN viviendas v ON c.vivienda_id = v.id
+                         WHERE v.calle_id = ? AND v.estado_servicio='Activo' AND v.exento_cobro=0
+                           AND c.mes = ? AND c.anio = ? AND c.estado = 'Pagado'
+                     ) x",
                     [$calle_id, $mes, $anio]
                 )->fetchColumn();
 
                 $monto_recolectado = (float)$this->ejecutarConsulta(
                     "SELECT COALESCE(SUM(c.monto),0) FROM cobros c 
                      JOIN viviendas v ON c.vivienda_id = v.id 
-                     WHERE v.calle_id = ? AND c.mes = ? AND c.anio = ? AND c.estado = 'Pagado'",
+                     WHERE v.calle_id = ? AND v.estado_servicio='Activo' AND v.exento_cobro=0
+                       AND c.mes = ? AND c.anio = ? AND c.estado = 'Pagado'",
                     [$calle_id, $mes, $anio]
                 )->fetchColumn();
 
@@ -478,7 +547,7 @@ class calleController extends mainModel {
                 $this->ejecutarConsulta(
                     "INSERT INTO lotes_calle (periodo_mes, periodo_anio, mes, anio, calle_id, barrio_id, encargado_calle_id, monto_esperado, monto_recolectado, total_casas, casas_pagadas, casas_morosas, estado, fecha_envio, comprobante_lote, referencia_lote)
                      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'Enviado', NOW(), ?, ?)
-                     ON DUPLICATE KEY UPDATE monto_recolectado=VALUES(monto_recolectado), casas_pagadas=VALUES(casas_pagadas), casas_morosas=VALUES(casas_morosas), estado='Enviado', fecha_envio=NOW(), comprobante_lote=VALUES(comprobante_lote), referencia_lote=VALUES(referencia_lote)",
+                     ON DUPLICATE KEY UPDATE monto_esperado=VALUES(monto_esperado), total_casas=VALUES(total_casas), monto_recolectado=VALUES(monto_recolectado), casas_pagadas=VALUES(casas_pagadas), casas_morosas=VALUES(casas_morosas), estado='Enviado', fecha_envio=NOW(), comprobante_lote=VALUES(comprobante_lote), referencia_lote=VALUES(referencia_lote)",
                     [$mes, $anio, $mes, $anio, $calle_id, $barrio_id, $user['id'], $monto_esperado, $monto_recolectado, $total_casas, $casas_pagadas, $casas_morosas, $comprobanteLote, $referenciaLote]
                 );
 

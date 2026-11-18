@@ -133,7 +133,7 @@ ob_start();
 
 <style>
     .hero-section {
-      background: linear-gradient(rgba(76,110,145, 0.9), rgba(62,92,118, 0.9)), url('https://images.unsplash.com/photo-1595278069441-2cf29f8005a4?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80') center/cover no-repeat;
+      background: linear-gradient(rgba(76,110,145, 0.9), rgba(62,92,118, 0.9)), url('/reciclaje/img/WhatsApp-Image-2026-05-12-at-2.03.59-PM.jpeg') center/cover no-repeat;
       padding: 100px 0; color: white; text-shadow: 1px 1px 3px rgba(0,0,0,0.3);
     }
     .hero-section h1 { font-weight: 700; font-size: 3rem; }

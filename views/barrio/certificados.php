@@ -90,6 +90,7 @@ if (!empty($lotes)) {
     }
 }
 
+$title = 'Historial de Facturas - EPSIC';
 $header_title = 'Historial de Facturas';
 $header_subtitle = 'Barrio: ' . htmlspecialchars($barrio['nombre']);
 $extra_css = '

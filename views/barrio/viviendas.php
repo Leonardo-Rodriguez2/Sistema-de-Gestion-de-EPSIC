@@ -104,6 +104,8 @@ foreach ($viviendas as $v) {
         '#' . ($v['numero_casa'] ?? ''),
         $v['propietario'] ?? '',
         formato_identificacion($v['cedula'] ?? '', $v['cedula_tipo'] ?? 'V', $v['otro_identificador'] ?? ''),
+        tipo_predio_etiqueta($v['tipo_predio'] ?? 'Vivienda'),
+        number_format(monto_predio_efectivo($v['tipo_predio'] ?? 'Vivienda', $v['cantidad_casas'] ?? 1, tarifas_barrio($pdo, $v['barrio_id'])), 2, '.', ''),
         $v['calle_nombre'] ?? 'Sin calle',
         $v['direccion'] ?? '',
         $v['estado_servicio'] ?? '',
@@ -115,7 +117,7 @@ foreach ($viviendas as $v) {
 reporte_exportar_si_solicitado(
     'viviendas_barrio',
     'Viviendas del barrio',
-    ['Casa', 'Propietario', 'Identificación', 'Calle', 'Dirección', 'Estado del servicio', 'Pago del mes', 'Deuda', 'Exenta'],
+    ['Casa', 'Propietario', 'Identificación', 'Tipo de predio', 'Monto mensual', 'Calle', 'Dirección', 'Estado del servicio', 'Pago del mes', 'Deuda', 'Exenta'],
     $filasViviendas,
     array_merge($metaViviendas, ['Total viviendas' => count($filasViviendas)]),
     'Revisión completa de viviendas y estado de pagos'
@@ -295,6 +297,7 @@ ob_start();
                 <tr style="text-align: left;">
                     <th style="padding: 12px; color: #6B7280; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px;">Ubicación / Calle</th>
                     <th style="padding: 12px; color: #6B7280; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px;">Propietario</th>
+                    <th style="padding: 12px; color: #6B7280; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px;">Tipo / Cuota</th>
                     <th style="padding: 12px; color: #6B7280; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px;">Dirección / Referencia</th>
                     <th style="padding: 12px; text-align: center; color: #6B7280; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px;">Estado Pago</th>
                     <th style="padding: 12px; text-align: center; color: #6B7280; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px;">Deuda</th>
@@ -305,7 +308,7 @@ ob_start();
                <tbody>
                    <?php if (empty($viviendas)): ?>
                        <tr>
-                           <td colspan="7" style="padding: 50px; text-align: center; color: #9CA3AF; background: #F9FAFB; border-radius: 12px;">
+                           <td colspan="8" style="padding: 50px; text-align: center; color: #9CA3AF; background: #F9FAFB; border-radius: 12px;">
                                <div style="font-size: 40px; margin-bottom: 10px;">🏠</div>
                                No se encontraron viviendas registradas en esta zona.
                            </td>
@@ -335,7 +338,11 @@ ob_start();
                                <div style="font-size: 11px; color: #6B7280;">ID: #<?= $v['id'] ?></div>
                            </td>
                            <td style="padding: 15px; border: 1px solid #F3F4F6; border-left: none; border-right: none;">
-                               <div style="font-weight: 700; color: #4B5563;">Casa <?= htmlspecialchars($v['numero_casa'] ?: '-') ?></div>
+                               <div style="font-weight: 700; color: #374151;"><?= htmlspecialchars(tipo_predio_etiqueta($v['tipo_predio'] ?? 'Vivienda')) ?></div>
+                                <div style="font-size: 11px; color: #6B7280;"><?= htmlspecialchars(etiqueta_monto_predio($v['tipo_predio'] ?? 'Vivienda', $v['cantidad_casas'] ?? 1, tarifas_barrio($pdo, $v['barrio_id']))) ?></div>
+                            </td>
+                            <td style="padding: 15px; border: 1px solid #F3F4F6; border-left: none; border-right: none;">
+                                <div style="font-weight: 700; color: #4B5563;">Casa <?= htmlspecialchars($v['numero_casa'] ?: '-') ?></div>
                                <div style="font-size: 12px; color: #9CA3AF; font-style: italic;"><?= htmlspecialchars($v['direccion']) ?></div>
                            </td>
                             <td style="padding: 15px; text-align: center; border: 1px solid #F3F4F6; border-left: none; border-right: none;">

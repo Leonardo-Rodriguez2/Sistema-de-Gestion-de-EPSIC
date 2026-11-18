@@ -4,7 +4,7 @@ $page = $page ?? 'dashboard';
 ?>
 <aside class="sidebar" id="sidebar">
     <div class="sidebar-header">
-        <span class="brand"><img src="/reciclaje/assets/img/icono.png?v=3" alt="" class="brand-logo"><span class="brand-name">EPSIC</span></span>
+        <span class="brand"><img src="/reciclaje/img/logo.png?v=4" alt="Logo EPSIC" class="brand-logo"><span class="brand-name">EPSIC</span></span>
         <button class="sidebar-close" onclick="toggleSidebar()">&#x2715;</button>
     </div>
     <div class="sidebar-search">
@@ -14,6 +14,9 @@ $page = $page ?? 'dashboard';
         <ul class="nav-links" id="navLinks">
             <li><a href="router.php?page=dashboard" class="<?= $page=='dashboard'?'active':'' ?>">&#x1f4ca; Dashboard</a></li>
             <li><a href="router.php?page=notificaciones" class="<?= $page=='notificaciones'?'active':'' ?>">&#x1f514; Notificaciones<?php if (!empty($notif_count)): ?><span style="margin-left:auto;background:#8A5A5A;color:#fff;border-radius:10px;padding:1px 7px;font-size:10px;font-weight:700;flex-shrink:0;"><?= (int)$notif_count ?></span><?php endif; ?></a></li>
+            <?php if ($rol_id == 3): ?>
+            <li><a href="router.php?page=reportes_ciudadanos" class="<?= $page=='reportes_ciudadanos'?'active':'' ?>">&#x1f4e3; Reportes Ciudadanos</a></li>
+            <?php endif; ?>
             <!-- ═══════ ADMIN ═══════ -->
             <?php if ($rol_id == 1): ?>
             <li class="sep">ADMIN</li>
@@ -57,6 +60,7 @@ $page = $page ?? 'dashboard';
                 <ul class="sub">
                     <li><a href="router.php?page=gestor_viviendas" class="<?= $page=='gestor_viviendas'?'active':'' ?>">Lista</a></li>
                     <li><a href="router.php?page=registrar_vivienda">Registrar</a></li>
+                    <li><a href="router.php?page=registrar_vivienda&tipo=Comercio">Registrar Comercio / Tienda</a></li>
                     <li><a href="router.php?page=solicitudes" class="<?= $page=='solicitudes'?'active':'' ?>">Solicitudes</a></li>
                     <li><a href="router.php?page=quitar_servicio">Quitar Servicio</a></li>
                     <li><a href="router.php?page=reporte_bajas">Reporte Bajas</a></li>
@@ -76,8 +80,9 @@ $page = $page ?? 'dashboard';
                 <a href="javascript:void(0)" onclick="tSub(this)">&#x1f4ca; Reportes<span class="arr">&#x25bc;</span></a>
                 <ul class="sub">
                     <li><a href="router.php?page=monitor_pagos" class="<?= $page=='monitor_pagos'?'active':'' ?>">Monitor Pagos</a></li>
-                    <li><a href="router.php?page=reportes">Reportes</a></li>
+                    <li><a href="router.php?page=reportes" class="<?= $page=='reportes'?'active':'' ?>">Reportes</a></li>
                     <li><a href="router.php?page=reporte_calle" class="<?= $page=='reporte_calle'?'active':'' ?>">Reporte por Calle</a></li>
+                    <li><a href="router.php?page=reportes_ciudadanos" class="<?= $page=='reportes_ciudadanos'?'active':'' ?>">Reportes Ciudadanos</a></li>
                 </ul>
             </li>
 
@@ -96,6 +101,7 @@ $page = $page ?? 'dashboard';
                 <ul class="sub">
                     <li><a href="router.php?page=gestor_viviendas" class="<?= $page=='gestor_viviendas'?'active':'' ?>">Estado Viviendas</a></li>
                     <li><a href="router.php?page=registrar_vivienda">Registrar</a></li>
+                    <li><a href="router.php?page=registrar_vivienda&tipo=Comercio">Registrar Comercio / Tienda</a></li>
                 </ul>
             </li>
             <li><a href="router.php?page=historial" class="<?= $page=='historial'?'active':'' ?>">&#x1f4cb; Historial</a></li>
@@ -104,6 +110,7 @@ $page = $page ?? 'dashboard';
             <li><a href="router.php?page=reporte_calle" class="<?= $page=='reporte_calle'?'active':'' ?>">&#x1f3d8;&#xfe0f; Reporte por Calle</a></li>
             <li><a href="router.php?page=gestor_certificado_calle" class="<?= $page=='gestor_certificado_calle'?'active':'' ?>">&#x1f4dc; Facturas</a></li>
             <li><a href="router.php?page=solicitudes_barrio" class="<?= $page=='solicitudes_barrio'?'active':'' ?>">Solicitudes del Barrio</a></li>
+            <li><a href="router.php?page=reportes_ciudadanos" class="<?= $page=='reportes_ciudadanos'?'active':'' ?>">&#x1f4e3; Reportes Ciudadanos</a></li>
 
             <!-- ═══════ BARRIO ═══════ -->
             <?php elseif ($rol_id == 5): ?>
@@ -112,12 +119,13 @@ $page = $page ?? 'dashboard';
                 <a href="javascript:void(0)" onclick="tSub(this)">&#x1f6e3;&#xfe0f; Barrio<span class="arr">&#x25bc;</span></a>
                 <ul class="sub">
                     <li><a href="router.php?page=calles" class="<?= $page=='calles'?'active':'' ?>">Lista de Calles</a></li>
-                    <li><a href="router.php?page=registrar_vivienda" class="<?= $page=='registrar_vivienda'?'active':'' ?>">Registrar Casa</a></li>
+                    <li><a href="router.php?page=registrar_vivienda" class="<?= $page=='registrar_vivienda' && empty($_GET['tipo'])?'active':'' ?>">Registrar Casa</a></li>
+                    <li><a href="router.php?page=registrar_vivienda&tipo=Comercio" class="<?= $page=='registrar_vivienda' && ($_GET['tipo']??'')==='Comercio'?'active':'' ?>">Registrar Comercio / Tienda</a></li>
                     <li><a href="router.php?page=solicitudes" class="<?= $page=='solicitudes'?'active':'' ?>">Solicitudes Registro</a></li>
                     <li><a href="router.php?page=ordenes_baja" class="<?= $page=='ordenes_baja'?'active':'' ?>">Ordenes de Baja</a></li>
                     <li><a href="router.php?page=solicitudes_renovacion" class="<?= $page=='solicitudes_renovacion'?'active':'' ?>">Ordenes Renovacion</a></li>
                     <li><a href="router.php?page=historial_solicitudes" class="<?= $page=='historial_solicitudes'?'active':'' ?>">Historial Tramites</a></li>
-                    <li><a href="router.php?page=configuracion" class="<?= $page=='configuracion'?'active':'' ?>">Configuracion Tasas</a></li>
+                    <li><a href="router.php?page=configuracion" class="<?= $page=='configuracion'?'active':'' ?>">Configuración de Pagos</a></li>
                     <li><a href="router.php?page=solicitar_gestion" class="<?= $page=='solicitar_gestion'?'active':'' ?>">Solicitar Calle / Encargado</a></li>
                     <li><a href="router.php?page=viviendas" class="<?= $page=='viviendas'?'active':'' ?>">Ver Todas Viviendas</a></li>
                 </ul>
@@ -188,7 +196,7 @@ $page = $page ?? 'dashboard';
 .sidebar{width:232px;background:#17212b;height:100vh;display:flex;flex-direction:column;position:fixed;left:0;top:0;font-size:12px;z-index:999;color:#9eabb6;box-shadow:4px 0 18px rgba(23,33,43,.08)}
 .sidebar-header{padding:16px;border-bottom:1px solid #273744;display:flex;align-items:center;justify-content:space-between}
 .brand{color:#eee;font-size:17px;font-weight:700;display:flex;align-items:center;gap:8px}
-.brand-logo{width:28px;height:28px;object-fit:contain;flex-shrink:0;display:block}
+.brand-logo{width:32px;height:32px;object-fit:contain;flex-shrink:0;display:block}
 .brand-name{color:#FFFFFF;font-size:18px;font-weight:800;letter-spacing:.6px;line-height:1}
 .sidebar-close{display:none;background:#333;color:#aaa;border:none;width:28px;height:28px;border-radius:0;font-size:13px;cursor:pointer;align-items:center;justify-content:center}
 @media(max-width:1024px){.sidebar-close{display:flex}}

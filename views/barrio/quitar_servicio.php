@@ -36,7 +36,23 @@ ob_start();
 ?>
     <?php render_dashboard_alerts($mensaje_exito ?? null, $mensaje_error ?? null); ?>
 
-    <div class="card">
+    <style>
+        .suspension-card .table-pagination {
+            margin-top:0; padding:14px 16px; border-top:1px solid #E8EEF2;
+            border-radius:0 0 8px 8px; background:#F8FAFC; color:#526171;
+        }
+        .suspension-card .table-page-button {
+            min-width:88px; padding:8px 13px; border:1px solid #CBD7DE;
+            border-radius:7px; background:#fff; color:#3E5C76; font-size:11px;
+            font-weight:700; transition:background .15s, color .15s, border-color .15s;
+        }
+        .suspension-card .table-page-button:hover:not(:disabled) {
+            border-color:#3E5C76; background:#3E5C76; color:#fff;
+        }
+        .suspension-card .table-page-indicator { color:#263746; font-weight:700; }
+    </style>
+
+    <div class="card suspension-card">
         <h3 style="margin-top:0;">📋 Viviendas Disponibles</h3>
         <p style="font-size: 13px; color: #6B7280; margin-bottom: 20px;">
             Al anular el servicio, la vivienda dejará de recibir cobros mensuales y se registrará su deuda actual.
@@ -59,7 +75,7 @@ ob_start();
         </form>
         
         <div class="table-wrap">
-            <table class="table-mini" data-no-table-search="true" style="width: 100%; border-collapse: collapse;">
+            <table class="table-mini" data-page-size="10" data-no-table-search="true" data-no-tools="true" style="width: 100%; border-collapse: collapse;">
                 <thead>
                     <tr style="text-align: left; border-bottom: 2px solid #F3F4F6;">
                         <th style="padding: 12px;">Calle / N°</th>

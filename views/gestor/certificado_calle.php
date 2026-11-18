@@ -5,6 +5,10 @@ use app\models\mainModel;
 
 if (empty($pdo)) $pdo = (new mainModel())->conectar();
 
+$rolActual = (int)($user['rol_id'] ?? 0);
+$pageCertificado = in_array($rolActual, [5, 6], true) ? 'certificado_calle' : 'gestor_certificado_calle';
+$puedeEnviarFacturas = !in_array($rolActual, [5, 6], true);
+
 $lote_calle_id = (int)($_GET['lote_calle_id'] ?? 0);
 if (!$lote_calle_id) {
     $vistaFacturacion = ($_GET['vista'] ?? 'pendientes') === 'emitidas' ? 'emitidas' : 'pendientes';
@@ -60,9 +64,17 @@ if (!$lote_calle_id) {
         $certificadosParams[] = '%' . $f_buscar . '%';
     }
 
-    if (($user['rol_id'] ?? 0) === 6) {
+    if ($rolActual === 5) {
+        // El encargado de barrio solo puede consultar las facturas de su barrio.
+        $certificadosSql .= " AND lc.barrio_id = (
+            SELECT barrio_id FROM detalles_encargado_barrio WHERE usuario_id = ? LIMIT 1
+        )";
+        $certificadosParams[] = $user['id'];
+    }
+
+    if ($rolActual === 6) {
         $certificadosSql .= " AND lc.calle_id = (
-            SELECT calle_id FROM detalles_encargado_calle WHERE usuario_id = ?
+            SELECT calle_id FROM detalles_encargado_calle WHERE usuario_id = ? LIMIT 1
         )";
         $certificadosParams[] = $user['id'];
     }
@@ -97,7 +109,17 @@ if (!$lote_calle_id) {
         'Facturación por barrio'
     );
 
-    $barriosFiltro = $pdo->query("SELECT id, nombre FROM barrios ORDER BY nombre")->fetchAll(PDO::FETCH_ASSOC);
+    if ($rolActual === 5) {
+        $barriosStmt = $pdo->prepare(
+            "SELECT b.id, b.nombre FROM barrios b
+             JOIN detalles_encargado_barrio d ON d.barrio_id = b.id
+             WHERE d.usuario_id = ? ORDER BY b.nombre"
+        );
+        $barriosStmt->execute([$user['id']]);
+        $barriosFiltro = $barriosStmt->fetchAll(PDO::FETCH_ASSOC);
+    } else {
+        $barriosFiltro = $pdo->query("SELECT id, nombre FROM barrios ORDER BY nombre")->fetchAll(PDO::FETCH_ASSOC);
+    }
     $title = $vistaFacturacion === 'pendientes' ? 'Lotes Pendientes de Facturación' : 'Facturas Emitidas';
     $header_title = $vistaFacturacion === 'pendientes' ? 'Lotes Pendientes de Facturación' : 'Facturas Emitidas';
     $header_subtitle = 'Consulta y gestiona la facturación por barrio.';
@@ -107,16 +129,16 @@ if (!$lote_calle_id) {
     <?= reporte_botonera() ?>
     <div class="card" style="padding:20px;">
         <div class="page-tabs no-print" style="margin-bottom:18px;">
-            <a class="page-tab <?= $vistaFacturacion === 'pendientes' ? 'active' : '' ?>" href="router.php?page=gestor_certificado_calle&vista=pendientes">⏳ Pendientes</a>
-            <a class="page-tab <?= $vistaFacturacion === 'emitidas' ? 'active' : '' ?>" href="router.php?page=gestor_certificado_calle&vista=emitidas">📄 Emitidas</a>
+            <a class="page-tab <?= $vistaFacturacion === 'pendientes' ? 'active' : '' ?>" href="router.php?page=<?= $pageCertificado ?>&vista=pendientes">⏳ Pendientes</a>
+            <a class="page-tab <?= $vistaFacturacion === 'emitidas' ? 'active' : '' ?>" href="router.php?page=<?= $pageCertificado ?>&vista=emitidas">📄 Emitidas</a>
         </div>
         <form method="GET" action="router.php" class="unified-filter no-print">
-            <input type="hidden" name="page" value="gestor_certificado_calle">
+            <input type="hidden" name="page" value="<?= $pageCertificado ?>">
             <input type="hidden" name="vista" value="<?= htmlspecialchars($vistaFacturacion) ?>">
             <div><label>Buscar barrio o calle</label><input type="search" name="search" value="<?= htmlspecialchars($f_buscar) ?>" placeholder="Nombre del barrio o calle"></div>
             <div><label>Barrio</label><select name="barrio_id"><option value="0">Todos</option><?php foreach ($barriosFiltro as $b): ?><option value="<?= (int)$b['id'] ?>" <?= $f_barrio === (int)$b['id'] ? 'selected' : '' ?>><?= htmlspecialchars($b['nombre']) ?></option><?php endforeach; ?></select></div>
             <button type="submit" class="btn-primary">Filtrar</button>
-            <a href="router.php?page=gestor_certificado_calle&vista=<?= urlencode($vistaFacturacion) ?>" class="btn-edit" style="text-decoration:none;">Limpiar</a>
+            <a href="router.php?page=<?= $pageCertificado ?>&vista=<?= urlencode($vistaFacturacion) ?>" class="btn-edit" style="text-decoration:none;">Limpiar</a>
         </form>
         <?php if (!$certificados): ?>
             <div style="padding:30px; text-align:center; color:#6B7280;">
@@ -149,14 +171,14 @@ if (!$lote_calle_id) {
                         <td><?= $totalCasas ?></td>
                         <td>Bs. <?= number_format($totalPagado, 2) ?></td>
                         <td>
-                            <?php if ($enviadoBarrio): ?>
+                            <?php if ($puedeEnviarFacturas && $enviadoBarrio): ?>
                                 <form method="POST" action="router.php?page=gestor_certificado_calle">
                                     <input type="hidden" name="page" value="gestor_certificado_calle">
                                     <input type="hidden" name="action" value="enviar_facturas_barrio">
                                     <input type="hidden" name="lote_id" value="<?= (int)$primero['lote_barrio_id'] ?>">
                                     <button type="submit" class="btn-primary" style="font-size:11px;" onclick="return confirm('¿Reenviar las facturas al encargado de barrio?')">🔁 Reenviar al encargado de barrio</button>
                                 </form>
-                            <?php elseif ($estadoBarrio === 'Aprobado' && !empty($primero['lote_barrio_id'])): ?>
+                            <?php elseif ($puedeEnviarFacturas && $estadoBarrio === 'Aprobado' && !empty($primero['lote_barrio_id'])): ?>
                                 <form method="POST" action="router.php?page=gestor_certificado_calle">
                                     <input type="hidden" name="page" value="gestor_certificado_calle">
                                     <input type="hidden" name="action" value="enviar_facturas_barrio">
@@ -166,7 +188,7 @@ if (!$lote_calle_id) {
                             <?php endif; ?>
                             <div style="display:flex; gap:6px; flex-wrap:wrap; margin-top:6px;">
                                 <?php foreach ($loteCertificados as $certificado): ?>
-                                    <a href="router.php?page=gestor_certificado_calle&lote_calle_id=<?= (int)$certificado['id'] ?>" class="btn-edit" style="text-decoration:none;">Ver <?= htmlspecialchars($certificado['calle_nombre']) ?></a>
+                                    <a href="router.php?page=<?= $pageCertificado ?>&lote_calle_id=<?= (int)$certificado['id'] ?>" class="btn-edit" style="text-decoration:none;">Ver <?= htmlspecialchars($certificado['calle_nombre']) ?></a>
                                 <?php endforeach; ?>
                             </div>
                         </td>
@@ -204,6 +226,29 @@ $stmt->execute([$lote_calle_id]);
 $lote = $stmt->fetch(PDO::FETCH_ASSOC);
 
 if (!$lote) { echo "<div class='alert alert-error'>Factura no encontrada.</div>"; return; }
+
+if ($rolActual === 5) {
+    $barrioAsignado = $pdo->prepare(
+        "SELECT barrio_id FROM detalles_encargado_barrio WHERE usuario_id = ? LIMIT 1"
+    );
+    $barrioAsignado->execute([$user['id']]);
+    if ((int)$barrioAsignado->fetchColumn() !== (int)$lote['barrio_id']) {
+        echo "<div class='alert alert-error'>No tienes permiso para consultar facturas de otro barrio.</div>";
+        return;
+    }
+}
+
+if ($rolActual === 6) {
+    $calleAsignada = $pdo->prepare(
+        "SELECT calle_id FROM detalles_encargado_calle WHERE usuario_id = ? LIMIT 1"
+    );
+    $calleAsignada->execute([$user['id']]);
+    if ((int)$calleAsignada->fetchColumn() !== (int)$lote['calle_id']) {
+        echo "<div class='alert alert-error'>No tienes permiso para consultar facturas de otra calle.</div>";
+        return;
+    }
+}
+
 if (!$lote['certificado_generado']) {
     echo "<div class='alert alert-warning'>Esta factura aún no está disponible. Debe ser aprobado por el gestor primero.</div>";
     return;
@@ -269,14 +314,14 @@ ob_start();
 ?>
 <div class="no-print" style="text-align:center; margin-bottom:20px;">
     <button class="btn-primary" onclick="window.print()">🖨️ Descargar PDF / Imprimir</button>
-    <?php if (($user['rol_id'] ?? 0) !== 6 && !empty($lote['lote_barrio_id']) && !$lote['facturas_enviadas_barrio'] && $lote['barrio_estado'] === 'Aprobado'): ?>
+    <?php if ($puedeEnviarFacturas && !empty($lote['lote_barrio_id']) && !$lote['facturas_enviadas_barrio'] && $lote['barrio_estado'] === 'Aprobado'): ?>
         <form method="POST" action="router.php?page=gestor_certificado_calle" style="display:inline-block; margin-left:10px;">
             <input type="hidden" name="page" value="gestor_certificado_calle">
             <input type="hidden" name="action" value="enviar_facturas_barrio">
             <input type="hidden" name="lote_id" value="<?= (int)$lote['lote_barrio_id'] ?>">
             <button type="submit" class="btn-primary">📤 Enviar resumen al Barrio</button>
         </form>
-    <?php elseif (!empty($lote['facturas_enviadas_barrio'])): ?>
+    <?php elseif ($puedeEnviarFacturas && !empty($lote['facturas_enviadas_barrio'])): ?>
         <form method="POST" action="router.php?page=gestor_certificado_calle" style="display:inline-block; margin-left:10px;">
             <input type="hidden" name="page" value="gestor_certificado_calle">
             <input type="hidden" name="action" value="enviar_facturas_barrio">

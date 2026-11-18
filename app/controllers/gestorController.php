@@ -48,8 +48,8 @@ class gestorController extends mainModel {
                     $ocupadoStmt->execute([$solicitud['calle_id']]);
                     if ($ocupadoStmt->fetchColumn()) throw new \Exception("La calle ya tiene encargado asignado.");
                     $email = trim((string)$solicitud['email']);
-                    if ($email === '') {
-                        $email = 'encargado.' . bin2hex(random_bytes(8)) . '@local.invalid';
+                    if ($email === '' || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
+                        $email = 'encargado.' . bin2hex(random_bytes(8)) . '@epsic.local';
                     }
                     $emailStmt = $pdo->prepare("SELECT id FROM usuarios WHERE email=? LIMIT 1");
                     $emailStmt->execute([$email]);
@@ -62,7 +62,7 @@ class gestorController extends mainModel {
                     $pdo->prepare("UPDATE solicitudes_gestion SET estado='Aprobada', procesado_por=?, fecha_revision=NOW() WHERE id=?")
                         ->execute([$user['id'], $solicitud_id]);
                     $pdo->commit();
-                    $mensaje_exito = "Encargado de calle creado y asignado. Contraseña inicial: 123456.";
+                    $mensaje_exito = "Encargado de calle creado y asignado. Correo: {$email}. Contraseña inicial: 123456.";
                 }
             } catch (\Throwable $e) {
                 if (isset($pdo) && $pdo->inTransaction()) $pdo->rollBack();
@@ -89,8 +89,13 @@ class gestorController extends mainModel {
                     $calle_id = (int)($_POST['calle_id'] ?? 0);
                     $nombre = trim($_POST['nombre'] ?? '');
                     $apellido = trim($_POST['apellido'] ?? '');
-                    $email = 'encargado.' . bin2hex(random_bytes(8)) . '@local.invalid';
+                    $email = trim($_POST['email'] ?? '');
                     if ($calle_id <= 0 || $nombre === '' || $apellido === '') throw new \Exception("Complete todos los datos del encargado.");
+                    if ($email === '') {
+                        $email = 'encargado.' . bin2hex(random_bytes(8)) . '@epsic.local';
+                    } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+                        throw new \Exception("El correo electrónico no tiene un formato válido.");
+                    }
                     $valid = $pdo->prepare("SELECT id FROM calles WHERE id=? AND barrio_id=?");
                     $valid->execute([$calle_id, $barrio_id]);
                     if (!$valid->fetchColumn()) throw new \Exception("La calle no pertenece al barrio.");
@@ -105,7 +110,7 @@ class gestorController extends mainModel {
                     $uid = (int)$pdo->lastInsertId();
                     $pdo->prepare("INSERT INTO detalles_encargado_calle (usuario_id,calle_id,dni,telefono) VALUES (?,?,?,?)")
                         ->execute([$uid, $calle_id, trim($_POST['dni'] ?? ''), trim($_POST['telefono'] ?? '')]);
-                    $mensaje_exito = "Encargado de calle creado directamente. Contraseña inicial: 123456.";
+                    $mensaje_exito = "Encargado de calle creado directamente. Correo: {$email}. Contraseña inicial: 123456.";
                 }
                 $pdo->commit();
             } catch (\Throwable $e) {
@@ -248,10 +253,11 @@ class gestorController extends mainModel {
 
     private function aplicarSancionesAlCerrar(\PDO $pdo, int $barrio_id, int $mes, int $anio): void {
         // Obtener viviendas activas del barrio que NO tienen cobro pagado en el periodo
+        $montoSql = self::sqlMontoPredio();
         $stmt = $pdo->prepare(
-            "SELECT v.id, cb.cuota_mensual FROM viviendas v
+            "SELECT v.id, {$montoSql} AS cuota_mensual FROM viviendas v
              LEFT JOIN configuraciones_barrio cb ON v.barrio_id = cb.barrio_id
-             WHERE v.barrio_id = ? AND v.estado_servicio = 'Activo'
+             WHERE v.barrio_id = ? AND v.estado_servicio = 'Activo' AND v.exento_cobro = 0
              AND v.id NOT IN (
                  SELECT DISTINCT c.vivienda_id FROM cobros c
                  WHERE c.mes = ? AND c.anio = ? AND c.estado = 'Pagado'

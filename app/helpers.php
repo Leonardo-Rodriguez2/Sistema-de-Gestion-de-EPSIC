@@ -56,6 +56,72 @@ function formato_identificacion($cedula, $tipo = 'V', $otro = '') {
 }
 
 /**
+ * Etiqueta legible para el tipo de predio registrado.
+ */
+function tipo_predio_etiqueta($tipo) {
+    $etiquetas = [
+        'Vivienda'     => 'Vivienda',
+        'Comercio'     => 'Comercio',
+        'Tienda'       => 'Tienda',
+        'Empresa'      => 'Empresa',
+        'Urbanizacion' => 'Urbanización',
+        'Otro'         => 'Otro',
+    ];
+    $tipo = (string)$tipo;
+    return $etiquetas[$tipo] ?? ($tipo !== '' ? $tipo : 'Vivienda');
+}
+
+/**
+ * Configuración de tarifas de un barrio (con caché por petición).
+ */
+function tarifas_barrio($pdo, $barrio_id) {
+    static $cache = [];
+    $barrio_id = (int)$barrio_id;
+    if (!array_key_exists($barrio_id, $cache)) {
+        $stmt = $pdo->prepare("SELECT * FROM configuraciones_barrio WHERE barrio_id = ?");
+        $stmt->execute([$barrio_id]);
+        $cache[$barrio_id] = $stmt->fetch(PDO::FETCH_ASSOC) ?: [];
+    }
+    return $cache[$barrio_id];
+}
+
+/**
+ * Monto mensual efectivo de un predio según la tarifa configurada para su tipo.
+ * Debe mantenerse sincronizado con mainModel::sqlMontoPredio().
+ */
+function monto_predio_efectivo($tipo_predio, $cantidad_casas, array $config) {
+    $cuota = (float)($config['cuota_mensual'] ?? 10.00);
+    $campo = [
+        'Comercio'     => 'precio_comercio',
+        'Tienda'       => 'precio_tienda',
+        'Empresa'      => 'precio_empresa',
+        'Urbanizacion' => 'precio_urbanizacion',
+        'Otro'         => 'precio_otro',
+    ][$tipo_predio] ?? null;
+
+    $monto = ($campo !== null && isset($config[$campo]) && $config[$campo] !== null)
+        ? (float)$config[$campo]
+        : $cuota;
+    if ($tipo_predio === 'Urbanizacion') {
+        $monto *= max(1, (int)$cantidad_casas);
+    }
+    return round($monto, 2);
+}
+
+/**
+ * Texto descriptivo del cobro de un predio (útil para urbanizaciones).
+ */
+function etiqueta_monto_predio($tipo_predio, $cantidad_casas, array $config) {
+    $monto = monto_predio_efectivo($tipo_predio, $cantidad_casas, $config);
+    if ($tipo_predio === 'Urbanizacion') {
+        $porCasa = (float)($config['precio_urbanizacion'] ?? $config['cuota_mensual'] ?? 10.00);
+        $casas = max(1, (int)$cantidad_casas);
+        return $casas . ' casas × Bs. ' . number_format($porCasa, 2) . ' = Bs. ' . number_format($monto, 2);
+    }
+    return 'Bs. ' . number_format($monto, 2);
+}
+
+/**
  * Genera la cuadrícula de estadísticas.
  */
 function render_dashboard_stats($stats = []) {

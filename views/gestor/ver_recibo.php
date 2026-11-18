@@ -25,11 +25,12 @@ $stmt = $pdo->prepare(
             v.otro_identificador as v_otro_identificador,
             v.numero_casa as v_casa, v.direccion, v.barrio_id, v.calle_id,
             b.nombre as barrio_nombre, v.estado_servicio, cl.nombre as calle_nombre,
-            (SELECT cuota_mensual FROM configuraciones_barrio WHERE barrio_id = v.barrio_id) as cuota
+            " . app\models\mainModel::sqlMontoPredio('v', 'cb') . " as cuota
      FROM cobros c
      JOIN viviendas v ON c.vivienda_id = v.id
      JOIN barrios b ON v.barrio_id = b.id
      LEFT JOIN calles cl ON v.calle_id = cl.id
+     LEFT JOIN configuraciones_barrio cb ON cb.barrio_id = v.barrio_id
      WHERE c.id = ?"
 );
 $stmt->execute([$cobro_id]);
@@ -150,11 +151,15 @@ $fecha_pago = $cobro['fecha_confirmacion_barrio'] ?? $cobro['fecha_confirmacion_
         <div class="amount">Bs. <?= number_format($cobro['monto'], 2) ?></div>
       </div>
 
-      <?php if(!empty($cobro['comprobante_calle'])): ?>
+      <?php
+      $comprobanteRecibo = trim((string)($cobro['comprobante_barrio'] ?? ''));
+      if ($comprobanteRecibo === '') $comprobanteRecibo = trim((string)($cobro['comprobante_calle'] ?? ''));
+      ?>
+      <?php if($comprobanteRecibo !== ''): ?>
       <div class="comprobante-section">
         <h3>📎 Comprobante Adjunto</h3>
-        <a href="<?= htmlspecialchars($cobro['comprobante_calle']) ?>" target="_blank">
-          <img src="<?= htmlspecialchars($cobro['comprobante_calle']) ?>" alt="Comprobante de pago"
+        <a href="<?= htmlspecialchars($comprobanteRecibo) ?>" target="_blank">
+          <img src="<?= htmlspecialchars($comprobanteRecibo) ?>" alt="Comprobante de pago"
                onerror="this.parentElement.innerHTML='<p style=color:#7A4F4F;font-size:12px;>Imagen no disponible. <a href='+this.src+' target=_blank>Abrir directamente</a></p>'">
         </a>
       </div>
@@ -172,6 +177,7 @@ $fecha_pago = $cobro['fecha_confirmacion_barrio'] ?? $cobro['fecha_confirmacion_
       Generado el <?= date('d/m/Y H:i') ?>
     </div>
   </div>
+  <script src="/reciclaje/assets/js/system-icons.js"></script>
 </body>
 </html>
 <?php

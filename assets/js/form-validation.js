@@ -47,7 +47,7 @@
         editar_cobro: ['cobro_id', 'referencia_pago'],
         enviar_lote_calle: ['mes', 'anio', 'referencia_lote'],
         enviar_lote_barrio: ['periodo_mes', 'periodo_anio'],
-        actualizar_configuracion_barrio: ['cuota_mensual', 'multa_renovacion'],
+        actualizar_configuracion_barrio: ['cuota_mensual', 'precio_comercio', 'precio_tienda', 'precio_empresa', 'precio_urbanizacion', 'precio_otro', 'multa_renovacion', 'fecha_limite_pago'],
         enviar_certificado_calle: ['lote_calle_id'],
         verificar_pago_casa: ['cobro_id', 'decision'],
         procesar_solicitud: ['solicitud_id', 'estado'],
@@ -150,6 +150,24 @@
                     var field = form.querySelector('[name="' + name + '"]');
                     if (field && !field.disabled) markRequired(field);
                 });
+            }
+        }
+
+        // Solo la urbanización necesita declarar cuántas casas agrupa; las
+        // tarifas se configuran por barrio en "Configuración de Pagos".
+        if (action === 'nuevo_vecino_admin' || action === 'nuevo_vecino' || action === 'editar_vivienda') {
+            var tipoPredio = form.querySelector('[name="tipo_predio"]');
+            var cantidadCasas = form.querySelector('[name="cantidad_casas"]');
+            if (tipoPredio && cantidadCasas) {
+                var actualizarCasas = function () {
+                    var esUrbanizacion = String(tipoPredio.value) === 'Urbanizacion';
+                    cantidadCasas.required = esUrbanizacion;
+                    if (cantidadCasas.hasAttribute('disabled') && !esUrbanizacion) return;
+                    var bloque = document.getElementById('campo_cantidad_casas');
+                    if (bloque) bloque.style.display = esUrbanizacion ? '' : 'none';
+                };
+                tipoPredio.addEventListener('change', actualizarCasas);
+                actualizarCasas();
             }
         }
 
@@ -261,11 +279,21 @@
                 return;
             }
 
-            if (name === 'cuota_mensual' || name === 'multa_renovacion' || name === 'monto') {
+            if (name === 'cuota_mensual' || name === 'multa_renovacion' || name === 'monto' || name === 'precio_comercio' || name === 'precio_tienda' || name === 'precio_empresa' || name === 'precio_urbanizacion' || name === 'precio_otro') {
                 if (type !== 'number') el.type = 'number';
                 el.setAttribute('step', '0.01');
                 el.setAttribute('min', name === 'cuota_mensual' ? '0.01' : '0');
                 el.setAttribute('max', '999999999.99');
+                return;
+            }
+
+            if (name === 'cantidad_casas') {
+                if (tag === 'input') {
+                    el.type = 'number';
+                    el.setAttribute('step', '1');
+                    el.setAttribute('min', '1');
+                    el.setAttribute('max', '100000');
+                }
                 return;
             }
 
@@ -503,11 +531,19 @@
                 return;
             }
 
-            if (name === 'cuota_mensual' || name === 'multa_renovacion' || name === 'monto') {
+            if (name === 'cuota_mensual' || name === 'multa_renovacion' || name === 'monto' || name === 'precio_comercio' || name === 'precio_tienda' || name === 'precio_empresa' || name === 'precio_urbanizacion' || name === 'precio_otro') {
                 var monto = Number(value.replace(',', '.'));
-                var minimo = name === 'cuota_mensual' ? 0.01 : 0;
+                var minimo = (name === 'cuota_mensual' || name.indexOf('precio_') === 0) ? 0.01 : 0;
                 if (!isFinite(monto) || monto < minimo) {
                     addError(el, 'Ingrese un monto válido' + (minimo > 0 ? ' mayor que cero.' : ' igual o mayor que cero.'));
+                }
+                return;
+            }
+
+            if (name === 'cantidad_casas') {
+                var casas = Number(value);
+                if (!Number.isInteger(casas) || casas < 1 || casas > 100000) {
+                    addError(el, 'Ingrese una cantidad de casas válida (entre 1 y 100000).');
                 }
                 return;
             }

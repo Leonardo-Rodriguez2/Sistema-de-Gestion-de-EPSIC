@@ -230,9 +230,11 @@ class adminController extends mainModel {
                 $cedula = $this->normalizarCedula($_POST['cedula'] ?? '');
                 $cedulaTipo = $this->normalizarTipoCedula($_POST['cedula_tipo'] ?? 'V');
                 $otroIdentificador = $this->normalizarOtroIdentificador($_POST['otro_identificador'] ?? '');
+                $tipoPredio = $this->normalizarTipoPredio($_POST['tipo_predio'] ?? 'Vivienda');
+                $cantidadCasas = $this->normalizarCantidadCasas($_POST['cantidad_casas'] ?? '', $tipoPredio);
 
                 $this->ejecutarConsulta(
-                    "UPDATE viviendas SET propietario=?, cedula=?, cedula_tipo=?, otro_identificador=?, barrio_id=?, calle_id=?, direccion=?, numero_casa=?, referencia=? WHERE id=?",
+                    "UPDATE viviendas SET propietario=?, cedula=?, cedula_tipo=?, otro_identificador=?, barrio_id=?, calle_id=?, direccion=?, numero_casa=?, referencia=?, tipo_predio=?, cantidad_casas=? WHERE id=?",
                     [
                         $_POST['propietario'],
                         $cedula,
@@ -243,6 +245,8 @@ class adminController extends mainModel {
                         $_POST['direccion'],
                         $_POST['numero_casa'] ?? null,
                         $_POST['referencia'] ?? null,
+                        $tipoPredio,
+                        $cantidadCasas,
                         (int)$_POST['id']
                     ]
                 );
@@ -272,10 +276,12 @@ class adminController extends mainModel {
                 $cedula = $this->normalizarCedula($_POST['cedula'] ?? '');
                 $cedulaTipo = $this->normalizarTipoCedula($_POST['cedula_tipo'] ?? 'V');
                 $otroIdentificador = $this->normalizarOtroIdentificador($_POST['otro_identificador'] ?? '');
+                $tipoPredio = $this->normalizarTipoPredio($_POST['tipo_predio'] ?? 'Vivienda');
+                $cantidadCasas = $this->normalizarCantidadCasas($_POST['cantidad_casas'] ?? '', $tipoPredio);
 
                 $this->ejecutarConsulta(
-                    "INSERT INTO viviendas (propietario, cedula, cedula_tipo, otro_identificador, barrio_id, calle_id, direccion, numero_casa, referencia)
-                     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                    "INSERT INTO viviendas (propietario, cedula, cedula_tipo, otro_identificador, barrio_id, calle_id, direccion, numero_casa, referencia, tipo_predio, cantidad_casas)
+                     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
                     [
                         $_POST['propietario'],
                         $cedula,
@@ -285,10 +291,14 @@ class adminController extends mainModel {
                         $calle_id,
                         $_POST['direccion'],
                         $_POST['numero_casa'] ?? null,
-                        $_POST['referencia'] ?? null
+                        $_POST['referencia'] ?? null,
+                        $tipoPredio,
+                        $cantidadCasas
                     ]
                 );
-                $mensaje_exito = "Vivienda registrada correctamente.";
+                $mensaje_exito = $tipoPredio === 'Vivienda'
+                    ? "Vivienda registrada correctamente."
+                    : "Establecimiento registrado correctamente.";
             } catch (\Throwable $e) {
                 $mensaje_error = "Error al registrar vivienda: " . $e->getMessage();
             }
@@ -300,17 +310,23 @@ class adminController extends mainModel {
                 $vivienda_id = (int)$_POST['vivienda_id'];
                 
                 // 1. Obtener datos básicos
-                $vStmt = $this->ejecutarConsulta("SELECT v.calle_id, v.barrio_id FROM viviendas v WHERE v.id = ?", [$vivienda_id]);
+                $vStmt = $this->ejecutarConsulta(
+                    "SELECT v.calle_id, v.barrio_id, v.estado_servicio FROM viviendas v WHERE v.id = ?",
+                    [$vivienda_id]
+                );
                 $vData = $vStmt->fetch(\PDO::FETCH_ASSOC);
 
                 if (!$vData) throw new \Exception("Vivienda no encontrada.");
+                if ($vData['estado_servicio'] !== 'Activo') {
+                    throw new \Exception("El servicio de esta vivienda ya está inactivo.");
+                }
 
-                // 2. Calcular deuda actual
+                // 2. Calcular deuda actual (los cobros anulados no son deuda)
                 $deudaStmt = $this->ejecutarConsulta(
                     "SELECT SUM(monto) as total, COUNT(*) as cantidad, 
                             GROUP_CONCAT(CONCAT(tipo_cobro, ' ', mes, '/', anio) SEPARATOR ', ') as resumen
                      FROM cobros 
-                     WHERE vivienda_id = ? AND estado != 'Pagado'",
+                     WHERE vivienda_id = ? AND estado NOT IN ('Pagado', 'Anulado')",
                     [$vivienda_id]
                 );
                 $deuda_info = $deudaStmt->fetch(\PDO::FETCH_ASSOC);

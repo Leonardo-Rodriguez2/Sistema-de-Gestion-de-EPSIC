@@ -5,6 +5,7 @@ ob_start();
 
 <div class="forgot-container">
     <div class="forgot-card">
+        <img src="/reciclaje/img/logo.png?v=4" alt="Logo EPSIC" class="forgot-logo">
         <i class="fas fa-key forgot-icon"></i>
         <h1>Recuperar contraseña</h1>
         <p>Esta función aún no está implementada plenamente en el sistema corporativo.</p>
@@ -37,6 +38,12 @@ $extra_css = "
         max-width: 500px;
         width: 100%;
         text-align: center;
+    }
+    .forgot-logo {
+        width: 72px;
+        height: 72px;
+        object-fit: contain;
+        margin-bottom: 10px;
     }
     .forgot-icon {
         font-size: 48px;

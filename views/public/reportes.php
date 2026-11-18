@@ -76,7 +76,7 @@ ob_start();
     <main class="report-main">
         <!-- Izquierda: Información Corporativa -->
         <div class="info-panel">
-            <img src="https://images.unsplash.com/photo-1611284446314-60a58ac0deb9?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80" alt="Personal de Limpieza de EPSIC">
+            <img src="/reciclaje/img/WhatsApp-Image-2026-05-05-at-2.53.46-PM.jpeg" alt="Personal de Limpieza de EPSIC">
             <h2>¿Por qué hacemos esto?</h2>
             <p>Cualquier ciudadano puede enviarnos alertas de zonas críticas en nuestra ruta.</p>
             
@@ -225,7 +225,7 @@ ob_start();
                 </div>
             </div>
             <div>
-                <img src="https://images.unsplash.com/photo-1542838132-92c53300491e?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80" alt="Impacto Ambiental" style="width: 100%; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
+                <img src="/reciclaje/img/WhatsApp-Image-2026-05-12-at-2.03.59-PM.jpeg" alt="Impacto Ambiental" style="width: 100%; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
             </div>
         </div>
     </section>
@@ -301,7 +301,7 @@ ob_start();
 
         /* Hero Section */
         .hero {
-            background: linear-gradient(rgba(76,110,145, 0.9), rgba(62,92,118, 0.9)), url('https://images.unsplash.com/photo-1532996122724-e3c354a0b15b?ixlib=rb-1.2.1&auto=format&fit=crop&w=1950&q=80') center/cover no-repeat;
+            background: linear-gradient(rgba(76,110,145, 0.9), rgba(62,92,118, 0.9)), url('/reciclaje/img/WhatsApp-Image-2026-05-05-at-2.53.48-PM.jpeg') center/cover no-repeat;
             padding: 60px 20px;
             text-align: center;
             color: white;

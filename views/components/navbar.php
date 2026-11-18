@@ -62,7 +62,7 @@
 </style>
 <div class="cabecera">
     <div class="titulo">
-        <img src="/reciclaje/assets/img/icono.png?v=3" alt="" style="width: 2rem; height: 2rem;">
+        <img src="/reciclaje/img/logo.png?v=4" alt="Logo EPSIC" style="width: 2.2rem; height: 2.2rem; object-fit: contain;">
         <span style="font-size: 26px; font-weight: 800; letter-spacing: .5px;">EPSIC</span>
     </div>
     <div class="menu">

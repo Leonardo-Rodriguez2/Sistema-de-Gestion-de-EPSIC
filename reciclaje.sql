@@ -117,7 +117,13 @@ CREATE TABLE `configuraciones_barrio` (
   `id` int(11) NOT NULL,
   `barrio_id` int(11) NOT NULL,
   `cuota_mensual` decimal(10,2) NOT NULL DEFAULT 10.00,
+  `precio_comercio` decimal(10,2) DEFAULT NULL,
+  `precio_tienda` decimal(10,2) DEFAULT NULL,
+  `precio_empresa` decimal(10,2) DEFAULT NULL,
+  `precio_urbanizacion` decimal(10,2) DEFAULT NULL,
+  `precio_otro` decimal(10,2) DEFAULT NULL,
   `multa_renovacion` decimal(10,2) NOT NULL DEFAULT 5.00,
+  `fecha_limite_pago` date DEFAULT NULL,
   `actualizado_por` int(11) DEFAULT NULL,
   `fecha_actualizacion` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -465,6 +471,9 @@ CREATE TABLE `viviendas` (
   `direccion` varchar(255) NOT NULL,
   `numero_casa` varchar(20) DEFAULT NULL,
   `referencia` varchar(255) DEFAULT NULL,
+  `tipo_predio` enum('Vivienda','Comercio','Tienda','Empresa','Urbanizacion','Otro') NOT NULL DEFAULT 'Vivienda',
+  `monto_mensual` decimal(10,2) DEFAULT NULL,
+  `cantidad_casas` int(11) NOT NULL DEFAULT 1,
   `estado_servicio` enum('Activo','Suspendido','Anulado') DEFAULT 'Activo',
   `fecha_registro` timestamp NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

@@ -189,7 +189,7 @@ ob_start();
 
         /* Hero */
         .hero {
-            background: linear-gradient(rgba(31, 41, 55, 0.85), rgba(76,110,145, 0.85)), url('https://images.unsplash.com/photo-1605600659873-d808a1d85715?ixlib=rb-1.2.1&auto=format&fit=crop&w=1950&q=80') center/cover no-repeat;
+            background: linear-gradient(rgba(31, 41, 55, 0.85), rgba(76,110,145, 0.85)), url('/reciclaje/img/servicio.jpeg') center/cover no-repeat;
             padding: 80px 20px;
             text-align: center;
             color: white;
@@ -344,7 +344,7 @@ ob_start();
 
         /* Banner Final */
         .bottom-banner {
-            background: url('https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?ixlib=rb-1.2.1&auto=format&fit=crop&w=1950&q=80') center/cover no-repeat;
+            background: url('/reciclaje/img/WhatsApp-Image-2026-05-05-at-2.53.48-PM.jpeg') center/cover no-repeat;
             border-radius: 16px;
             padding: 60px;
             text-align: center;

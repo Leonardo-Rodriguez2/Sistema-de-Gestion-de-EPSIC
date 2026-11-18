@@ -47,6 +47,15 @@ ob_start();
         </div>
 
         <div class="vv-card">
+            <h3>🏪 Tipo de predio</h3>
+            <div class="vv-row"><span class="lab">Tipo</span><span class="val"><?= htmlspecialchars(tipo_predio_etiqueta($vivienda['tipo_predio'] ?? 'Vivienda')) ?></span></div>
+            <div class="vv-row"><span class="lab">Cobro mensual</span><span class="val"><?= htmlspecialchars(etiqueta_monto_predio($vivienda['tipo_predio'] ?? 'Vivienda', $vivienda['cantidad_casas'] ?? 1, tarifas_barrio($pdo, $vivienda['barrio_id']))) ?></span></div>
+            <?php if (($vivienda['tipo_predio'] ?? 'Vivienda') === 'Urbanizacion'): ?>
+                <div class="vv-row"><span class="lab">Casas agrupadas</span><span class="val"><?= (int)($vivienda['cantidad_casas'] ?? 1) ?></span></div>
+            <?php endif; ?>
+        </div>
+
+        <div class="vv-card">
             <h3>📍 Ubicación</h3>
             <div class="vv-row"><span class="lab">Barrio</span><span class="val"><?= htmlspecialchars($vivienda['barrio_nombre'] ?? '—') ?></span></div>
             <div class="vv-row"><span class="lab">Calle</span><span class="val"><?= htmlspecialchars($vivienda['calle_nombre'] ?? '—') ?></span></div>

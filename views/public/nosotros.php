@@ -78,7 +78,7 @@ ob_start();
                 </div>
             </div>
             <div class="about-image">
-                <img src="https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?ixlib=rb-1.2.1&auto=format&fit=crop&w=1000&q=80" alt="Reciclaje EcoCusco">
+                <img src="/reciclaje/img/servicio.jpeg" alt="Reciclaje EPSIC">
                 <div class="badge-float">
                     <span><?php echo isset($totalReportes) ? $totalReportes : '100+'; ?></span>
                     <span style="font-size: 12px; font-weight: normal;">Zonas Atendidas</span>
@@ -118,7 +118,7 @@ ob_start();
             
             <div class="team-grid container" style="margin: 40px auto;">
                 <div class="team-card">
-                    <img src="https://images.unsplash.com/photo-1560250097-0b93528c311a?ixlib=rb-1.2.1&auto=format&fit=crop&w=400&q=80" alt="CEO">
+                    <img src="/reciclaje/img/WhatsApp-Image-2026-05-03-at-5.05.32-PM.jpeg" alt="Equipo EPSIC">
                     <div class="team-info">
                         <h4 style="margin: 0 0 5px; font-size: 20px;">Ing. Carlos Mendoza</h4>
                         <p style="color: var(--primary); font-weight: 600; margin: 0 0 15px; font-size: 14px;">Director Ejecutivo (CEO)</p>
@@ -126,7 +126,7 @@ ob_start();
                     </div>
                 </div>
                 <div class="team-card">
-                    <img src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?ixlib=rb-1.2.1&auto=format&fit=crop&w=400&q=80" alt="Operaciones">
+                    <img src="/reciclaje/img/WhatsApp-Image-2026-07-19-at-11.22.52-AM.jpeg" alt="Operaciones EPSIC">
                     <div class="team-info">
                         <h4 style="margin: 0 0 5px; font-size: 20px;">Arq. Valeria Ríos</h4>
                         <p style="color: var(--primary); font-weight: 600; margin: 0 0 15px; font-size: 14px;">Gerente de Operaciones GPS</p>
@@ -134,7 +134,7 @@ ob_start();
                     </div>
                 </div>
                 <div class="team-card">
-                                        <img src="https://images.unsplash.com/photo-1560250097-0b93528c311a?ixlib=rb-1.2.1&auto=format&fit=crop&w=400&q=80" alt="CEO">
+                                        <img src="/reciclaje/img/WhatsApp-Image-2026-07-19-at-11.16.05-AM-1.jpeg" alt="Equipo EPSIC">
                     <div class="team-info">
                         <h4 style="margin: 0 0 5px; font-size: 20px;">Julio Ramírez</h4>
                         <p style="color: var(--primary); font-weight: 600; margin: 0 0 15px; font-size: 14px;">Líder de Flota de Recojo</p>
@@ -210,7 +210,7 @@ $extra_css = "
 
         /* Hero Nosotros */
         .hero {
-            background: linear-gradient(rgba(31, 41, 55, 0.8), rgba(76,110,145, 0.8)), url('https://images.unsplash.com/photo-1574052309191-030a2f4a4df6?ixlib=rb-1.2.1&auto=format&fit=crop&w=1950&q=80') center/cover no-repeat;
+            background: linear-gradient(rgba(31, 41, 55, 0.8), rgba(76,110,145, 0.8)), url('/reciclaje/img/WhatsApp-Image-2026-05-05-at-2.53.46-PM.jpeg') center/cover no-repeat;
             padding: 100px 20px;
             text-align: center;
             color: white;

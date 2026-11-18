@@ -25,7 +25,7 @@ ob_start();
   <div class="login-row">
     <div class="login-left">
       <div class="login-brand">
-        <img class="login-brand-icon" src="/reciclaje/assets/img/icono.png?v=3" alt="">
+        <img class="login-brand-icon" src="/reciclaje/img/logo.png?v=4" alt="Logo EPSIC">
         <span class="login-brand-text">EPSIC</span>
       </div>
       <div class="login-subtitle">Sistema de Gestión de Reciclaje</div>
@@ -50,7 +50,7 @@ ob_start();
         <div class="login-input-group">
           <label for="password">Contraseña</label>
           <div class="login-input-relative">
-            <span class="login-input-icon">&#3E5C76;</span> <!-- Ícono de candado -->
+            <span class="login-input-icon">&#128274;</span> <!-- Ícono de candado -->
             <input type="password" id="password" name="password" placeholder="***********" required />
           </div>
         </div>
@@ -67,7 +67,12 @@ ob_start();
       </form>
     </div>
 
-    <div class="login-right"></div>
+    <div class="login-right">
+      <div class="login-right-content">
+        <span class="login-right-tag">EPSIC · Cusco</span>
+        <h2>Reciclaje responsable,<br>gestión transparente.</h2>
+      </div>
+    </div>
   </div>
 
 <?php
@@ -102,9 +107,44 @@ $extra_css = "
     }
 
     .login-right {
-      background-image: url('https://images.unsplash.com/photo-1511497584788-876760111969?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80');
+      position: relative;
+      overflow: hidden;
+      background-image: url('/reciclaje/img/WhatsApp-Image-2026-05-05-at-2.53.46-PM.jpeg');
       background-size: cover;
-      background-position: center;
+      background-position: center center;
+    }
+
+    .login-right::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(180deg, rgba(17, 24, 39, 0.25), rgba(23, 107, 135, 0.55));
+    }
+
+    .login-right-content {
+      position: relative;
+      z-index: 1;
+      padding: 40px;
+      color: #fff;
+    }
+
+    .login-right-tag {
+      display: inline-block;
+      padding: 6px 12px;
+      margin-bottom: 14px;
+      background: rgba(255, 255, 255, 0.2);
+      border: 1px solid rgba(255, 255, 255, 0.35);
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+
+    .login-right-content h2 {
+      margin: 0;
+      font-size: 30px;
+      font-weight: 800;
+      line-height: 1.25;
     }
 
     .login-brand {
@@ -116,8 +156,8 @@ $extra_css = "
     }
 
     .login-brand-icon {
-      width: 56px;
-      height: 56px;
+      width: 64px;
+      height: 64px;
       object-fit: contain;
       flex-shrink: 0;
     }
@@ -226,7 +266,7 @@ $extra_css = "
         padding: 25px 20px;
         border-radius: 12px;
       }
-      .login-brand-icon { width: 46px; height: 46px; }
+      .login-brand-icon { width: 52px; height: 52px; }
       .login-brand-text { font-size: 32px; }
       .login-form { max-width: 100%; }
       .login-form input { padding: 14px 14px 14px 40px; font-size: 16px; }
@@ -234,7 +274,7 @@ $extra_css = "
     }
     @media (max-width: 400px) {
       .login-left { padding: 20px 15px; }
-      .login-brand-icon { width: 40px; height: 40px; }
+      .login-brand-icon { width: 46px; height: 46px; }
       .login-brand-text { font-size: 28px; }
     }
   ";

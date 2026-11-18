@@ -31,6 +31,12 @@ if (!defined('RECEPCION_ESTADOS')) {
     define('RECEPCION_ESTADOS', ['Registrada', 'Anulada']);
 }
 
+// Tipos de predio que pueden registrarse. Los predios distintos de "Vivienda"
+// (comercios, tiendas, empresas, urbanizaciones) tienen monto mensual propio.
+if (!defined('TIPOS_PREDIO')) {
+    define('TIPOS_PREDIO', ['Vivienda', 'Comercio', 'Tienda', 'Empresa', 'Urbanizacion', 'Otro']);
+}
+
 if (!function_exists('validacion_agregar_error')) {
     function validacion_agregar_error(array &$errores, $mensaje) {
         $mensaje = trim((string)$mensaje);
@@ -405,6 +411,20 @@ if (!function_exists('validar_accion_post')) {
         if ($tiene('multa_renovacion')) {
             $add(validacion_monto($get('multa_renovacion'), 'La multa de renovación', 0, 999999999.99, true));
         }
+        foreach (['precio_comercio', 'precio_tienda', 'precio_empresa', 'precio_urbanizacion', 'precio_otro'] as $campoPrecio) {
+            if ($tiene($campoPrecio)) {
+                $add(validacion_monto($get($campoPrecio), 'La tarifa de ' . str_replace('precio_', '', $campoPrecio), 0.01, 999999999.99, true));
+            }
+        }
+        if ($tiene('cantidad_casas')) {
+            $add(validacion_entero($get('cantidad_casas'), 'La cantidad de casas', 1, 100000, true));
+        }
+        if ($tiene('tipo_predio')) {
+            $add(validacion_opcion($get('tipo_predio'), TIPOS_PREDIO, 'El tipo de predio'));
+        }
+        if ($tiene('fecha_limite_pago')) {
+            $add(validacion_fecha_registro($get('fecha_limite_pago'), 'La fecha límite de pago', true, true));
+        }
         if ($tiene('monto')) {
             $add(validacion_monto($get('monto'), 'El monto', 0, 999999999.99, true));
         }
@@ -477,7 +497,10 @@ if (!function_exists('validar_accion_post')) {
         ];
         foreach ($archivos as $campo => $etiqueta) {
             if (isset($files[$campo])) {
-                $add(validacion_archivo($files[$campo], $etiqueta, false));
+                $maxBytes = $accion === 'marcar_pago_barrio' && $campo === 'comprobante_pago'
+                    ? 2097152
+                    : 5242880;
+                $add(validacion_archivo($files[$campo], $etiqueta, false, $maxBytes));
             }
         }
 
@@ -504,12 +527,22 @@ if (!function_exists('validar_accion_post')) {
             'ordenar_baja'                  => ['vivienda_id' => 'Vivienda'],
             'marcar_pago_vivienda'          => ['vivienda_id' => 'Vivienda'],
             'marcar_pago_simple'            => ['vivienda_id' => 'Vivienda', 'referencia_pago' => 'Referencia de pago'],
+            'marcar_pago_barrio'            => ['vivienda_id' => 'Vivienda', 'referencia_pago' => 'Referencia de pago'],
             'solicitar_exoneracion'         => ['vivienda_id' => 'Vivienda', 'tipo_exencion' => 'Tipo de exención', 'descripcion' => 'Descripción / motivo'],
             'anular_pago'                   => ['cobro_id' => 'Cobro', 'motivo_anulacion' => 'Motivo de anulación'],
             'editar_cobro'                  => ['cobro_id' => 'Cobro', 'referencia_pago' => 'Referencia de pago'],
             'enviar_lote_calle'             => ['mes' => 'Mes', 'anio' => 'Año', 'referencia_lote' => 'Referencia del lote'],
             'enviar_lote_barrio'            => ['periodo_mes' => 'Mes del periodo', 'periodo_anio' => 'Año del periodo'],
-            'actualizar_configuracion_barrio' => ['cuota_mensual' => 'Cuota mensual', 'multa_renovacion' => 'Multa de renovación'],
+            'actualizar_configuracion_barrio' => [
+                'cuota_mensual'      => 'Cuota mensual de vivienda',
+                'precio_comercio'    => 'Precio de comercio',
+                'precio_tienda'      => 'Precio de tienda',
+                'precio_empresa'     => 'Precio de empresa',
+                'precio_urbanizacion' => 'Precio por casa de urbanización',
+                'precio_otro'        => 'Precio de otros predios',
+                'multa_renovacion'   => 'Multa de renovación',
+                'fecha_limite_pago'  => 'Fecha límite de pago',
+            ],
             'enviar_certificado_calle'      => ['lote_calle_id' => 'Lote de calle'],
             'verificar_pago_casa'           => ['cobro_id' => 'Cobro', 'decision' => 'Decisión'],
             'procesar_solicitud'            => ['solicitud_id' => 'Solicitud', 'estado' => 'Estado'],
@@ -547,6 +580,15 @@ if (!function_exists('validar_accion_post')) {
         /* ------------------------------------------------------------------
          * 3. Reglas específicas por acción
          * ------------------------------------------------------------------ */
+
+        // Las tarifas se configuran por barrio; solo la urbanización necesita
+        // declarar cuántas casas agrupa para calcular su pago mensual.
+        if (in_array($accion, ['nuevo_vecino_admin', 'nuevo_vecino', 'editar_vivienda'], true)) {
+            $tipoPredio = $get('tipo_predio') !== '' ? $get('tipo_predio') : 'Vivienda';
+            if ($tipoPredio === 'Urbanizacion' && !$tiene('cantidad_casas')) {
+                $add('Indica la cantidad de casas de la urbanización.');
+            }
+        }
 
         if (in_array($accion, ['add_user', 'edit_user'], true)) {
             $add(validacion_nombre_persona($get('nombre'), 'El nombre', false));
@@ -607,7 +649,7 @@ if (!function_exists('validar_accion_post')) {
             $add(validacion_texto($get('descripcion'), 'La descripción / motivo', 10, 2000, false));
         }
 
-        if ($accion === 'marcar_pago_simple' || $accion === 'editar_cobro') {
+        if (in_array($accion, ['marcar_pago_simple', 'marcar_pago_barrio', 'editar_cobro'], true)) {
             $add(validacion_texto($get('referencia_pago'), 'La referencia de pago', 3, 150, false));
         }
 
