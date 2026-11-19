@@ -34,6 +34,7 @@ class viewsModel extends mainModel {
             'quitar_servicio',
             'reporte_bajas',
             'reportes_ciudadanos',
+            'solicitudes_servicio',
             'gestor_dashboard',
             'gestor_viviendas',
             'gestor_historial',
@@ -65,6 +66,7 @@ class viewsModel extends mainModel {
             'revisar_lotes',
             'solicitudes_barrio',
             'reportes_ciudadanos',
+            'solicitudes_servicio',
             'notificaciones',
         ],
         'personal' => [
@@ -129,6 +131,14 @@ class viewsModel extends mainModel {
             // 0.2 Reportes ciudadanos: vista compartida por roles internos
             if ($page === 'reportes_ciudadanos' && in_array($folder, ['gestor', 'personal'], true)) {
                 $ruta = "views/admin/reportes_ciudadanos.php";
+                if (file_exists($ruta)) {
+                    return $ruta;
+                }
+            }
+
+            // 0.3 Bandeja de cotizaciones: vista compartida por admin y gestor
+            if ($page === 'solicitudes_servicio' && $folder === 'gestor') {
+                $ruta = "views/admin/solicitudes_servicio.php";
                 if (file_exists($ruta)) {
                     return $ruta;
                 }

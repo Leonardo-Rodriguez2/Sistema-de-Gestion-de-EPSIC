@@ -68,7 +68,7 @@ foreach ($rows as $r) {
         html_entity_decode($r['barrio'] ?? '', ENT_QUOTES, 'UTF-8'),
         html_entity_decode($r['calle'] ?? '', ENT_QUOTES, 'UTF-8'),
         ($r['mes'] ? ($meses_nombres[$r['mes']] ?? '') . ' ' . ($r['anio'] ?? '') : ''),
-        number_format((float)$r['monto'], 2),
+        monto((float)$r['monto']),
         $r['estado'] ?? '',
         $r['referencia_pago'] ?? '',
         $r['fecha_emision'] ?? '',

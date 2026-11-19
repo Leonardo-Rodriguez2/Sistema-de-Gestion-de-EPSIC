@@ -88,7 +88,7 @@ foreach ($solicitudes as $s) {
         trim(($s['solicitante_nombre'] ?? '') . ' ' . ($s['solicitante_apellido'] ?? '')),
         $s['propietario'] ?? '',
         formato_identificacion($s['cedula'] ?? '', $s['cedula_tipo'] ?? 'V', $s['otro_identificador'] ?? ''),
-        number_format((float)($s['monto_deuda'] ?? 0), 2, '.', ','),
+        monto((float)($s['monto_deuda'] ?? 0)),
         $s['detalles_deuda'] ?? '',
     ];
 }
@@ -199,7 +199,7 @@ ob_start();
                                     <div style="font-size:11px;color:#6B7280;">ID: <?= htmlspecialchars($identificacion) ?></div>
                                 <?php endif; ?>
                             </td>
-                            <td style="padding:12px;font-weight:700;color:#7A4F4F;">S/ <?= number_format($s['monto_deuda'] ?? 0, 2) ?></td>
+                            <td style="padding:12px;font-weight:700;color:#7A4F4F;"><?= monto($s['monto_deuda'] ?? 0) ?></td>
                         </tr>
                     <?php endforeach; ?>
                 </tbody>

@@ -67,7 +67,7 @@ foreach ($bajas as $b) {
         '#' . ($b['numero_casa'] ?? ''),
         $b['propietario'] ?? '',
         formato_identificacion($b['cedula'] ?? '', $b['cedula_tipo'] ?? 'V', $b['otro_identificador'] ?? ''),
-        number_format((float)($b['monto_deuda'] ?? 0), 2, '.', ','),
+        monto((float)($b['monto_deuda'] ?? 0)),
         $b['detalles_deuda'] ?? '',
         $b['ejecutor_nombre'] ?? '',
     ];
@@ -77,11 +77,11 @@ reporte_exportar_si_solicitado(
     'Reporte global de bajas',
     ['Fecha de baja', 'Barrio', 'Calle', 'Casa', 'Propietario', 'Identificación', 'Deuda final', 'Detalles de deuda', 'Autorizado por'],
     $filasBajas,
-    array_merge($metaBajas, ['Total bajas' => count($filasBajas), 'Deuda total' => number_format($totalDeudaBajas, 2, '.', ',')]),
+    array_merge($metaBajas, ['Total bajas' => count($filasBajas), 'Deuda total' => monto($totalDeudaBajas)]),
     'Historial de servicios anulados y deudas pendientes'
 );
 
-$title = "Reporte Global de Bajas - EcoCusco";
+$title = "Reporte Global de Bajas - EcoReciclaje";
 $header_title = "Auditoría de Retiros";
 $header_subtitle = "Historial completo de servicios anulados y deudas pendientes en todo el sistema.";
 
@@ -89,7 +89,7 @@ ob_start();
 ?>
     <?php render_dashboard_alerts($mensaje_exito ?? null, $mensaje_error ?? null); ?>
 
-    <?= reporte_encabezado_impresion('Reporte global de bajas', 'Historial de servicios anulados y deudas pendientes', array_merge($metaBajas, ['Total bajas' => count($bajas), 'Deuda total' => 'S/ ' . number_format($totalDeudaBajas, 2, '.', ',')])) ?>
+    <?= reporte_encabezado_impresion('Reporte global de bajas', 'Historial de servicios anulados y deudas pendientes', array_merge($metaBajas, ['Total bajas' => count($bajas), 'Deuda total' => monto($totalDeudaBajas)])) ?>
     <?= reporte_botonera() ?>
 
     <form method="GET" action="router.php" class="card no-print" style="margin-bottom:18px; padding:14px 16px; display:grid; grid-template-columns:minmax(200px,1.5fr) repeat(3,minmax(130px,1fr)) auto; gap:10px; align-items:end;">
@@ -158,7 +158,7 @@ ob_start();
                                 <div style="font-size: 11px; color: #6B7280;"><?= htmlspecialchars($b['calle_nombre']) ?> | Casa #<?= htmlspecialchars($b['numero_casa']) ?></div>
                             </td>
                             <td style="padding: 12px; text-align: right;">
-                                <div style="font-weight: 800; color: #7A4F4F;">S/ <?= number_format($b['monto_deuda'], 2) ?></div>
+                                <div style="font-weight: 800; color: #7A4F4F;"><?= monto($b['monto_deuda']) ?></div>
                                 <div style="font-size: 10px; color: #6B7280; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 200px;"><?= htmlspecialchars($b['detalles_deuda']) ?></div>
                             </td>
                             <td style="padding: 12px;">

@@ -186,7 +186,7 @@ ob_start();
                         <div style="font-size:11px; color:#6B7280;">
                             👤 <?= htmlspecialchars(trim(($cl['enc_nombre']??'') . ' ' . ($cl['enc_apellido']??''))) ?> •
                             🏠 <?= $cl['casas_pagadas'] ?>/<?= $cl['total_casas'] ?> pag. •
-                            💰 Bs. <?= number_format($cl['monto_recolectado'] ?? 0, 2) ?> recaudados
+                            💰 <?= monto($cl['monto_recolectado'] ?? 0) ?> recaudados
                             <?php if (!empty($cl['fecha_certificado'])): ?>
                                 • ✅ <?= date('d/m/Y H:i', strtotime($cl['fecha_certificado'])) ?>
                             <?php endif; ?>
@@ -219,7 +219,7 @@ ob_start();
                             <div style="font-size:9px; color:#6B7280; text-transform:uppercase;">Morosas</div>
                         </div>
                         <div style="text-align:center; padding:8px; background:#F9FAFB; border-radius:6px;">
-                            <div style="font-size:18px; font-weight:800; color:#33485C;">Bs. <?= number_format((float)$cl['monto_recolectado'], 2) ?></div>
+                            <div style="font-size:18px; font-weight:800; color:#33485C;"><?= monto((float)$cl['monto_recolectado']) ?></div>
                             <div style="font-size:9px; color:#6B7280; text-transform:uppercase;">Recaudado</div>
                         </div>
                     </div>
@@ -258,12 +258,12 @@ ob_start();
                                     <?php else: ?><span style="color:#7A6A4F;">—</span><?php endif; ?>
                                 </td>
                                 <td style="font-size:10px; color:#6B7280;"><?= htmlspecialchars($v['referencia_pago'] ?? '—') ?></td>
-                                <td style="text-align:right; font-weight:700;"><?= $v['monto'] ? 'Bs. '.number_format($v['monto'], 2) : '—' ?></td>
+                                <td style="text-align:right; font-weight:700;"><?= $v['monto'] ? monto($v['monto']) : '—' ?></td>
                             </tr>
                             <?php endforeach; ?>
                             <tr class="total-row">
                                 <td colspan="6" style="padding:8px; text-align:right;">TOTAL — <?= htmlspecialchars($cl['calle_nombre']) ?></td>
-                                <td style="padding:8px; text-align:right; font-size:13px;">Bs. <?= number_format($total_monto_calle, 2) ?></td>
+                                <td style="padding:8px; text-align:right; font-size:13px;"><?= monto($total_monto_calle) ?></td>
                             </tr>
                         </tbody>
                     </table>

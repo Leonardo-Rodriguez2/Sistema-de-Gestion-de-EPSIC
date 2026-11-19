@@ -97,7 +97,7 @@ class notificacionModel extends mainModel {
             $items[] = $this->item(
                 'lote_barrio', '🏘️', 'Lote de barrio por aprobar',
                 $r['barrio_nombre'] . ' · ' . $this->periodo($r['periodo_mes'], $r['periodo_anio']) .
-                ' · Bs. ' . number_format((float)$r['monto_total_recolectado'], 2),
+                ' · ' . monto((float)$r['monto_total_recolectado']),
                 'router.php?page=revisar_lotes&lote_id=' . (int)$r['id'] . '#lote-' . (int)$r['id'],
                 $r['fecha_envio'], 'Lotes'
             );
@@ -126,7 +126,7 @@ class notificacionModel extends mainModel {
             $items[] = $this->item(
                 'lote_barrio', '🏘️', 'Lote de barrio por aprobar',
                 $r['barrio_nombre'] . ' · ' . $this->periodo($r['periodo_mes'], $r['periodo_anio']) .
-                ' · Bs. ' . number_format((float)$r['monto_total_recolectado'], 2),
+                ' · ' . monto((float)$r['monto_total_recolectado']),
                 'router.php?page=revisar_lotes&lote_id=' . (int)$r['id'] . '#lote-' . (int)$r['id'],
                 $r['fecha_envio'], 'Lotes'
             );
@@ -280,7 +280,7 @@ class notificacionModel extends mainModel {
             $items[] = $this->item(
                 'lote_calle', '📋', 'Lote de calle por verificar',
                 $r['calle_nombre'] . ' · ' . $this->periodo($r['periodo_mes'], $r['periodo_anio']) .
-                ' · Bs. ' . number_format((float)$r['monto_recolectado'], 2),
+                ' · ' . monto((float)$r['monto_recolectado']),
                 'router.php?page=reportar_pago&mes=' . (int)$r['periodo_mes'] . '&anio=' . (int)$r['periodo_anio'] .
                 '&lote_id=' . (int)$r['id'] . '#lote-calle-' . (int)$r['id'],
                 $r['fecha_envio'], 'Lotes'

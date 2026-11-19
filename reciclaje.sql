@@ -30,7 +30,7 @@ SET time_zone = "+00:00";
 CREATE TABLE `barrios` (
   `id` int(11) NOT NULL,
   `nombre` varchar(100) NOT NULL,
-  `ciudad` varchar(100) NOT NULL DEFAULT 'Cusco',
+  `ciudad` varchar(100) NOT NULL DEFAULT '',
   `codigo_postal` varchar(20) DEFAULT NULL,
   `parroquia_municipio` varchar(150) DEFAULT NULL,
   `lider_comunidad` varchar(150) DEFAULT NULL,
@@ -42,9 +42,9 @@ CREATE TABLE `barrios` (
 --
 
 INSERT INTO `barrios` (`id`, `nombre`, `ciudad`, `codigo_postal`) VALUES
-(1, 'Barrio San Blas', 'Cusco', NULL),
-(2, 'Santa Ana', 'Cusco', NULL),
-(3, 'Wanchaq', 'Cusco', NULL);
+(1, 'Barrio San Blas', '', NULL),
+(2, 'Santa Ana', '', NULL),
+(3, 'Wanchaq', '', NULL);
 
 -- --------------------------------------------------------
 
@@ -122,6 +122,10 @@ CREATE TABLE `configuraciones_barrio` (
   `precio_empresa` decimal(10,2) DEFAULT NULL,
   `precio_urbanizacion` decimal(10,2) DEFAULT NULL,
   `precio_otro` decimal(10,2) DEFAULT NULL,
+  `precio_bolivar` decimal(14,4) NOT NULL DEFAULT 130.0000,
+  `precio_bolivar_actualizado_en` datetime DEFAULT NULL,
+  `precio_bolivar_fuente` varchar(60) DEFAULT NULL,
+  `tasa_automatica` tinyint(1) NOT NULL DEFAULT 1,
   `multa_renovacion` decimal(10,2) NOT NULL DEFAULT 5.00,
   `fecha_limite_pago` date DEFAULT NULL,
   `actualizado_por` int(11) DEFAULT NULL,
@@ -360,6 +364,10 @@ CREATE TABLE `solicitudes_servicio` (
   `telefono` varchar(30) NOT NULL,
   `barrio` varchar(150) NOT NULL,
   `tipo_contrato` varchar(100) DEFAULT NULL,
+  `plan` varchar(80) DEFAULT NULL,
+  `cantidad` int(11) DEFAULT NULL,
+  `monto_estimado_usd` decimal(10,2) DEFAULT NULL,
+  `detalles` text DEFAULT NULL,
   `correo` varchar(150) DEFAULT NULL,
   `estado` enum('Pendiente','Atendido','Descartado') NOT NULL DEFAULT 'Pendiente',
   `fecha` timestamp NOT NULL DEFAULT current_timestamp(),
@@ -449,7 +457,7 @@ CREATE TABLE `usuarios` (
 
 INSERT INTO `usuarios` (`id`, `nombre`, `apellido`, `email`, `genero`, `fecha_nacimiento`, `password_hash`, `rol_id`, `creado_en`) VALUES
 (1, 'Admin', 'Sistema', 'admin@gmail.com', NULL, NULL, '$2y$10$cGTJCOs8F3urGLa.nsuCweiQ3EomwGo3nc0ZmlKfWcUaUUFcUeCom', 1, '2026-07-04 12:53:02'),
-(2, 'Julio', 'Pagos', 'gestor@ecocusco.com', NULL, NULL, '$2y$10$/gkxq6jLVIP53mheew6cWOiyZCBWQw18ueq0eK798CbicmlLJxbX.', 2, '2026-07-04 12:53:02'),
+(2, 'Julio', 'Pagos', 'gestor@ecoreciclaje.com', NULL, NULL, '$2y$10$/gkxq6jLVIP53mheew6cWOiyZCBWQw18ueq0eK798CbicmlLJxbX.', 2, '2026-07-04 12:53:02'),
 (4, 'calle', 'calle', 'calle@gmail.com', 'M', '1979-07-12', '$2y$10$Ax.onSIzKtRgZVQmf//hFOW4GJzbNmWIu2zerGQSTmsEEzZVV.k3y', 6, '2026-07-04 12:58:03'),
 (5, 'barrio', 'barrio', 'barrio@gmail.com', 'M', '1979-07-18', '$2y$10$BXUU0.9/6d8Illqs9TjJFebAxW4CIAapKK3sa/jS2YrSGmVPcYSZK', 5, '2026-07-04 13:50:51');
 

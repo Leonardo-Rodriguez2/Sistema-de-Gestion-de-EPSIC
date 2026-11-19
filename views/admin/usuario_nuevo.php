@@ -32,7 +32,7 @@ $barrios_lista = $barriosStmt->fetchAll(PDO::FETCH_ASSOC);
 $barriosTodosStmt = $pdo->query("SELECT id, nombre FROM barrios ORDER BY nombre ASC");
 $barrios_todos = $barriosTodosStmt->fetchAll(PDO::FETCH_ASSOC);
 
-$title = "Nuevo Usuario - EcoCusco";
+$title = "Nuevo Usuario - EcoReciclaje";
 $header_title = "";
 
 ob_start();

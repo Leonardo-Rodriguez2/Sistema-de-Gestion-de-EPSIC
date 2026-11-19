@@ -74,7 +74,7 @@ foreach ($solicitudes as $s) {
         '#' . ($casa ?? ''),
         $propietario ?? '',
         formato_identificacion($s['cedula'] ?? '', $s['cedula_tipo'] ?? 'V', $s['otro_identificador'] ?? ''),
-        number_format((float)($s['monto_deuda'] ?? 0), 2, '.', ','),
+        monto((float)($s['monto_deuda'] ?? 0)),
         $s['detalles_deuda'] ?? '',
         !empty($s['fecha_revision']) ? date('d/m/Y H:i', strtotime($s['fecha_revision'])) : '',
     ];
@@ -88,7 +88,7 @@ reporte_exportar_si_solicitado(
     'Seguimiento de altas, bajas y renovaciones enviadas'
 );
 
-$title = "Mis Solicitudes - EcoCusco";
+$title = "Mis Solicitudes - EcoReciclaje";
 $header_title = "Seguimiento de Trámites";
 $header_subtitle = "Revisa el estado de tus solicitudes de alta, baja o renovación.";
 
@@ -198,7 +198,7 @@ ob_start();
                             </td>
                             <td style="padding: 12px;">
                                 <?php if(in_array($tipoSolicitud, ['Baja', 'Renovacion'], true)): ?>
-                                    <div style="font-weight: 800; color: <?= $tipoSolicitud === 'Baja' ? '#7A4F4F' : '#3E5C76' ?>; font-size: 12px;">S/ <?= number_format($montoDeuda, 2) ?></div>
+                                    <div style="font-weight: 800; color: <?= $tipoSolicitud === 'Baja' ? '#7A4F4F' : '#3E5C76' ?>; font-size: 12px;"><?= monto($montoDeuda) ?></div>
                                     <?php if ($detallesDeuda !== ''): ?>
                                         <div style="font-size: 10px; color: #6B7280;"><?= htmlspecialchars($detallesDeuda) ?></div>
                                     <?php endif; ?>

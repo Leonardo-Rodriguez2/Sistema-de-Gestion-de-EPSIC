@@ -165,10 +165,10 @@ class calleController extends mainModel {
                 $deudaPendiente = max(0, (float)$deudaPendiente);
                 $montoTotal = $deudaPendiente + $multaRenovacion;
                 $detallesPago = sprintf(
-                    'Deuda pendiente: S/ %.2f; multa de renovación: S/ %.2f; total informado: S/ %.2f',
-                    $deudaPendiente,
-                    $multaRenovacion,
-                    $montoTotal
+                    'Deuda pendiente: %s; multa de renovación: %s; total informado: %s',
+                    monto($deudaPendiente),
+                    monto($multaRenovacion),
+                    monto($montoTotal)
                 );
                 $comprobantePath = $this->guardarArchivoPago($_FILES['comprobante_pago'], 'comprobantes');
 

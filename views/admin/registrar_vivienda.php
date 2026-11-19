@@ -10,7 +10,7 @@ $tipoPredioInicial = in_array($tipoSolicitado, TIPOS_PREDIO, true) ? $tipoSolici
 $esEstablecimiento = $tipoPredioInicial !== 'Vivienda';
 $etiquetaPredio = tipo_predio_etiqueta($tipoPredioInicial);
 
-$title = $esEstablecimiento ? "Registrar {$etiquetaPredio} - EcoCusco" : "Registrar Vivienda (Admin) - EcoCusco";
+$title = $esEstablecimiento ? "Registrar {$etiquetaPredio} - EcoReciclaje" : "Registrar Vivienda (Admin) - EcoReciclaje";
 $header_title = $esEstablecimiento ? "Nuevo {$etiquetaPredio}" : "Nueva Vivienda";
 $header_subtitle = $esEstablecimiento
     ? "Registro de establecimientos. La tarifa se define en Configuración de Pagos."
@@ -64,7 +64,7 @@ ob_start();
                 <div class="form-group" id="campo_cantidad_casas" style="<?= $tipoPredioInicial === 'Urbanizacion' ? '' : 'display:none;' ?>">
                     <label>Cantidad de casas</label>
                     <input type="number" name="cantidad_casas" id="cantidad_casas_field" step="1" min="1" max="100000" placeholder="Ej. 4" value="1" <?= $tipoPredioInicial === 'Urbanizacion' ? '' : 'disabled' ?>>
-                    <small style="font-size:10px; color:#9CA3AF; font-weight:600;">Se cobra una tarifa por casa, pero en un solo pago mensual. Ej.: 4 casas × Bs. 3 = Bs. 12.</small>
+                    <small style="font-size:10px; color:#9CA3AF; font-weight:600;">Se cobra una tarifa por casa, pero en un solo pago mensual. Ej.: 4 casas × US$ 3 = US$ 12 (el equivalente en Bs. se muestra según la tasa del barrio).</small>
                 </div>
             </div>
             <small style="font-size:10px; color:#6B7280;">El precio de cada tipo de predio se define en <strong>Configuración de Pagos</strong> del barrio.</small>

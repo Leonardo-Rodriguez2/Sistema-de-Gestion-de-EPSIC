@@ -347,7 +347,7 @@ class adminController extends mainModel {
                 $this->ejecutarConsulta("UPDATE viviendas SET estado_servicio = 'Anulado' WHERE id = ?", [$vivienda_id]);
 
                 $pdo->commit();
-                $mensaje_exito = "Servicio anulado directamente por Administración. Deuda registrada: Bs. " . number_format($monto_deuda, 2);
+                $mensaje_exito = "Servicio anulado directamente por Administración. Deuda registrada: " . monto($monto_deuda);
             } catch (\Exception $e) {
                 if(isset($pdo)) $pdo->rollBack();
                 $mensaje_error = "Error al ejecutar baja: " . $e->getMessage();

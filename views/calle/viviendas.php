@@ -105,12 +105,12 @@ foreach ($viviendas as $v) {
         formato_identificacion($v['cedula'] ?? '', $v['cedula_tipo'] ?? 'V', $v['otro_identificador'] ?? ''),
         $v['direccion'] ?? '',
         tipo_predio_etiqueta($v['tipo_predio'] ?? 'Vivienda'),
-        number_format(monto_predio_efectivo($v['tipo_predio'] ?? 'Vivienda', $v['cantidad_casas'] ?? 1, tarifas_barrio($pdo, $v['barrio_id'])), 2, '.', ''),
+        monto(monto_predio_efectivo($v['tipo_predio'] ?? 'Vivienda', $v['cantidad_casas'] ?? 1, tarifas_barrio($pdo, $v['barrio_id']))),
         $v['estado_servicio'] ?? '',
         !empty($v['exento_cobro']) ? 'Exenta' : 'No',
         $v['pago_mes_estado'] ?? 'Sin registro',
         $v['verificacion_mes'] ?? '',
-        number_format($deudaAcumulada, 2, '.', ','),
+        monto($deudaAcumulada),
     ];
 }
 reporte_exportar_si_solicitado(
@@ -223,7 +223,7 @@ ob_start();
                             </td>
                             <td style="padding: 10px 12px;">
                                 <?php if ($deuda_acumulada > 0 && !$v['exento_cobro']): ?>
-                                    <span style="color:#8A5A5A; font-weight:700; font-size:12px;">Bs. <?= number_format($deuda_acumulada, 2) ?></span>
+                                    <span style="color:#8A5A5A; font-weight:700; font-size:12px;"><?= monto($deuda_acumulada) ?></span>
                                 <?php else: ?>
                                     <span style="color:#9CA3AF;">—</span>
                                 <?php endif; ?>
@@ -279,7 +279,7 @@ ob_start();
                                             <?php foreach($historial as $h): ?>
                                                 <tr style="border-bottom:1px solid #F3F4F6;">
                                                     <td style="padding:3px;"><?= $meses_nombres[$h['mes']] ?> <?= $h['anio'] ?></td>
-                                                    <td style="padding:3px; font-weight:600;">Bs. <?= number_format($h['monto'],2) ?></td>
+                                                    <td style="padding:3px; font-weight:600;"><?= monto($h['monto']) ?></td>
                                                     <td style="padding:3px;">
                                                         <span style="background:<?= $h['cobro_estado']=='Pagado'?'#E9EFF4':'#F4EDED' ?>; color:<?= $h['cobro_estado']=='Pagado'?'#33485C':'#7A4F4F' ?>; padding:1px 5px; border-radius:3px; font-size:9px;">
                                                             <?= $h['cobro_estado'] == 'Pagado' ? '✓ Pagado' : ($h['cobro_estado'] == 'Anulado' ? '✗ Anulado' : '⏳ Pendiente') ?>

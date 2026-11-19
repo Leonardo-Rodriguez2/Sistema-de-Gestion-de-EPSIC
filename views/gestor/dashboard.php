@@ -47,7 +47,7 @@ $historial = $pdo->query(
 
 $meses_nombres = ['','Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
 
-$title          = "Dashboard Gestor - EcoCusco";
+$title          = "Dashboard Gestor - EcoReciclaje";
 $header_title   = "Panel de Gestión de Pagos";
 $header_subtitle = "Revisa y aprueba los lotes de barrio para cerrar el ciclo de facturación.";
 
@@ -126,7 +126,7 @@ include __DIR__ . '/../components/dashboard_charts.php';
                 <tr style="border-bottom:1px solid #F3F4F6;">
                     <td style="padding:10px; font-weight:700;"><?= htmlspecialchars($h['barrio_nombre']) ?></td>
                     <td style="padding:10px;"><?= $meses_nombres[$h['periodo_mes']] ?> <?= $h['periodo_anio'] ?></td>
-                    <td style="padding:10px; font-weight:800; color:#3E5C76;">Bs. <?= number_format($h['monto_total_recolectado'],2) ?></td>
+                    <td style="padding:10px; font-weight:800; color:#3E5C76;"><?= monto($h['monto_total_recolectado']) ?></td>
                     <td style="padding:10px; color:#6B7280;"><?= htmlspecialchars($h['gestor_nombre'] ?? '—') ?></td>
                     <td style="padding:10px;">
                         <?php if($h['numero_recibo']): ?>

@@ -55,7 +55,7 @@ foreach ($recaudaciones as $r) {
         date('d/m/Y H:i', strtotime($r['fecha_recaudacion'])),
         $r['barrio_nombre'] ?? '',
         $r['emisor_nombre'] ?? '',
-        number_format((float)($r['monto_total'] ?? 0), 2, '.', ','),
+        monto((float)($r['monto_total'] ?? 0)),
         $r['estado'] ?? '',
         $r['observaciones'] ?? '',
     ];
@@ -67,18 +67,18 @@ reporte_exportar_si_solicitado(
     $filasHistorial,
     array_merge($metaHistorial, [
         'Total liquidaciones' => count($filasHistorial),
-        'Monto total' => number_format($totalHistorial, 2, '.', ','),
+        'Monto total' => monto($totalHistorial),
     ]),
     'Revisión y filtrado de operaciones financieras'
 );
 
-$title = "Historial Financiero - EcoCusco";
+$title = "Historial Financiero - EcoReciclaje";
 $header_title = "Historial General";
 $header_subtitle = "Revisión y filtrado de todas las operaciones financieras.";
 
 ob_start();
 ?>
-    <?= reporte_encabezado_impresion('Historial de liquidaciones', 'Revisión y filtrado de operaciones financieras', array_merge($metaHistorial, ['Total liquidaciones' => count($recaudaciones), 'Monto total' => 'S/ ' . number_format($totalHistorial, 2, '.', ',')])) ?>
+    <?= reporte_encabezado_impresion('Historial de liquidaciones', 'Revisión y filtrado de operaciones financieras', array_merge($metaHistorial, ['Total liquidaciones' => count($recaudaciones), 'Monto total' => monto($totalHistorial)])) ?>
     <?= reporte_botonera() ?>
     <style>@media(max-width:600px){.historial-filter{width:100%!important;min-width:100%!important}}</style>
     <style>
@@ -136,7 +136,7 @@ ob_start();
                         <td style='padding: 12px;'><?php echo date('d/m/Y H:i', strtotime($r['fecha_recaudacion'])); ?></td>
                         <td style='padding: 12px;'><strong><?php echo htmlspecialchars($r['barrio_nombre']); ?></strong></td>
                         <td style='padding: 12px;'><?php echo htmlspecialchars($r['emisor_nombre']); ?></td>
-                        <td style='padding: 12px; font-weight: 800; color: #3E5C76;'>Bs. <?php echo number_format($r['monto_total'], 2); ?></td>
+                        <td style='padding: 12px; font-weight: 800; color: #3E5C76;'><?= monto($r['monto_total']) ?></td>
                         <td style='padding: 12px;'><span class='badge' style='background:#E9EFF4; color:#33485C;'><?php echo $r['estado']; ?></span></td>
                     </tr>
                     <?php endforeach; ?>

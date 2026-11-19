@@ -25,7 +25,7 @@ $pendientesStmt = $pdo->prepare("
 $pendientesStmt->execute([$calle_id]);
 $pendientes = $pendientesStmt->fetchAll(PDO::FETCH_ASSOC);
 
-$title = "Solicitar Baja - EcoCusco";
+$title = "Solicitar Baja - EcoReciclaje";
 $header_title = "Solicitar Baja de Vivienda";
 $header_subtitle = "Envía una solicitud de baja al encargado de barrio.";
 
@@ -79,7 +79,7 @@ ob_start();
                                 <span class="badge" style="background:#F2EEE7;color:#6E5F45;border:none;font-size:10px;">PENDIENTE</span>
                             </div>
                             <div style="font-size:11px;color:#6B7280;">
-                                Deuda: Bs. <?= number_format($p['monto_deuda'] ?? 0, 2) ?>
+                                Deuda: <?= monto($p['monto_deuda'] ?? 0) ?>
                             </div>
                             <div style="font-size:10px;color:#9CA3AF;margin-top:4px;">
                                 <?= date('d/m/Y', strtotime($p['fecha_creacion'])) ?>

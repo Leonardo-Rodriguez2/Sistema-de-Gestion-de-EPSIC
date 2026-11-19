@@ -93,7 +93,7 @@ if ($barrio_id > 0) {
             (int)$b['casas_pagadas'],
             (int)$b['pendientes'],
             $b['cumplimiento'] . '%',
-            number_format((float)($b['total_recaudado'] ?? 0), 2, '.', ','),
+            monto((float)($b['total_recaudado'] ?? 0)),
         ];
     }
     reporte_exportar_si_solicitado(
@@ -178,7 +178,7 @@ ob_start();
                                 <?= (int)$b['casas_pagadas'] ?> / <?= (int)$b['total_casas'] ?>
                             </td>
                             <td style="padding: 15px; text-align: center; font-weight: 800; color: #3E5C76;">
-                                S/ <?= number_format($b['total_recaudado'] ?? 0, 2) ?>
+                                <?= monto($b['total_recaudado'] ?? 0) ?>
                             </td>
                             <td style="padding: 15px; text-align: center;">
                                 <a href="router.php?page=monitor_pagos&barrio_id=<?= (int)$b['id'] ?>&mes=<?= (int)$mes ?>&anio=<?= (int)$anio ?>#detalle" class="badge no-print" style="background: #E9EFF4; color: #3E5C76; text-decoration: none;">Ver Morosos</a>

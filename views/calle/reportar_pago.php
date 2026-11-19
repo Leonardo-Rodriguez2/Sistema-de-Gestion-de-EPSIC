@@ -44,7 +44,7 @@ try {
     $fecha_limite_pago = $fechaLimiteStmt->fetchColumn() ?: '';
 
     if (!$calle_id) {
-        $title = "Error - EcoCusco";
+        $title = "Error - EcoReciclaje";
         $header_title = "Sin asignación";
         $header_subtitle = "No se pudo cargar la información de la calle.";
         ob_start();
@@ -115,7 +115,7 @@ try {
     return;
 }
 
-$title = "Reportar Lote - EcoCusco";
+$title = "Reportar Lote - EcoReciclaje";
 $header_title = "Reportar Pagos del Mes";
 $header_subtitle = "Administra el envío y estado del lote de recaudación mensual de tu calle.";
 
@@ -216,10 +216,10 @@ ob_start();
                                     </div>
                                 </td>
                                 <td style="padding: 12px; text-align: center; font-weight: 700; color: #4C6E91;">
-                                    Bs. <?= number_format($c['monto'], 2) ?>
+                                    <?= monto($c['monto']) ?>
                                 </td>
                                 <td style="padding: 12px; text-align: center;">
-                                    <button onclick="openDetalleCobro(<?= $c['id'] ?>, '<?= htmlspecialchars($c['numero_casa'], ENT_QUOTES) ?>', '<?= htmlspecialchars($c['propietario'], ENT_QUOTES) ?>', '<?= htmlspecialchars($c['referencia_pago'] ?? '', ENT_QUOTES) ?>', '<?= number_format($c['monto'], 2) ?>', '<?= htmlspecialchars($c['comprobante_calle'] ?? '', ENT_QUOTES) ?>')"
+                                    <button onclick="openDetalleCobro(<?= $c['id'] ?>, '<?= htmlspecialchars($c['numero_casa'], ENT_QUOTES) ?>', '<?= htmlspecialchars($c['propietario'], ENT_QUOTES) ?>', '<?= htmlspecialchars($c['referencia_pago'] ?? '', ENT_QUOTES) ?>', <?= (float)$c['monto'] ?>, '<?= htmlspecialchars($c['comprobante_calle'] ?? '', ENT_QUOTES) ?>')"
                                             style="background:#F3F4F6; color:#374151; border:1px solid #D1D5DB; padding:5px 10px; border-radius:4px; cursor:pointer; font-size:11px;">🔍 Detalle</button>
                                     <?php if (!in_array($lote_estado, ['Enviado', 'Aprobado'])): ?>
                                         <button onclick="openEditarCobro(<?= $c['id'] ?>, <?= $c['vivienda_id'] ?>, '<?= htmlspecialchars($c['numero_casa'], ENT_QUOTES) ?>', '<?= htmlspecialchars($c['propietario'], ENT_QUOTES) ?>', '<?= htmlspecialchars($c['referencia_pago'] ?? '', ENT_QUOTES) ?>')" 
@@ -265,7 +265,7 @@ ob_start();
         <div style="margin-bottom: 14px;">
             <div style="font-size: 11px; color:#6B7280;">Total Neto Recaudado:</div>
             <div style="font-size: 20px; font-weight: 800; color: #111827; margin-top: 2px;">
-                Bs. <?= number_format($total_recaudado, 2) ?>
+                <?= monto($total_recaudado) ?>
             </div>
             <div style="font-size: 11px; color:#9CA3AF; margin-top:2px;">Total transacciones: <?= count($cobros) ?></div>
         </div>
@@ -353,7 +353,7 @@ ob_start();
             <?php elseif ($lote_estado === 'Aprobado'): ?>
                 <div style="text-align:center; padding:15px; background:#E9EFF4; border-radius:8px; font-size:13px; color:#33485C;">
                     ✅ <strong>Lote aprobado por el Barrio</strong><br>
-                    <small>Monto aprobado: Bs. <?= number_format($lote['monto_recolectado'], 2) ?></small>
+                    <small>Monto aprobado: <?= monto($lote['monto_recolectado']) ?></small>
                 </div>
             <?php else: ?>
                 <div style="text-align:center; padding:15px; background:#EEF2F6; border-radius:8px; font-size:13px; color:#33485C;">
@@ -447,7 +447,7 @@ function openDetalleCobro(id, casa, prop, ref, monto, comprobante) {
     document.getElementById('detalle-casa-num').textContent = '#' + casa;
     document.getElementById('detalle-propietario').textContent = prop;
     document.getElementById('detalle-referencia').textContent = ref || '—';
-    document.getElementById('detalle-monto').textContent = 'Bs. ' + monto;
+    document.getElementById('detalle-monto').textContent = fmtMonto(monto);
     var compDiv = document.getElementById('detalle-comprobante');
     if (comprobante) {
         var isImage = comprobante.match(/\.(jpe?g|png|gif|webp|bmp)(\?.*)?$/i);

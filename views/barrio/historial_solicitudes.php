@@ -116,7 +116,7 @@ foreach ($historial as $h) {
         '#' . ($h['v_casa'] ?? $h['numero_casa'] ?? ''),
         $h['v_prop'] ?? $h['propietario'] ?? '',
         formato_identificacion($h['cedula'] ?? '', $h['cedula_tipo'] ?? 'V', $h['otro_identificador'] ?? ''),
-        number_format((float)($h['monto_deuda'] ?? 0), 2, '.', ','),
+        monto((float)($h['monto_deuda'] ?? 0)),
         '#' . implode(', #', $h['solicitud_ids']),
     ];
 }
@@ -129,7 +129,7 @@ reporte_exportar_si_solicitado(
     'Trámites de alta, baja y renovación ya procesados'
 );
 
-$title = "Historial de Trámites - EcoCusco";
+$title = "Historial de Trámites - EcoReciclaje";
 $header_title = "Historial de Solicitudes";
 $header_subtitle = "Revisa los trámites de alta, baja y renovación ya procesados.";
 
@@ -225,7 +225,7 @@ ob_start();
                             </td>
                             <td style="padding: 12px;">
                                 <div style="font-size: 11px; color: #4B5563;">
-                                    <?= ($h['tipo'] == 'Baja' || $h['tipo'] == 'Renovacion') ? '<b>Deuda:</b> S/ ' . number_format($h['monto_deuda'], 2) : 'Registro de Vivienda' ?>
+                                    <?= ($h['tipo'] == 'Baja' || $h['tipo'] == 'Renovacion') ? '<b>Deuda:</b> ' . monto($h['monto_deuda']) : 'Registro de Vivienda' ?>
                                 </div>
                                 <div style="font-size: 10px; color: #6B7280;">
                                     Solicitud<?= count($h['solicitud_ids']) > 1 ? 'es' : '' ?> #<?= htmlspecialchars(implode(', #', $h['solicitud_ids'])) ?>

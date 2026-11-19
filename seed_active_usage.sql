@@ -183,7 +183,7 @@ FROM (SELECT 1 n UNION ALL SELECT 2 UNION ALL SELECT 3 UNION ALL SELECT 4 UNION 
 JOIN seed_barrios sb ON sb.orden = 1 + MOD(n - 1, (SELECT COUNT(*) FROM seed_barrios));
 
 INSERT INTO reportes (usuario_id, ubicacion_nombre, latitud, longitud, tipo_residuo, descripcion, cantidad, estado, fotos, fecha_reporte)
-SELECT NULL, CONCAT('Punto ecológico ', n, ' - Cusco'), -13.51 - (n / 10000), -71.97 - (n / 10000),
+SELECT NULL, CONCAT('Punto ecológico ', n), -13.51 - (n / 10000), -71.97 - (n / 10000),
        CASE MOD(n, 5) WHEN 0 THEN 'Cartón' WHEN 1 THEN 'Plástico PET' WHEN 2 THEN 'Vidrio' WHEN 3 THEN 'Papel' ELSE 'Aluminio' END,
        CONCAT('Reporte ciudadano de materiales separados para recolección. Caso demo ', n),
        5 + n * 1.25, CASE MOD(n, 3) WHEN 0 THEN 'Pendiente' WHEN 1 THEN 'En proceso' ELSE 'Completado' END,

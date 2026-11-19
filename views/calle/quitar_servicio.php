@@ -25,7 +25,7 @@ $stmt = $pdo->prepare($sql);
 $stmt->execute($params);
 $viviendas = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-$title = "Solicitar Baja - EcoCusco";
+$title = "Solicitar Baja - EcoReciclaje";
 $header_title = "Retiro de Servicio";
 $header_subtitle = "Envia una solicitud al barrio para anular el servicio de una vivienda.";
 
@@ -77,7 +77,7 @@ ob_start();
                                 <div style="font-size: 10px; color: #9CA3AF;"><?= htmlspecialchars($v['direccion']) ?></div>
                             </td>
                             <td style="padding: 12px; text-align: center;">
-                                <div style="font-weight: 800; color: #7A4F4F;">Bs. <?= number_format($v['deuda_total'] ?: 0, 2) ?></div>
+                                <div style="font-weight: 800; color: #7A4F4F;"><?= monto($v['deuda_total'] ?: 0) ?></div>
                                 <div style="font-size: 10px; color: #6B7280;"><?= $v['meses_pendientes'] ?> conceptos</div>
                             </td>
                             <td style="padding: 12px; text-align: center;">

@@ -68,7 +68,7 @@ foreach ($bajas_confirmadas as $b) {
         $b['propietario'] ?? '',
         formato_identificacion($b['v_cedula'] ?? '', $b['v_cedula_tipo'] ?? 'V', $b['v_otro_identificador'] ?? ''),
         $b['direccion'] ?? '',
-        number_format((float)$b['monto_deuda'], 2, '.', ','),
+        monto((float)$b['monto_deuda']),
         $b['detalles_deuda'] ?? '',
         'Solicitud #' . $b['id'],
     ];
@@ -78,11 +78,11 @@ reporte_exportar_si_solicitado(
     'Reporte de bajas de la calle',
     ['Fecha de baja', 'Casa', 'Propietario', 'Identificación', 'Dirección', 'Deuda final', 'Conceptos pendientes', 'Solicitud'],
     $filasBajas,
-    array_merge($metaBajas, ['Total bajas' => count($filasBajas), 'Deuda total' => number_format($totalDeudaBajas, 2, '.', ',')]),
+    array_merge($metaBajas, ['Total bajas' => count($filasBajas), 'Deuda total' => monto($totalDeudaBajas)]),
     'Viviendas retiradas del servicio y estado de cuenta final'
 );
 
-$title = "Reporte de Bajas - EcoCusco";
+$title = "Reporte de Bajas - EcoReciclaje";
 $header_title = "Historial de Retiro";
 $header_subtitle = "Registro de viviendas que ya no cuentan con el servicio.";
 
@@ -90,7 +90,7 @@ ob_start();
 ?>
     <?php render_dashboard_alerts($mensaje_exito ?? null, $mensaje_error ?? null); ?>
 
-    <?= reporte_encabezado_impresion('Reporte de bajas de la calle', 'Viviendas retiradas del servicio y estado de cuenta final', array_merge($metaBajas, ['Total bajas' => count($bajas_confirmadas), 'Deuda total' => 'S/ ' . number_format($totalDeudaBajas, 2, '.', ',')])) ?>
+    <?= reporte_encabezado_impresion('Reporte de bajas de la calle', 'Viviendas retiradas del servicio y estado de cuenta final', array_merge($metaBajas, ['Total bajas' => count($bajas_confirmadas), 'Deuda total' => monto($totalDeudaBajas)])) ?>
     <?= reporte_botonera() ?>
 
     <style>
@@ -177,7 +177,7 @@ ob_start();
                                 <div style="font-size: 11px; color: #6B7280;">Solicitud #<?= $b['id'] ?></div>
                             </td>
                             <td style="padding: 12px; text-align: right;">
-                                <div style="font-weight: 800; color: #7A4F4F;">S/ <?= number_format($b['monto_deuda'], 2) ?></div>
+                                <div style="font-weight: 800; color: #7A4F4F;"><?= monto($b['monto_deuda']) ?></div>
                                 <div style="font-size: 9px; color: #6B7280;"><?= htmlspecialchars($b['detalles_deuda']) ?></div>
                             </td>
                             <td style="padding: 12px;">
@@ -219,9 +219,9 @@ ob_start();
                 <input type="hidden" name="vivienda_id" id="renovacionViviendaId">
                 <div class="renovar-modal-body">
                     <div class="renovar-amounts" aria-live="polite">
-                        <div class="renovar-amount-line"><span>Deuda pendiente</span><strong id="renovacionDeuda">S/ 0.00</strong></div>
-                        <div class="renovar-amount-line"><span>Multa de renovación</span><strong id="renovacionMulta">S/ 0.00</strong></div>
-                        <div class="renovar-amount-line renovar-amount-total"><span>Total a pagar</span><strong id="renovacionTotal">S/ 0.00</strong></div>
+                        <div class="renovar-amount-line"><span>Deuda pendiente</span><strong id="renovacionDeuda"><?= monto(0) ?></strong></div>
+                        <div class="renovar-amount-line"><span>Multa de renovación</span><strong id="renovacionMulta"><?= monto(0) ?></strong></div>
+                        <div class="renovar-amount-line renovar-amount-total"><span>Total a pagar</span><strong id="renovacionTotal"><?= monto(0) ?></strong></div>
                     </div>
                     <p style="margin:0 0 17px; color:#657384; font-size:12px; line-height:1.5;">
                         Confirma el pago del monto indicado y adjunta su referencia y comprobante. El encargado de barrio revisará la solicitud antes de reactivar el servicio.
@@ -270,9 +270,9 @@ ob_start();
             document.getElementById('renovacionViviendaId').value = boton.dataset.vivienda || '';
             document.getElementById('renovacionCliente').textContent =
                 `${boton.dataset.propietario || 'Cliente'} · Casa #${boton.dataset.casa || '?'}`;
-            document.getElementById('renovacionDeuda').textContent = `S/ ${deuda.toFixed(2)}`;
-            document.getElementById('renovacionMulta').textContent = `S/ ${multa.toFixed(2)}`;
-            document.getElementById('renovacionTotal').textContent = `S/ ${(deuda + multa).toFixed(2)}`;
+            document.getElementById('renovacionDeuda').textContent = fmtMonto(deuda);
+            document.getElementById('renovacionMulta').textContent = fmtMonto(multa);
+            document.getElementById('renovacionTotal').textContent = fmtMonto(deuda + multa);
             form.reset();
             document.getElementById('renovacionViviendaId').value = boton.dataset.vivienda || '';
             comprobante.setCustomValidity('');

@@ -503,10 +503,15 @@ class barrioController extends mainModel {
                 $tarifa = function ($campo) {
                     return (float)($_POST[$campo] ?? $_POST['cuota_mensual'] ?? 10.00);
                 };
+                $precioBolivar = (float)($_POST['precio_bolivar'] ?? TASA_BOLIVAR_PREDETERMINADA);
+                if ($precioBolivar <= 0) {
+                    throw new \Exception("El precio del bolívar debe ser mayor a cero.");
+                }
+                $tasaAutomatica = (isset($_POST['tasa_automatica']) && (string)$_POST['tasa_automatica'] === '1') ? 1 : 0;
                 $this->ejecutarConsulta(
                     "INSERT INTO configuraciones_barrio
-                        (barrio_id, cuota_mensual, precio_comercio, precio_tienda, precio_empresa, precio_urbanizacion, precio_otro, multa_renovacion, fecha_limite_pago, actualizado_por)
-                     VALUES (?,?,?,?,?,?,?,?,?,?)
+                        (barrio_id, cuota_mensual, precio_comercio, precio_tienda, precio_empresa, precio_urbanizacion, precio_otro, precio_especial, precio_bolivar, tasa_automatica, multa_renovacion, fecha_limite_pago, actualizado_por)
+                     VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)
                      ON DUPLICATE KEY UPDATE
                         cuota_mensual = VALUES(cuota_mensual),
                         precio_comercio = VALUES(precio_comercio),
@@ -514,6 +519,9 @@ class barrioController extends mainModel {
                         precio_empresa = VALUES(precio_empresa),
                         precio_urbanizacion = VALUES(precio_urbanizacion),
                         precio_otro = VALUES(precio_otro),
+                        precio_especial = VALUES(precio_especial),
+                        precio_bolivar = VALUES(precio_bolivar),
+                        tasa_automatica = VALUES(tasa_automatica),
                         multa_renovacion = VALUES(multa_renovacion),
                         fecha_limite_pago = VALUES(fecha_limite_pago),
                         actualizado_por = VALUES(actualizado_por)",
@@ -525,13 +533,46 @@ class barrioController extends mainModel {
                         $tarifa('precio_empresa'),
                         $tarifa('precio_urbanizacion'),
                         $tarifa('precio_otro'),
+                        $tarifa('precio_especial'),
+                        $precioBolivar,
+                        $tasaAutomatica,
                         (float)$_POST['multa_renovacion'],
                         $fecha_limite_pago,
                         $user['id']
                     ]
                 );
-                $mensaje_exito = "Configuración de pagos actualizada.";
+
+                if ($tasaAutomatica === 1) {
+                    // Modo automático: tomar la tasa vigente de inmediato.
+                    \tasa_bolivar_actualizar($this->conectar(), true);
+                } else {
+                    // Modo manual: conservar el valor capturado y limpiar la marca
+                    // de descarga para que no se muestre como automática.
+                    $this->ejecutarConsulta(
+                        "UPDATE configuraciones_barrio
+                         SET precio_bolivar_actualizado_en = NULL, precio_bolivar_fuente = NULL
+                         WHERE barrio_id = ?",
+                        [$barrio_id]
+                    );
+                }
+                $tasaFinal = \tasa_bolivar($this->conectar(), $barrio_id);
+                $mensaje_exito = "Configuración actualizada. Tasa: " . number_format($tasaFinal, 2)
+                    . " Bs. por US$ " . ($tasaAutomatica === 1 ? "(automática)." : "(manual).");
             } catch (\Exception $e) { $mensaje_error = "Error: " . $e->getMessage(); }
+        }
+
+        // 7b. Actualizar ahora el precio del dólar en bolívares
+        if ($action === 'actualizar_tasa_bolivar') {
+            try {
+                $resultado = \tasa_bolivar_actualizar($this->conectar(), true);
+                if (!empty($resultado['ok'])) {
+                    $mensaje_exito = $resultado['mensaje'];
+                } else {
+                    $mensaje_error = $resultado['mensaje'] ?? 'No se pudo actualizar la tasa.';
+                }
+            } catch (\Throwable $e) {
+                $mensaje_error = 'Error: ' . $e->getMessage();
+            }
         }
 
         // 8. Enviar certificado/factura al encargado de calle

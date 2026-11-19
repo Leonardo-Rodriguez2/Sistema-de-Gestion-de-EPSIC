@@ -113,7 +113,7 @@ foreach ($facturados as $fb) {
     $datosFacturados[$fb['id']] = $calles;
 }
 
-$title = 'Facturación — EcoCusco';
+$title = 'Facturación — EcoReciclaje';
 $header_title = '📄 Facturación por Barrio';
 $header_subtitle = 'Aprueba lotes, genera facturas por calle y envía todo al encargado de barrio';
 
@@ -192,9 +192,9 @@ render_dashboard_alerts($mensaje_exito ?? null, $mensaje_error ?? null);
         <div class="lote-body">
             <div class="lote-stats">
                 <div class="lote-stat"><div class="num" style="color:#6B7280;"><?= $lb['total_calles_lote'] ?></div><div class="lbl">Calles</div></div>
-                <div class="lote-stat"><div class="num" style="color:#3E5C76;">Bs. <?= number_format($lb['monto_total_recolectado']??0, 2) ?></div><div class="lbl">Recolectado</div></div>
-                <div class="lote-stat"><div class="num" style="color:#7A6A4F;">Bs. <?= number_format($lb['monto_total_esperado']??0, 2) ?></div><div class="lbl">Esperado</div></div>
-                <div class="lote-stat"><div class="num" style="color:<?= $dif>0?'#8A5A5A':'#3E5C76' ?>;"><?php if ($dif > 0): ?>-<?php endif; ?>Bs. <?= number_format($dif, 2) ?></div><div class="lbl">Diferencia</div></div>
+                <div class="lote-stat"><div class="num" style="color:#3E5C76;"><?= monto($lb['monto_total_recolectado']??0) ?></div><div class="lbl">Recolectado</div></div>
+                <div class="lote-stat"><div class="num" style="color:#7A6A4F;"><?= monto($lb['monto_total_esperado']??0) ?></div><div class="lbl">Esperado</div></div>
+                <div class="lote-stat"><div class="num" style="color:<?= $dif>0?'#8A5A5A':'#3E5C76' ?>;"><?php if ($dif > 0): ?>-<?php endif; ?><?= monto($dif) ?></div><div class="lbl">Diferencia</div></div>
             </div>
             <?php if (!empty($lb['observaciones_barrio'])): ?>
             <div style="background:#F7F4EE; padding:8px 12px; border-radius:6px; font-size:12px; color:#6E5F45; margin:8px 0;">💬 <?= htmlspecialchars($lb['observaciones_barrio']) ?></div>
@@ -281,7 +281,7 @@ render_dashboard_alerts($mensaje_exito ?? null, $mensaje_error ?? null);
                             <div style="font-size:11px; color:#6B7280;">
                                 👤 <?= htmlspecialchars($c['encargado_calle'] ?? '—') ?> •
                                 🏠 <?= $c['casas_pagadas'] ?>/<?= $c['total_casas'] ?> pag. •
-                                💰 Bs. <?= number_format($c['monto_recolectado'] ?? 0, 2) ?>
+                                💰 <?= monto($c['monto_recolectado'] ?? 0) ?>
                                 <span style="display:inline-block; margin-left:8px; font-size:9px; color:#9CA3AF;"><?= $num_factura_calle ?></span>
                             </div>
                         </div>
@@ -303,7 +303,7 @@ render_dashboard_alerts($mensaje_exito ?? null, $mensaje_error ?? null);
                                 <div style="font-size:9px; color:#6B7280; text-transform:uppercase;">Morosas</div>
                             </div>
                             <div style="text-align:center; padding:8px; background:#F9FAFB; border-radius:6px;">
-                                <div style="font-size:20px; font-weight:800; color:#33485C;">Bs. <?= number_format($total_monto, 2) ?></div>
+                                <div style="font-size:20px; font-weight:800; color:#33485C;"><?= monto($total_monto) ?></div>
                                 <div style="font-size:9px; color:#6B7280; text-transform:uppercase;">Total</div>
                             </div>
                         </div>
@@ -353,12 +353,12 @@ render_dashboard_alerts($mensaje_exito ?? null, $mensaje_error ?? null);
                                         <?php endif; ?>
                                     </td>
                                     <td style="font-size:10px; color:#6B7280;"><?= htmlspecialchars($v['referencia_pago'] ?? '—') ?></td>
-                                    <td style="text-align:right; font-weight:700;"><?= $v['monto'] ? 'Bs. '.number_format($v['monto'], 2) : '—' ?></td>
+                                    <td style="text-align:right; font-weight:700;"><?= $v['monto'] ? monto($v['monto']) : '—' ?></td>
                                 </tr>
                                 <?php endforeach; ?>
                                 <tr class="total-row">
                                     <td colspan="6" style="padding:8px; text-align:right;">TOTAL RECAUDADO — <?= htmlspecialchars($c['calle_nombre']) ?></td>
-                                    <td style="padding:8px; text-align:right; font-size:14px;">Bs. <?= number_format($total_monto, 2) ?></td>
+                                    <td style="padding:8px; text-align:right; font-size:14px;"><?= monto($total_monto) ?></td>
                                 </tr>
                             </tbody>
                         </table>

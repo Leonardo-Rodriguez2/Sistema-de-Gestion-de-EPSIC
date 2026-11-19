@@ -7,7 +7,7 @@ $stmt->execute([$id]);
 $barrio = $stmt->fetch(PDO::FETCH_ASSOC);
 if (!$barrio) { echo "<div class='alert alert-error'>Barrio no encontrado.</div>"; return; }
 
-$title = "Editar Barrio - EcoCusco";
+$title = "Editar Barrio - EcoReciclaje";
 $header_title = "Editar Barrio";
 $header_subtitle = "Modifica los datos del barrio seleccionado.";
 

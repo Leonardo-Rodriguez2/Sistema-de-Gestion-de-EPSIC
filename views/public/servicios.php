@@ -1,5 +1,5 @@
 <?php
-$title = "Nuestros Servicios | EcoCusco";
+$title = "Nuestros Servicios | EcoReciclaje";
 ob_start();
 ?>
 
@@ -19,7 +19,7 @@ ob_start();
             <div class="service-card popular">
                 <div class="popular-badge">Más Elegido</div>
                 <div class="service-icon"><i class="fas fa-house-chimney-window"></i></div>
-                <h3 class="service-title">Plan Vecinal</h3>
+                <h3 class="service-title">Plan Urbanización</h3>
                 <p class="service-desc">Para Comités, Urbanizaciones o Barrios completos que desean ordenar su recolección de forma unificada.</p>
                 
                 <ul class="feature-list">
@@ -27,10 +27,10 @@ ob_start();
                     <li><i class="fas fa-check"></i> Perfil individual por cada familia</li>
                     <li><i class="fas fa-check"></i> Dashboard Financiero por Vivienda</li>
                     <li><i class="fas fa-check"></i> Recolección diferenciada básica</li>
-                    <li><i class="fas fa-check"></i> Acceso global a Reportes Express</li>
+                    <li><i class="fas fa-check"></i> Seguimiento de tu servicio en línea</li>
                 </ul>
 
-                <a href="nosotros.php" class="btn-hire">Solicitar Cotización</a>
+                <a href="cotizacion.php?plan=urbanizacion" class="btn-hire">Solicitar Cotización</a>
             </div>
 
             <!-- Plan Comercial -->
@@ -41,13 +41,13 @@ ob_start();
                 
                 <ul class="feature-list">
                     <li><i class="fas fa-check"></i> Frecuencia de pagos (3 por sem.)</li>
-                    <li><i class="fas fa-check"></i> Recolección privada al solicitar el servicio</li>
+                    <li><i class="fas fa-check"></i> Recolección dedicada al solicitar el servicio</li>
                     <li><i class="fas fa-check"></i> Mas alcance de ruta de busqueda de basura </li>
                     <li><i class="fas fa-check"></i>  </li>
                     <li><i class="fas fa-check"></i> Mas capacidad al recoletar la basura </li>
                 </ul>
 
-                <a href="nosotros.php" class="btn-hire">Contactar a Ventas</a>
+                <a href="cotizacion.php?plan=comercial" class="btn-hire">Solicitar Cotización</a>
             </div>
 
             <!-- Servicios Especiales -->
@@ -64,7 +64,7 @@ ob_start();
                     <li><i class="fas fa-check"></i> Un equipo de trabajadores dispuestos a ayudar </li>
                 </ul>
 
-                <a href="nosotros.php" class="btn-hire">Agendar Recojo Único</a>
+                <a href="cotizacion.php?plan=especial" class="btn-hire">Solicitar Cotización</a>
             </div>
 
         </div>
@@ -99,7 +99,8 @@ ob_start();
 
         <!-- Tabla Comparativa -->
         <div class="compare-section text-center">
-            <h2 class="fw-bold mb-4" style="color: var(--dark); font-size: 28px;">¿Por qué cambiar a EPSIC?</h2>
+            <h2 class="fw-bold mb-2" style="color: var(--dark); font-size: 28px;">¿Por qué elegir el servicio de EPSIC?</h2>
+            <p class="text-muted mb-4">Atención pública para barrios, comercios y condominios.</p>
             
             <div class="table-wrap">
                 <table class="compare-table">
@@ -107,7 +108,7 @@ ob_start();
                         <tr>
                             <th style="text-align: left; background: var(--light); color: var(--dark);">Característica del Servicio</th>
                             <th style="background: var(--primary);">Con EPSIC</th>
-                            <th style="background: #9A6A6A;">Recolección Informal o Pública</th>
+                            <th style="background: #9A6A6A;">Recolección Informal</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -127,8 +128,8 @@ ob_start();
                             <td style="color: #6B7280;">Sin Respaldo Documentario</td>
                         </tr>
                         <tr>
-                            <td style="text-align: left; font-weight: 600;">Atención a Incidentes</td>
-                            <td class="eco-col"><i class="fas fa-check-circle"></i> Portal de Reportes Web 24/7</td>
+                            <td style="text-align: left; font-weight: 600;">Atención al Vecino</td>
+                            <td class="eco-col"><i class="fas fa-check-circle"></i> Canal directo 24/7</td>
                             <td style="color: #6B7280;">Sin canal de reclamos directos</td>
                         </tr>
                     </tbody>
@@ -151,10 +152,10 @@ ob_start();
             
             <div class="accordion-item">
                 <div class="accordion-header" onclick="this.nextElementSibling.style.display = this.nextElementSibling.style.display === 'block' ? 'none' : 'block'">
-                    ¿Cómo se realiza el pago del Plan Vecinal? <i class="fas fa-chevron-down"></i>
+                    ¿Cómo se realiza el pago del Plan Urbanización? <i class="fas fa-chevron-down"></i>
                 </div>
                 <div class="accordion-body">
-                    Para realizar el pago del Plan Vecinal, por favor comuníquese con su Jefe de Barrio. Puede pagar en efectivo o por medios digitales; sin embargo, es indispensable coordinar con el encargado para confirmar el proceso y asegurar que su pago sea debidamente registrado.
+                    Para realizar el pago del Plan Urbanización, por favor comuníquese con su Jefe de Barrio. Puede pagar en efectivo o por medios digitales; sin embargo, es indispensable coordinar con el encargado para confirmar el proceso y asegurar que su pago sea debidamente registrado.
                 </div>
             </div>
 
@@ -163,7 +164,7 @@ ob_start();
                     ¿Qué ocurre si la basura recolectada sobrepasa mi plan? <i class="fas fa-chevron-down"></i>
                 </div>
                 <div class="accordion-body">
-                    Nuestro personal está capacitado para recoger la carga ordinaria. En caso de volúmenes excepcionales, se reporta al sistema y se emite un recargo por "Recojo Especial" a esa sola vivienda o local comercial tras notificárnos.
+                    Nuestro personal está capacitado para recoger la carga ordinaria. En caso de volúmenes excepcionales, se registra en el sistema y se emite un recargo por "Recojo Especial" a esa sola vivienda o local comercial tras notificárnos.
                 </div>
             </div>
         </div>
@@ -171,7 +172,7 @@ ob_start();
         <div class="bottom-banner">
             <div class="content">
                 <h2 style="font-size:32px; margin-bottom: 20px;">¿Si estas seguro qué nuestro plan te conviene?</h2>
-                <a href="nosotros.php" class="btn-hire" style="background:var(--primary); color:white; border:none; width:auto; padding: 15px 40px; border-radius:30px;">Ir a Formulario de Solicitud <i class="fas fa-arrow-right" style="margin-left: 10px;"></i></a>
+                <a href="cotizacion.php" class="btn-hire" style="background:var(--primary); color:white; border:none; width:auto; padding: 15px 40px; border-radius:30px;">Calcular mi Cotización <i class="fas fa-arrow-right" style="margin-left: 10px;"></i></a>
             </div>
         </div>
 

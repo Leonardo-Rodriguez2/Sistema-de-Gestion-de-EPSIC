@@ -50,7 +50,7 @@ foreach ($pagos as $p) {
         formato_identificacion($p['cedula'] ?? '', $p['cedula_tipo'] ?? 'V', $p['otro_identificador'] ?? ''),
         $p['barrio_nombre'] ?? '',
         ($p['mes'] ?? '') . '/' . ($p['anio'] ?? ''),
-        number_format((float)($p['monto'] ?? 0), 2, '.', ','),
+        monto((float)($p['monto'] ?? 0)),
         $p['referencia_pago'] ?? '',
         $p['fecha_emision'] ?? '',
     ];
@@ -64,7 +64,7 @@ reporte_exportar_si_solicitado(
     'Centro de recibos y comprobantes de pago'
 );
 
-$title = "Centro de Recibos - EcoCusco";
+$title = "Centro de Recibos - EcoReciclaje";
 $header_title = "Gestión de Comprobantes";
 $header_subtitle = "Emisión de recibos y reportes para los ciudadanos.";
 

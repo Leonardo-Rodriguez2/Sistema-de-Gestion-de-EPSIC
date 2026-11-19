@@ -264,7 +264,7 @@ ob_start();
 
 <div class="card report-print-area" style="padding:24px;">
     <div style="text-align:center; border-bottom:2px solid #33485C; padding-bottom:14px; margin-bottom:18px;">
-        <div style="font-size:11px; letter-spacing:1px; color:#6B7280; text-transform:uppercase;">Sistema de Gestión de Reciclaje — EPSIC / EcoCusco</div>
+        <div style="font-size:11px; letter-spacing:1px; color:#6B7280; text-transform:uppercase;">Sistema de Gestión de Reciclaje — EPSIC / EcoReciclaje</div>
         <h2 style="margin:6px 0 4px; font-size:22px; color:#111827;">REPORTE DE VIVIENDAS POR CALLE</h2>
         <div style="font-size:12px; color:#6B7280;">Emitido el <?= date('d/m/Y H:i') ?></div>
     </div>
@@ -306,11 +306,11 @@ ob_start();
             <div style="font-size:10px; color:#6B7280; text-transform:uppercase;">Exentas</div>
         </div>
         <div style="background:#E9EFF4; border-radius:8px; padding:10px; text-align:center;">
-            <div style="font-size:18px; font-weight:800; color:#33485C;">Bs. <?= number_format($resumen['recaudado'], 2) ?></div>
+            <div style="font-size:18px; font-weight:800; color:#33485C;"><?= monto($resumen['recaudado']) ?></div>
             <div style="font-size:10px; color:#6B7280; text-transform:uppercase;">Recaudado</div>
         </div>
         <div style="background:#F4EDED; border-radius:8px; padding:10px; text-align:center;">
-            <div style="font-size:18px; font-weight:800; color:#8A5A5A;">Bs. <?= number_format($resumen['deuda'], 2) ?></div>
+            <div style="font-size:18px; font-weight:800; color:#8A5A5A;"><?= monto($resumen['deuda']) ?></div>
             <div style="font-size:10px; color:#6B7280; text-transform:uppercase;">Deuda acumulada</div>
         </div>
     </div>
@@ -356,9 +356,9 @@ ob_start();
                                 <span style="background:#F3F4F6; color:#6B7280; padding:2px 8px; border-radius:10px; font-size:11px; font-weight:700;">Sin cobro</span>
                             <?php endif; ?>
                         </td>
-                        <td style="padding:8px 10px; text-align:right; font-weight:600;"><?= !empty($v['pagado']) ? 'Bs. ' . number_format((float)$v['monto_periodo'], 2) : '—' ?></td>
+                        <td style="padding:8px 10px; text-align:right; font-weight:600;"><?= !empty($v['pagado']) ? monto((float)$v['monto_periodo']) : '—' ?></td>
                         <td style="padding:8px 10px; text-align:right; font-weight:700; color:<?= (float)$v['deuda'] > 0 ? '#8A5A5A' : '#9CA3AF' ?>;">
-                            <?= (float)$v['deuda'] > 0 ? 'Bs. ' . number_format((float)$v['deuda'], 2) : '—' ?>
+                            <?= (float)$v['deuda'] > 0 ? monto((float)$v['deuda']) : '—' ?>
                         </td>
                     </tr>
                     <?php endforeach; ?>
@@ -367,8 +367,8 @@ ob_start();
             <tfoot>
                 <tr style="border-top:2px solid #33485C; background:#EEF2F6;">
                     <td colspan="7" style="padding:10px; text-align:right; font-weight:800;">TOTALES DEL REPORTE</td>
-                    <td style="padding:10px; text-align:right; font-weight:800; color:#33485C;">Bs. <?= number_format($resumen['recaudado'], 2) ?></td>
-                    <td style="padding:10px; text-align:right; font-weight:800; color:#8A5A5A;">Bs. <?= number_format($resumen['deuda'], 2) ?></td>
+                    <td style="padding:10px; text-align:right; font-weight:800; color:#33485C;"><?= monto($resumen['recaudado']) ?></td>
+                    <td style="padding:10px; text-align:right; font-weight:800; color:#8A5A5A;"><?= monto($resumen['deuda']) ?></td>
                 </tr>
             </tfoot>
         </table>

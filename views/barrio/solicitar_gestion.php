@@ -22,7 +22,7 @@ $historialStmt = $pdo->prepare(
 $historialStmt->execute([$user['id']]);
 $historial = $historialStmt->fetchAll(PDO::FETCH_ASSOC);
 $tab = ($_GET['tab'] ?? 'nueva') === 'historial' ? 'historial' : 'nueva';
-$title = 'Solicitar Calle o Encargado - EcoCusco';
+$title = 'Solicitar Calle o Encargado - EcoReciclaje';
 $header_title = 'Solicitar gestión al Gestor';
 $header_subtitle = 'Barrio: ' . htmlspecialchars($barrio['nombre'] ?? 'Sin asignar');
 ob_start();

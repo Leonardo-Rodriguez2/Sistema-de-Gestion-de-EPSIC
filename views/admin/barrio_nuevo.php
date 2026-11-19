@@ -2,7 +2,7 @@
 // views/admin/barrio_nuevo.php
 $user = check_dashboard_access([1]);
 
-$title = "Registrar Nuevo Barrio - EcoCusco";
+$title = "Registrar Nuevo Barrio - EcoReciclaje";
 $header_title = "Nuevo Barrio";
 $header_subtitle = "Define una nueva zona geográfica para el servicio de reciclaje.";
 

@@ -43,7 +43,7 @@ if ($calle_barrio_actual) {
     $calle_barrio_actual = '';
 }
 
-$title = "Editar - EcoCusco";
+$title = "Editar - EcoReciclaje";
 $header_title = "Editar: " . $u['nombre'];
 
 ob_start();

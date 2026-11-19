@@ -9,7 +9,7 @@ if (!$calle) { echo "<div class='alert alert-error'>Calle no encontrada.</div>";
 
 $barrios = $pdo->query("SELECT id, nombre FROM barrios ORDER BY nombre")->fetchAll(PDO::FETCH_ASSOC);
 
-$title = "Editar Calle - EcoCusco";
+$title = "Editar Calle - EcoReciclaje";
 $header_title = "Editar Calle";
 $header_subtitle = "Modifica los datos de la calle seleccionada.";
 

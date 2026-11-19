@@ -29,7 +29,7 @@ $conteos = $pdo->query(
 )->fetchAll(PDO::FETCH_KEY_PAIR);
 $barrios = $pdo->query("SELECT id,nombre FROM barrios ORDER BY nombre")->fetchAll(PDO::FETCH_ASSOC);
 $calles = $pdo->query("SELECT id,barrio_id,nombre FROM calles ORDER BY nombre")->fetchAll(PDO::FETCH_ASSOC);
-$title = 'Solicitudes del Barrio - EcoCusco';
+$title = 'Solicitudes del Barrio - EcoReciclaje';
 $header_title = 'Solicitudes del Barrio';
 $header_subtitle = 'Aprueba solicitudes o crea calles y encargados directamente.';
 ob_start();

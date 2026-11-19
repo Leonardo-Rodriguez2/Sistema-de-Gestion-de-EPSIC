@@ -39,7 +39,7 @@ $viviendas = $stmt->fetchAll(PDO::FETCH_ASSOC);
 $barrios = $pdo->query("SELECT id, nombre FROM barrios ORDER BY nombre")->fetchAll(PDO::FETCH_ASSOC);
 $calles = $pdo->query("SELECT id, nombre, barrio_id FROM calles ORDER BY nombre")->fetchAll(PDO::FETCH_ASSOC);
 
-$title = "Quitar Servicio (Admin) - EcoCusco";
+$title = "Quitar Servicio (Admin) - EcoReciclaje";
 $header_title = "Control Maestro de Servicios";
 $header_subtitle = "Anula servicios de cualquier vivienda del sistema de forma directa y permanente.";
 
@@ -105,7 +105,7 @@ ob_start();
                                 <div style="font-size: 11px; color: #6B7280;">Casa #<?= htmlspecialchars($v['numero_casa']) ?></div>
                             </td>
                             <td style="padding: 12px; text-align: center;">
-                                <div style="font-weight: 800; color: #7A4F4F;">Bs. <?= number_format($v['deuda_total'] ?: 0, 2) ?></div>
+                                <div style="font-weight: 800; color: #7A4F4F;"><?= monto($v['deuda_total'] ?: 0) ?></div>
                                 <div style="font-size: 10px; color: #6B7280;">Monto al retiro</div>
                             </td>
                             <td style="padding: 12px; text-align: center;">

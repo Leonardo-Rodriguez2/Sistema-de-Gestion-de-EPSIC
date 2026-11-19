@@ -16,7 +16,7 @@ $stmt = $pdo->prepare($sql);
 $stmt->execute([$user['id']]);
 $renovaciones = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-$title = "Órdenes de Renovación - EcoCusco";
+$title = "Órdenes de Renovación - EcoReciclaje";
 $header_title = "Reactivación de Servicios";
 $header_subtitle = "Aprueba las renovaciones de viviendas que han regularizado su situación.";
 
@@ -62,7 +62,7 @@ ob_start();
                                 <div style="font-size: 11px; color: #6B7280;">ID Casa: #<?= $r['vivienda_id'] ?> | Casa #<?= htmlspecialchars($v['numero_casa'] ?? '#') ?></div>
                             </td>
                             <td style="padding: 12px; text-align: right;">
-                                <div style="font-weight: 800; color: #33485C;">S/ <?= number_format($r['monto_deuda'], 2) ?></div>
+                                <div style="font-weight: 800; color: #33485C;"><?= monto($r['monto_deuda']) ?></div>
                                 <div style="font-size: 9px; color: #6B7280;"><?= htmlspecialchars($r['detalles_deuda']) ?></div>
                                 <?php if (!empty($r['referencia_pago'])): ?>
                                     <div style="margin-top:7px; text-align:left; font-size:11px; color:#455765;">

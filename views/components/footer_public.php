@@ -5,7 +5,7 @@
     <div class="container">
       <div class="row g-4">
         <div class="col-md-4">
-          <h5 class="fw-bold text-white mb-3"><i class="fas fa-leaf text-success me-2"></i> EcoCusco Empresarial</h5>
+          <h5 class="fw-bold text-white mb-3"><i class="fas fa-leaf text-success me-2"></i> EcoReciclaje Empresarial</h5>
           <p class="text-light pe-4">Transformando la recolección de basura en una cadena limpia, justa y sostenible mediante la gestión tercerizada. Contribuimos desde la base.</p>
         </div>
         <div class="col-md-2">
@@ -13,15 +13,14 @@
           <ul class="list-unstyled">
             <li class="mb-2"><a href="/reciclaje/views/public/nosotros.php" class="text-decoration-none text-light">Sobre Nosotros</a></li>
             <li class="mb-2"><a href="/reciclaje/views/public/servicios.php" class="text-decoration-none text-light">Nuestros Planes</a></li>
-            <li class="mb-2"><a href="/reciclaje/views/public/nosotros.php" class="text-decoration-none text-light">Casos y Estadísticas</a></li>
-            <li class="mb-2"><a href="/reciclaje/views/public/reportes.php" class="text-decoration-none text-light">Portal Cívico</a></li>
+            <li class="mb-2"><a href="/reciclaje/views/public/cotizacion.php" class="text-decoration-none text-light">Solicitar Cotización</a></li>
           </ul>
         </div>
         <div class="col-md-3">
           <h6 class="fw-bold text-white mb-3">Contacto Comercial</h6>
-          <p class="mb-2 text-light"><i class="fas fa-envelope text-success me-2"></i> ventas@ecocusco.com</p>
+          <p class="mb-2 text-light"><i class="fas fa-envelope text-success me-2"></i> ventas@ecoreciclaje.com</p>
           <p class="mb-2 text-light"><i class="fas fa-phone text-success me-2"></i> +51 084 254 365</p>
-          <p class="mb-2 text-light"><i class="fas fa-map-marker-alt text-success me-2"></i> Av. Cultura 1230, Cusco Sur, Perú</p>
+          <p class="mb-2 text-light"><i class="fas fa-map-marker-alt text-success me-2"></i> Av. Cultura 1230, Perú</p>
         </div>
         <div class="col-md-3">
           <h6 class="fw-bold text-white mb-3">Portal de Afiliados</h6>
@@ -31,7 +30,7 @@
       </div>
       <hr class="mt-5 mb-4 border-secondary">
       <div class="text-center text-light small">
-        &copy; <?php echo date('Y'); ?> EcoCusco Holdings S.A.C. Todos los derechos reservados.
+        &copy; <?php echo date('Y'); ?> EcoReciclaje Holdings S.A.C. Todos los derechos reservados.
       </div>
     </div>
 </footer>

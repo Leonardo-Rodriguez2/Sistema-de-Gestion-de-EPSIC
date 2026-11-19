@@ -19,7 +19,7 @@ $cantidadCasasActual = max(1, (int)($vivienda['cantidad_casas'] ?? 1));
 $esEstablecimiento = $tipoPredioActual !== 'Vivienda';
 $etiquetaPredio = tipo_predio_etiqueta($tipoPredioActual);
 
-$title = "Editar {$etiquetaPredio} - EcoCusco";
+$title = "Editar {$etiquetaPredio} - EcoReciclaje";
 $header_title = "Editar {$etiquetaPredio}";
 $header_subtitle = "Modifica los datos del predio #" . $vivienda['id'];
 
@@ -72,7 +72,7 @@ ob_start();
                 <div class="form-group" id="campo_cantidad_casas" style="<?= $tipoPredioActual === 'Urbanizacion' ? '' : 'display:none;' ?>">
                     <label>Cantidad de casas</label>
                     <input type="number" name="cantidad_casas" id="cantidad_casas_field" step="1" min="1" max="100000" value="<?= $cantidadCasasActual ?>" <?= $tipoPredioActual === 'Urbanizacion' ? '' : 'disabled' ?>>
-                    <small style="font-size:10px; color:#9CA3AF; font-weight:600;">Una tarifa por casa en un solo pago mensual. Ej.: 4 casas × Bs. 3 = Bs. 12.</small>
+                    <small style="font-size:10px; color:#9CA3AF; font-weight:600;">Una tarifa por casa en un solo pago mensual. Ej.: 4 casas × US$ 3 = US$ 12 (el equivalente en Bs. se muestra según la tasa del barrio).</small>
                 </div>
             </div>
             <small style="font-size:10px; color:#6B7280;">El precio de cada tipo de predio se define en <strong>Configuración de Pagos</strong> del barrio.</small>

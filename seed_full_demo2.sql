@@ -49,10 +49,10 @@ ALTER TABLE usuarios AUTO_INCREMENT = 6;
 
 -- Barrios
 INSERT INTO barrios (nombre, ciudad, codigo_postal) VALUES
-('Barrio San Blas', 'Cusco', '08003'),
-('Santa Ana', 'Cusco', '08004'),
-('Wanchaq', 'Cusco', '08006'),
-('Santiago', 'Cusco', '08001');
+('Barrio San Blas', '', '08003'),
+('Santa Ana', '', '08004'),
+('Wanchaq', '', '08006'),
+('Santiago', '', '08001');
 
 -- Calles
 INSERT INTO calles (nombre, barrio_id) VALUES

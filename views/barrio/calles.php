@@ -29,7 +29,7 @@ $callesStmt = $pdo->prepare("SELECT c.*,
 $callesStmt->execute([$mes_actual, $anio_actual, $barrio_info['id']]);
 $calles = $callesStmt->fetchAll(PDO::FETCH_ASSOC);
 
-$title = "Lista de Calles - EcoCusco";
+$title = "Lista de Calles - EcoReciclaje";
 $header_title = "Calles en " . htmlspecialchars($barrio_info['nombre']);
 $header_subtitle = "Monitorea el progreso de recaudación de cada calle en tu barrio.";
 

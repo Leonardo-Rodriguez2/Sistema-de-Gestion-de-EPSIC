@@ -2,10 +2,305 @@
 
 require_once __DIR__ . '/validacion.php';
 
+/* =============================================================
+ * Monedas del sistema
+ * -------------------------------------------------------------
+ * Todos los montos se guardan en DÓLARES (US$). Cada barrio define
+ * cuántos bolívares vale 1 dólar en su configuración, y ese valor
+ * se usa para mostrar siempre ambos importes en pantalla.
+ * ============================================================= */
+
+/** Tasa provisional de emergencia (solo si no hay BD ni internet). */
+const TASA_BOLIVAR_PREDETERMINADA = 130.00;
+
+/** Tiempo de validez de la tasa descargada antes de volver a consultarla. */
+const TASA_BOLIVAR_TTL_SEGUNDOS = 10800; // 3 horas
+
+/**
+ * Barrio asociado al usuario en sesión (encargado de barrio o de calle).
+ * Devuelve 0 cuando no puede determinarse (roles globales).
+ */
+function barrio_id_actual($pdo = null) {
+    static $barrioCache = null;
+    if ($barrioCache !== null) return $barrioCache;
+
+    if ($pdo === null) {
+        global $pdo;
+    }
+    if (!$pdo instanceof \PDO) return 0;
+
+    if (session_status() === PHP_SESSION_NONE && !headers_sent()) {
+        session_start();
+    }
+    $sid = $_SESSION['active_sid'] ?? 'main';
+    $user_id = (int)($_SESSION['identities'][$sid]['user_id'] ?? $_SESSION['user_id'] ?? 0);
+
+    $barrioCache = 0;
+    if ($user_id > 0) {
+        $stmt = $pdo->prepare("SELECT barrio_id FROM detalles_encargado_barrio WHERE usuario_id = ? LIMIT 1");
+        $stmt->execute([$user_id]);
+        $barrioCache = (int)$stmt->fetchColumn();
+
+        if ($barrioCache === 0) {
+            $stmt = $pdo->prepare("SELECT c.barrio_id FROM detalles_encargado_calle dc
+                                   JOIN calles c ON c.id = dc.calle_id
+                                   WHERE dc.usuario_id = ? LIMIT 1");
+            $stmt->execute([$user_id]);
+            $barrioCache = (int)$stmt->fetchColumn();
+        }
+    }
+    if ($barrioCache === 0) {
+        $barrioCache = (int)$pdo->query("SELECT barrio_id FROM configuraciones_barrio
+                                         WHERE precio_bolivar IS NOT NULL AND precio_bolivar > 0
+                                         ORDER BY barrio_id LIMIT 1")->fetchColumn();
+    }
+    return $barrioCache;
+}
+
+/**
+ * Precio del bolívar (bolívares por 1 US$) configurado para un barrio.
+ * Si no se indica barrio se usa el de la sesión o el primero configurado.
+ */
+function tasa_bolivar($pdo = null, $barrio_id = null) {
+    // La caché es global para poder invalidarla cuando se actualiza la tasa.
+    $cache =& $GLOBALS['tasa_bolivar_cache'];
+    if (!is_array($cache)) $cache = [];
+
+    if ($pdo === null) {
+        global $pdo;
+    }
+    if (!$pdo instanceof \PDO) return TASA_BOLIVAR_PREDETERMINADA;
+
+    if ($barrio_id === null) {
+        $barrio_id = barrio_id_actual($pdo);
+    }
+    $key = (int)$barrio_id;
+    if (!array_key_exists($key, $cache)) {
+        $valor = null;
+        if ($key > 0) {
+            $stmt = $pdo->prepare("SELECT precio_bolivar FROM configuraciones_barrio WHERE barrio_id = ?");
+            $stmt->execute([$key]);
+            $valor = $stmt->fetchColumn();
+        }
+        if ($valor === false || $valor === null || (float)$valor <= 0) {
+            $valor = $pdo->query("SELECT precio_bolivar FROM configuraciones_barrio
+                                  WHERE precio_bolivar IS NOT NULL AND precio_bolivar > 0
+                                  ORDER BY barrio_id LIMIT 1")->fetchColumn();
+        }
+        $cache[$key] = ($valor === false || $valor === null || (float)$valor <= 0)
+            ? TASA_BOLIVAR_PREDETERMINADA
+            : (float)$valor;
+    }
+    return $cache[$key];
+}
+
+/**
+ * Descarga el contenido de una URL usando cURL (o file_get_contents como
+ * alternativa). Nunca lanza excepciones: devuelve null si falla.
+ */
+function tasa_bolivar_http_get($url, $timeout = 5) {
+    if (function_exists('curl_init')) {
+        $ch = curl_init($url);
+        curl_setopt_array($ch, [
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_TIMEOUT        => $timeout,
+            CURLOPT_CONNECTTIMEOUT => $timeout,
+            CURLOPT_FOLLOWLOCATION => true,
+            CURLOPT_USERAGENT      => 'EcoReciclaje/1.0',
+            CURLOPT_SSL_VERIFYPEER => true,
+        ]);
+        $body = curl_exec($ch);
+        $codigo = (int)curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        curl_close($ch);
+        if ($body === false || $codigo < 200 || $codigo >= 300) return null;
+        return $body;
+    }
+
+    if (ini_get('allow_url_fopen')) {
+        $ctx = stream_context_create([
+            'http' => ['timeout' => $timeout, 'user_agent' => 'EcoReciclaje/1.0'],
+        ]);
+        $body = @file_get_contents($url, false, $ctx);
+        return $body === false ? null : $body;
+    }
+
+    return null;
+}
+
+/**
+ * Consulta el precio USD/VES en APIs públicas. Prueba varias fuentes y
+ * devuelve la primera válida: ['tasa', 'fuente', 'fecha'] o null.
+ */
+function tasa_bolivar_consultar_api($timeout = 5) {
+    $fuentes = [
+        [
+            'nombre' => 'ExchangeRate-API',
+            'url'    => 'https://open.er-api.com/v6/latest/USD',
+            'ruta'   => ['rates', 'VES'],
+        ],
+        [
+            'nombre' => 'Currency API',
+            'url'    => 'https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@latest/v1/currencies/usd.json',
+            'ruta'   => ['usd', 'ves'],
+        ],
+    ];
+
+    foreach ($fuentes as $fuente) {
+        $cuerpo = tasa_bolivar_http_get($fuente['url'], $timeout);
+        if ($cuerpo === null) continue;
+
+        $datos = json_decode($cuerpo, true);
+        if (!is_array($datos)) continue;
+
+        $valor = $datos;
+        foreach ($fuente['ruta'] as $clave) {
+            if (!is_array($valor) || !array_key_exists($clave, $valor)) {
+                $valor = null;
+                break;
+            }
+            $valor = $valor[$clave];
+        }
+        $tasa = (float)$valor;
+        if ($tasa < 1 || $tasa > 100000000) continue;
+
+        return [
+            'tasa'   => round($tasa, 4),
+            'fuente' => $fuente['nombre'],
+            'fecha'  => (string)($datos['time_last_update_utc'] ?? $datos['date'] ?? date('Y-m-d H:i:s')),
+        ];
+    }
+
+    return null;
+}
+
+/**
+ * Actualiza automáticamente la tasa USD/VES guardada en la BD.
+ *
+ * Respeta un periodo de validez (TASA_BOLIVAR_TTL_SEGUNDOS) para no consultar
+ * internet en cada página. Con $forzar = true descarga de inmediato.
+ * Si falla la conexión, conserva el valor anterior sin interrumpir el sistema.
+ *
+ * @return array ok, actualizado, tasa, fuente, mensaje
+ */
+function tasa_bolivar_actualizar($pdo = null, $forzar = false) {
+    static $resultado = null;
+    if ($resultado !== null && !$forzar) return $resultado;
+
+    if ($pdo === null) {
+        global $pdo;
+    }
+    if (!$pdo instanceof \PDO) {
+        return ['ok' => false, 'actualizado' => false, 'mensaje' => 'Sin conexión a la base de datos.'];
+    }
+
+    try {
+        $auto = (int)$pdo->query("SELECT COUNT(*) FROM configuraciones_barrio WHERE tasa_automatica = 1")->fetchColumn();
+        if ($auto === 0) {
+            return $resultado = [
+                'ok' => false, 'actualizado' => false,
+                'mensaje' => 'La actualización automática está desactivada.',
+            ];
+        }
+
+        if (!$forzar) {
+            $ultima = $pdo->query("SELECT MAX(precio_bolivar_actualizado_en)
+                                   FROM configuraciones_barrio WHERE tasa_automatica = 1")->fetchColumn();
+            if ($ultima && (time() - strtotime((string)$ultima)) < TASA_BOLIVAR_TTL_SEGUNDOS) {
+                $vigente = (float)$pdo->query("SELECT precio_bolivar FROM configuraciones_barrio
+                                               WHERE tasa_automatica = 1 ORDER BY barrio_id LIMIT 1")->fetchColumn();
+                return $resultado = [
+                    'ok' => true, 'actualizado' => false, 'tasa' => $vigente,
+                    'mensaje' => 'Tasa vigente.',
+                ];
+            }
+        }
+    } catch (\PDOException $e) {
+        return ['ok' => false, 'actualizado' => false, 'mensaje' => 'No se pudo consultar la tasa guardada.'];
+    }
+
+    $api = tasa_bolivar_consultar_api();
+    if ($api === null) {
+        return $resultado = [
+            'ok' => false, 'actualizado' => false,
+            'mensaje' => 'No se pudo obtener la tasa desde internet. Se conserva el valor anterior.',
+        ];
+    }
+
+    try {
+        $pdo->beginTransaction();
+
+        $upd = $pdo->prepare("UPDATE configuraciones_barrio
+                              SET precio_bolivar = ?,
+                                  precio_bolivar_actualizado_en = NOW(),
+                                  precio_bolivar_fuente = ?
+                              WHERE tasa_automatica = 1");
+        $upd->execute([$api['tasa'], $api['fuente']]);
+
+        // Los barrios que aún no tienen fila de configuración también deben
+        // mostrar la tasa vigente.
+        $ins = $pdo->prepare("INSERT INTO configuraciones_barrio
+                (barrio_id, cuota_mensual, multa_renovacion, precio_bolivar,
+                 precio_bolivar_actualizado_en, precio_bolivar_fuente,
+                 fecha_limite_pago, tasa_automatica)
+             SELECT b.id, 10.00, 5.00, ?, NOW(), ?, LAST_DAY(CURDATE()), 1
+               FROM barrios b
+               LEFT JOIN configuraciones_barrio c ON c.barrio_id = b.id
+              WHERE c.id IS NULL");
+        $ins->execute([$api['tasa'], $api['fuente']]);
+
+        $pdo->commit();
+    } catch (\Throwable $e) {
+        if ($pdo->inTransaction()) $pdo->rollBack();
+        return $resultado = [
+            'ok' => false, 'actualizado' => false,
+            'mensaje' => 'No se pudo guardar la tasa automática.',
+        ];
+    }
+
+    $GLOBALS['tasa_bolivar_cache'] = [];
+    $resultado = [
+        'ok' => true,
+        'actualizado' => true,
+        'tasa' => $api['tasa'],
+        'fuente' => $api['fuente'],
+        'fecha_api' => $api['fecha'],
+        'mensaje' => 'Tasa actualizada: US$ 1 = Bs. ' . number_format($api['tasa'], 2, '.', ',')
+                   . ' (' . $api['fuente'] . ').',
+    ];
+    return $resultado;
+}
+
+/** Texto del importe en dólares. */
+function usd($monto) {
+    return 'US$ ' . number_format((float)$monto, 2, '.', ',');
+}
+
+/** Convierte un monto en dólares a bolívares con la tasa indicada. */
+function bolivares($monto, $tasa = null) {
+    if ($tasa === null) $tasa = tasa_bolivar();
+    return round((float)$monto * (float)$tasa, 2);
+}
+
+/** Texto del importe en bolívares (el parámetro siempre está en US$). */
+function bs($monto, $tasa = null) {
+    return 'Bs. ' . number_format(bolivares($monto, $tasa), 2, '.', ',');
+}
+
+/** Texto con ambos importes: dólares y bolívares. */
+function monto($monto, $tasa = null) {
+    return usd($monto) . ' / ' . bs($monto, $tasa);
+}
+
+/** Versión HTML del importe, con los bolívares en una segunda línea. */
+function monto_html($monto, $tasa = null) {
+    return '<span class="cur-usd">' . usd($monto) . '</span><br>'
+         . '<span class="cur-bs">' . bs($monto, $tasa) . '</span>';
+}
+
 function check_dashboard_access($allowed_roles = [1]) {
     global $pdo;
     
-    if (session_status() === PHP_SESSION_NONE) {
+    if (session_status() === PHP_SESSION_NONE && !headers_sent()) {
         session_start();
     }
 
@@ -113,12 +408,15 @@ function monto_predio_efectivo($tipo_predio, $cantidad_casas, array $config) {
  */
 function etiqueta_monto_predio($tipo_predio, $cantidad_casas, array $config) {
     $monto = monto_predio_efectivo($tipo_predio, $cantidad_casas, $config);
+    $tasa = (float)($config['precio_bolivar'] ?? 0) > 0
+        ? (float)$config['precio_bolivar']
+        : tasa_bolivar();
     if ($tipo_predio === 'Urbanizacion') {
         $porCasa = (float)($config['precio_urbanizacion'] ?? $config['cuota_mensual'] ?? 10.00);
         $casas = max(1, (int)$cantidad_casas);
-        return $casas . ' casas × Bs. ' . number_format($porCasa, 2) . ' = Bs. ' . number_format($monto, 2);
+        return $casas . ' casas × ' . usd($porCasa) . ' = ' . monto($monto, $tasa);
     }
-    return 'Bs. ' . number_format($monto, 2);
+    return monto($monto, $tasa);
 }
 
 /**
@@ -216,7 +514,7 @@ function reporte_encabezado_impresion($titulo, $subtitulo = '', array $meta = []
     }
 
     $html = '<div class="report-print-head">';
-    $html .= '<div class="report-print-brand">EPSIC · EcoCusco</div>';
+    $html .= '<div class="report-print-brand">EPSIC · EcoReciclaje</div>';
     $html .= '<h2>' . htmlspecialchars((string)$titulo, ENT_QUOTES, 'UTF-8') . '</h2>';
     if ($subtitulo !== '') {
         $html .= '<p class="report-print-subtitle">' . htmlspecialchars((string)$subtitulo, ENT_QUOTES, 'UTF-8') . '</p>';

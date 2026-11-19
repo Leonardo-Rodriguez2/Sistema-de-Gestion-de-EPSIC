@@ -49,7 +49,7 @@ $anioActual = date('Y');
 $lbStatus->execute([$barrio_info['id'], $mesActual, $anioActual]);
 $lote_barrio_estado = $lbStatus->fetchColumn() ?: '—';
 
-$title = "Dashboard Barrio - EcoCusco";
+$title = "Dashboard Barrio - EcoReciclaje";
 $header_title = "Panel de Barrio: " . htmlspecialchars($barrio_info['nombre']);
 $header_subtitle = "Gestión centralizada de calles, pagos y solicitudes.";
 

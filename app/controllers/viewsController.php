@@ -85,6 +85,10 @@ class viewsController extends viewsModel {
         $this->asegurarSolicitudesGestion();
         $this->asegurarRecepcionesResiduos();
 
+        // Mantener el precio del dólar en bolívares actualizado (máximo una
+        // descarga cada 3 horas; si falla internet se conserva el valor guardado).
+        \tasa_bolivar_actualizar($pdo);
+
         // 5.1 Validación centralizada de todos los formularios POST del área privada.
         // Si hay errores, se devuelve al formulario sin ejecutar la acción.
         if ($isPost) {

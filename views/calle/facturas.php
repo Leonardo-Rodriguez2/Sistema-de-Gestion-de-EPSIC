@@ -127,7 +127,7 @@ ob_start();
                 <div style="font-size:11px; color:#6B7280;">
                     🏙️ <?= htmlspecialchars($f['barrio_nombre']) ?> •
                     🏠 <?= $f['casas_pagadas'] ?>/<?= $f['total_casas'] ?> pag. •
-                    💰 Bs. <?= number_format($f['monto_recolectado'] ?? 0, 2) ?>
+                    💰 <?= monto($f['monto_recolectado'] ?? 0) ?>
                 </div>
             </div>
             <div style="display:flex; align-items:center; gap:8px;">
@@ -153,7 +153,7 @@ ob_start();
                     <div style="font-size:9px; color:#6B7280; text-transform:uppercase;">Morosas</div>
                 </div>
                 <div style="text-align:center; padding:8px; background:#F9FAFB; border-radius:6px;">
-                    <div style="font-size:18px; font-weight:800; color:#33485C;">Bs. <?= number_format($total_monto, 2) ?></div>
+                    <div style="font-size:18px; font-weight:800; color:#33485C;"><?= monto($total_monto) ?></div>
                     <div style="font-size:9px; color:#6B7280; text-transform:uppercase;">Total</div>
                 </div>
             </div>
@@ -179,12 +179,12 @@ ob_start();
                         <td><?php if ($v['estado_servicio']==='Activo'): ?><span style="padding:2px 6px; border-radius:8px; font-size:9px; font-weight:700; background:#E9EFF4; color:#33485C;">Activo</span><?php elseif ($v['estado_servicio']==='Suspendido'): ?><span style="padding:2px 6px; border-radius:8px; font-size:9px; font-weight:700; background:#F2EEE7; color:#6E5F45;">Suspendido</span><?php else: ?><?= $v['estado_servicio'] ?><?php endif; ?></td>
                         <td><?php if ($v['cobro_estado']==='Pagado'): ?><span style="color:#3E5C76; font-weight:700;">✅ Pagado</span><?php if ($v['fecha_emision']): ?><div style="font-size:9px; color:#9CA3AF;"><?= date('d/m/Y', strtotime($v['fecha_emision'])) ?></div><?php endif; ?><?php elseif ($v['cobro_estado']==='Pendiente'): ?><span style="color:#7A6A4F; font-weight:700;">⏳ Pendiente</span><?php else: ?><span style="color:#7A6A4F;">—</span><?php endif; ?></td>
                         <td style="font-size:10px; color:#6B7280;"><?= htmlspecialchars($v['referencia_pago'] ?? '—') ?></td>
-                        <td style="text-align:right; font-weight:700;"><?= $v['monto'] ? 'Bs. '.number_format($v['monto'], 2) : '—' ?></td>
+                        <td style="text-align:right; font-weight:700;"><?= $v['monto'] ? monto($v['monto']) : '—' ?></td>
                     </tr>
                     <?php endforeach; ?>
                     <tr class="total-row">
                         <td colspan="6" style="padding:8px; text-align:right;">TOTAL</td>
-                        <td style="padding:8px; text-align:right; font-size:13px;">Bs. <?= number_format($total_monto, 2) ?></td>
+                        <td style="padding:8px; text-align:right; font-size:13px;"><?= monto($total_monto) ?></td>
                     </tr>
                 </tbody>
             </table>

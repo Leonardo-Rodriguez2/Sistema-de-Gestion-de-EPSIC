@@ -37,7 +37,7 @@ $historial = $pdo->query(
      LIMIT 30"
 )->fetchAll(PDO::FETCH_ASSOC);
 
-$title = "Revisar Lotes - EcoCusco";
+$title = "Revisar Lotes - EcoReciclaje";
 $header_title = "Revisión de Lotes de Barrio";
 $header_subtitle = "Revisa, compara y aprueba los lotes enviados por los encargados de barrio.";
 
@@ -88,18 +88,18 @@ ob_start();
     <div style="display:grid; grid-template-columns:1fr 1fr 1fr 1fr; gap:12px; margin-bottom:16px;">
         <div style="background:#F9FAFB; padding:14px; border-radius:8px; text-align:center; border:1px solid #E5E7EB;">
             <div style="font-size:10px; color:#6B7280; text-transform:uppercase; font-weight:600; margin-bottom:4px;">Esperado</div>
-            <div style="font-size:22px; font-weight:800; color:#111827;">Bs. <?= number_format($lb['monto_total_esperado'],2) ?></div>
+            <div style="font-size:22px; font-weight:800; color:#111827;"><?= monto($lb['monto_total_esperado']) ?></div>
             <div style="font-size:10px; color:#9CA3AF; margin-top:2px;">de <?= $lb['total_calles'] ?? 0 ?> calles</div>
         </div>
         <div style="background:<?= $dif<0?'#F7F2F2':'#F4F6F8' ?>; padding:14px; border-radius:8px; text-align:center; border:1px solid <?= $dif<0?'#E8D8D8':'#D6E1EA' ?>;">
             <div style="font-size:10px; color:#6B7280; text-transform:uppercase; font-weight:600; margin-bottom:4px;">Recolectado</div>
-            <div style="font-size:22px; font-weight:800; color:<?= $dif<0?'#8A5A5A':'#3E5C76' ?>;">Bs. <?= number_format($lb['monto_total_recolectado'],2) ?></div>
+            <div style="font-size:22px; font-weight:800; color:<?= $dif<0?'#8A5A5A':'#3E5C76' ?>;"><?= monto($lb['monto_total_recolectado']) ?></div>
             <div style="font-size:10px; color:#9CA3AF; margin-top:2px;"><?= $lb['calles_completas'] ?? 0 ?> calles completas</div>
         </div>
         <div style="background:<?= $dif<0?'#F2EEE7':'#EEF2F6' ?>; padding:14px; border-radius:8px; text-align:center; border:1px solid <?= $dif<0?'#E8E0CF':'#CDDCE8' ?>;">
             <div style="font-size:10px; color:#6B7280; text-transform:uppercase; font-weight:600; margin-bottom:4px;">Diferencia</div>
             <div style="font-size:22px; font-weight:800; color:<?= $dif<0?'#7A6A4F':'#33485C' ?>;">
-                <?= $dif >= 0 ? '+' : '' ?>Bs. <?= number_format(abs($dif),2) ?>
+                <?= $dif >= 0 ? '+' : '' ?><?= monto(abs($dif)) ?>
             </div>
             <div style="font-size:10px; color:<?= $dif<0?'#7A6A4F':'#33485C' ?>; margin-top:2px;"><?= $dif>=0?'Sobrante':'Faltante' ?></div>
         </div>
@@ -177,7 +177,7 @@ ob_start();
                         <span title="Pagadas"><strong style="color:#3E5C76;"><?= $cl['casas_pagadas'] ?></strong> pagadas</span>
                         <span title="Sin pagar" style="color:#8A5A5A;"><strong><?= $sinPagar ?></strong> sin pagar</span>
                         <span title="Exoneradas" style="color:#4A5568;"><strong><?= $cl['viviendas_exentas'] ?? 0 ?></strong> exentas</span>
-                        <span style="font-weight:700; color:#111827;">Bs. <?= number_format($cl['monto_recolectado'],2) ?></span>
+                        <span style="font-weight:700; color:#111827;"><?= monto($cl['monto_recolectado']) ?></span>
                     </div>
                 </div>
 
@@ -277,7 +277,7 @@ ob_start();
                                     <?php endif; ?>
                                 </td>
                                 <td style="padding:5px 8px; text-align:right; font-weight:700; color:<?= $pagado?'#3E5C76':($exenta?'#4A5568':($suspendida?'#9CA3AF':'#8A5A5A')) ?>;">
-                                    <?php if($suspendida): ?>—<?php elseif($exenta): ?>Exenta<?php else: ?>Bs. <?= number_format($cs['monto'] ?? 0,2) ?><?php endif; ?>
+                                    <?php if($suspendida): ?>—<?php elseif($exenta): ?>Exenta<?php else: ?><?= monto($cs['monto'] ?? 0) ?><?php endif; ?>
                                 </td>
                             </tr>
                             <?php endforeach; ?>
@@ -340,7 +340,7 @@ ob_start();
                 <tr style="border-bottom:1px solid #F3F4F6;">
                     <td style="padding:10px; font-weight:600;"><?= htmlspecialchars($h['barrio_nombre']) ?></td>
                     <td style="padding:10px;"><?= $meses_nombres[$h['periodo_mes']] ?> <?= $h['periodo_anio'] ?></td>
-                    <td style="padding:10px; font-weight:700; color:#3E5C76;">Bs. <?= number_format($h['monto_total_recolectado'],2) ?></td>
+                    <td style="padding:10px; font-weight:700; color:#3E5C76;"><?= monto($h['monto_total_recolectado']) ?></td>
                     <td style="padding:10px;">
                         <?php if($h['estado']==='Aprobado'): ?>
                             <span style="background:#E9EFF4; color:#33485C; padding:2px 8px; border-radius:10px; font-size:10px; font-weight:600;">✅ Aprobado</span>

@@ -18,7 +18,7 @@ $operativoStmt = $pdo->query("
 ");
 $operativo = $operativoStmt->fetch(PDO::FETCH_ASSOC);
 
-$title = "Dashboard Personal - EcoCusco";
+$title = "Dashboard Personal - EcoReciclaje";
 $header_title = "Panel Operativo";
 $header_subtitle = "Bienvenido, " . htmlspecialchars($user['nombre']) . " [" . htmlspecialchars($cargo) . "]";
 

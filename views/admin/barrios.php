@@ -34,7 +34,7 @@ foreach ($barrios as $b) {
         $b['lider_comunidad'] ?? '',
         $b['limite_referencia'] ?? '',
         (int)($b['total_viviendas'] ?? 0),
-        number_format((float)($b['total_recaudado'] ?? 0), 2, '.', ','),
+        monto((float)($b['total_recaudado'] ?? 0)),
         'Activo',
     ];
 }
@@ -47,7 +47,7 @@ reporte_exportar_si_solicitado(
     'Catálogo territorial y rendimiento de recaudación'
 );
 
-$title = "Gestión de Barrios - EcoCusco";
+$title = "Gestión de Barrios - EcoReciclaje";
 $header_title = "Barrios y Comunidades";
 $header_subtitle = "Administra las zonas de recolección y monitorea su recaudación.";
 
@@ -105,7 +105,7 @@ ob_start();
                                 <td><?= htmlspecialchars($b['lider_comunidad'] ?? 'Sin asignar') ?></td>
                                 <td style="max-width:220px;"><?= nl2br(htmlspecialchars($b['limite_referencia'] ?? '')) ?: '<span style="color:#9CA3AF;">—</span>' ?></td>
                                 <td><?= $b['total_viviendas'] ?> casas</td>
-                                <td style="font-weight: 700; color: #4C6E91;">Bs. <?= number_format($b['total_recaudado'] ?? 0, 2) ?></td>
+                                <td style="font-weight: 700; color: #4C6E91;"><?= monto($b['total_recaudado'] ?? 0) ?></td>
                                 <td><span class="badge pagado">Activo</span></td>
                                 <td><a href="router.php?page=barrio_editar&id=<?= $b['id'] ?>" class="btn-edit">✏️ Editar</a></td>
                             </tr>
@@ -129,7 +129,7 @@ ob_start();
                         $total = array_sum(array_column($barrios, 'total_recaudado'));
                         $promedio = count($barrios) > 0 ? $total / count($barrios) : 0;
                     ?>
-                    <span style="font-size: 24px; font-weight: 700; color: #4C6E91;">Bs. <?= number_format($promedio, 2) ?></span>
+                    <span style="font-size: 24px; font-weight: 700; color: #4C6E91;"><?= monto($promedio) ?></span>
                 </div>
             </div>
         </div>

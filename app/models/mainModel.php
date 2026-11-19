@@ -89,6 +89,15 @@ class mainModel {
             ['precio_empresa',      'DECIMAL(10,2) DEFAULT NULL'],
             ['precio_urbanizacion', 'DECIMAL(10,2) DEFAULT NULL'],
             ['precio_otro',         'DECIMAL(10,2) DEFAULT NULL'],
+            // Pago único por recojo especial (eventos, desmonte, electrónicos).
+            ['precio_especial',     'DECIMAL(10,2) NOT NULL DEFAULT 20.00'],
+            // Bolívares por cada dólar. Se usa para mostrar todos los importes
+            // en US$ y en Bs. a la vez.
+            ['precio_bolivar',              'DECIMAL(14,4) NOT NULL DEFAULT 130.0000'],
+            // Control de la tasa obtenida automáticamente desde internet.
+            ['precio_bolivar_actualizado_en', 'DATETIME NULL'],
+            ['precio_bolivar_fuente',         'VARCHAR(60) NULL'],
+            ['tasa_automatica',               'TINYINT(1) NOT NULL DEFAULT 1'],
         ];
         foreach ($columnasConfigBarrio as [$col, $def]) {
             $chk = $pdo->prepare("SHOW COLUMNS FROM configuraciones_barrio LIKE ?");
@@ -99,6 +108,22 @@ class mainModel {
         }
         // Valor inicial para barrios que aún nunca guardaron la configuración.
         $pdo->exec("UPDATE configuraciones_barrio SET fecha_limite_pago = LAST_DAY(CURDATE()) WHERE fecha_limite_pago IS NULL");
+        $pdo->exec("UPDATE configuraciones_barrio SET precio_bolivar = 130.0000 WHERE precio_bolivar IS NULL OR precio_bolivar <= 0");
+
+        // --- Columnas para las cotizaciones enviadas desde el portal público ---
+        $columnasSolicitudes = [
+            ['plan',               'VARCHAR(80) DEFAULT NULL'],
+            ['cantidad',           'INT(11) DEFAULT NULL'],
+            ['monto_estimado_usd', 'DECIMAL(10,2) DEFAULT NULL'],
+            ['detalles',           'TEXT NULL'],
+        ];
+        foreach ($columnasSolicitudes as [$col, $def]) {
+            $chk = $pdo->prepare("SHOW COLUMNS FROM solicitudes_servicio LIKE ?");
+            $chk->execute([$col]);
+            if ($chk->rowCount() === 0) {
+                $pdo->exec("ALTER TABLE solicitudes_servicio ADD COLUMN `{$col}` {$def}");
+            }
+        }
 
         // --- Columnas en cobros ---
         $columnasCobros = [

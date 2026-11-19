@@ -80,7 +80,7 @@ ob_start();
             <div class="about-image">
                 <img src="/reciclaje/img/servicio.jpeg" alt="Reciclaje EPSIC">
                 <div class="badge-float">
-                    <span><?php echo isset($totalReportes) ? $totalReportes : '100+'; ?></span>
+                    <span>100+</span>
                     <span style="font-size: 12px; font-weight: normal;">Zonas Atendidas</span>
                 </div>
             </div>
@@ -109,7 +109,7 @@ ob_start();
         <!-- Historia -->
         <div class="history-section">
             <h2 style="font-size: 32px; color: var(--primary-dark); margin-bottom: 20px;">Nuestra Historia</h2>
-            <p style="color: var(--text-gray); line-height: 1.8; max-width: 800px; margin: 0 auto;">Nacimos hace más de 12 años en Cusco y hoy somos una de las principales flotas privadas de recolección, al servicio de condominios, municipalidades y comercios.</p>
+            <p style="color: var(--text-gray); line-height: 1.8; max-width: 800px; margin: 0 auto;">Nacimos hace más de 12 años y hoy somos una de las principales flotas de recolección, al servicio de barrios, condominios, municipalidades y comercios.</p>
         </div>
 
         <!-- Equipo -->
@@ -146,7 +146,7 @@ ob_start();
 
         <div class="cta-section">
             <h2>¿Es usted jefe o encargado de un Barrio o Condominio?</h2>
-            <p>Solicite precios corporativos mensuales y reportes para todas sus viviendas.</p>
+            <p>Solicite precios corporativos mensuales para todas sus viviendas.</p>
             
             <?php if(!empty($mensaje_form)): ?>
                 <div style="background: #E9EFF4; color: #33485C; padding: 15px; border-radius: 8px; margin-bottom: 20px; font-weight: 600;">
@@ -157,6 +157,11 @@ ob_start();
                     <i class="fas fa-triangle-exclamation"></i> <?php echo htmlspecialchars($error_form); ?>
                 </div>
             <?php endif; ?>
+
+            <div style="background:#EEF4F8; border:1px solid #D6E2EC; border-left:5px solid #4C6E91; padding:14px 18px; border-radius:8px; margin-bottom:22px; color:#33485C; font-size:14px;">
+                <strong>¿Quieres ver un estimado antes?</strong> Usa la calculadora de cotización para conocer el monto aproximado en dólares y bolívares.
+                <a href="cotizacion.php" style="color:#4C6E91; font-weight:700; text-decoration:underline;">Calcular mi cotización</a>
+            </div>
 
             <form method="POST" action="nosotros.php">
                 <input type="hidden" name="form_type" value="solicitud">
@@ -194,7 +199,7 @@ ob_start();
                 <button type="submit" class="cta-btn">Solicitar Cotización Gratuita <i class="fas fa-arrow-right"></i></button>
             </form>
             
-            <div style="margin-top: 25px; font-size: 14px; opacity: 0.6;">O llame al +51 000--000000 de Lunes a Viernes (08:00 - 18:00)</div>
+            <div style="margin-top: 25px; font-size: 14px; opacity: 0.6;">O comunícate al +51 084 254 365 o ventas@ecoreciclaje.com · Lunes a Viernes (8:00 a.m. - 6:00 p.m.)</div>
         </div>
     </main>
 

@@ -88,7 +88,7 @@ reporte_exportar_si_solicitado(
     'Altas de viviendas enviadas por los encargados de calle'
 );
 
-$title = "Solicitudes de Registro - EcoCusco";
+$title = "Solicitudes de Registro - EcoReciclaje";
 $header_title = "Solicitudes de Registro";
 $header_subtitle = "Revisa y aprueba las solicitudes de alta de viviendas enviadas por los encargados de calle.";
 

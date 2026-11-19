@@ -411,10 +411,13 @@ if (!function_exists('validar_accion_post')) {
         if ($tiene('multa_renovacion')) {
             $add(validacion_monto($get('multa_renovacion'), 'La multa de renovación', 0, 999999999.99, true));
         }
-        foreach (['precio_comercio', 'precio_tienda', 'precio_empresa', 'precio_urbanizacion', 'precio_otro'] as $campoPrecio) {
+        foreach (['precio_comercio', 'precio_tienda', 'precio_empresa', 'precio_urbanizacion', 'precio_otro', 'precio_especial'] as $campoPrecio) {
             if ($tiene($campoPrecio)) {
                 $add(validacion_monto($get($campoPrecio), 'La tarifa de ' . str_replace('precio_', '', $campoPrecio), 0.01, 999999999.99, true));
             }
+        }
+        if ($tiene('precio_bolivar')) {
+            $add(validacion_monto($get('precio_bolivar'), 'El precio del bolívar', 0.01, 999999999.99, true));
         }
         if ($tiene('cantidad_casas')) {
             $add(validacion_entero($get('cantidad_casas'), 'La cantidad de casas', 1, 100000, true));
@@ -540,6 +543,8 @@ if (!function_exists('validar_accion_post')) {
                 'precio_empresa'     => 'Precio de empresa',
                 'precio_urbanizacion' => 'Precio por casa de urbanización',
                 'precio_otro'        => 'Precio de otros predios',
+                'precio_especial'    => 'Precio de recojo especial',
+                'precio_bolivar'     => 'Precio del bolívar (Bs. por US$)',
                 'multa_renovacion'   => 'Multa de renovación',
                 'fecha_limite_pago'  => 'Fecha límite de pago',
             ],

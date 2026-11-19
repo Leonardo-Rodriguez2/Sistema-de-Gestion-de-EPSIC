@@ -105,14 +105,14 @@ $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
 $gran_total = 0;
 foreach ($rows as $r) $gran_total += $r['total'];
 $filasRecaudacion = array_map(static function ($r) use ($meses) {
-    return [$meses[(int)$r['mes']] . ' ' . $r['anio'], $r['barrio'], $r['transacciones'], number_format((float)$r['total'], 2, '.', ',')];
+    return [$meses[(int)$r['mes']] . ' ' . $r['anio'], $r['barrio'], $r['transacciones'], monto((float)$r['total'])];
 }, $rows);
 reporte_exportar_si_solicitado(
     'recaudacion_periodo',
     'Recaudación por periodo',
     ['Periodo', 'Barrio', 'Transacciones', 'Total'],
     $filasRecaudacion,
-    ['Total recaudado' => 'Bs. ' . number_format($gran_total, 2, '.', ',')],
+    ['Total recaudado' => monto($gran_total)],
     'Reporte general de recaudación'
 );
 ?>
@@ -144,7 +144,7 @@ reporte_exportar_si_solicitado(
     </form>
   </div>
   <div style="font-size:24px; font-weight:800; color:#3E5C76; margin-bottom:15px;">
-    Total recaudado: Bs. <?= number_format($gran_total, 2) ?>
+    Total recaudado: <?= monto($gran_total) ?>
   </div>
   <?php if (empty($rows)): ?>
     <div style="text-align:center; padding:30px; color:#9CA3AF;">Sin datos para el periodo seleccionado.</div>
@@ -160,7 +160,7 @@ reporte_exportar_si_solicitado(
           <td style="padding:10px;"><?= $meses[$r['mes']] ?> <?= $r['anio'] ?></td>
           <td style="padding:10px;"><?= htmlspecialchars($r['barrio']) ?></td>
           <td style="padding:10px;"><?= $r['transacciones'] ?></td>
-          <td style="padding:10px; font-weight:700; color:#3E5C76;">Bs. <?= number_format($r['total'], 2) ?></td>
+          <td style="padding:10px; font-weight:700; color:#3E5C76;"><?= monto($r['total']) ?></td>
         </tr>
         <?php endforeach; ?>
       </tbody>
@@ -227,7 +227,7 @@ if ($pagosViviendas) {
     }
 }
 $filasPagos = array_map(static function ($p) {
-    return [$p['barrio'], $p['calle'], $p['numero_casa'], $p['propietario'], formato_identificacion($p['cedula'] ?? '', $p['cedula_tipo'] ?? 'V', $p['otro_identificador'] ?? ''), $p['pagado'] ? 'Pagado' : 'Pendiente', number_format((float)$p['monto'], 2, '.', ',')];
+    return [$p['barrio'], $p['calle'], $p['numero_casa'], $p['propietario'], formato_identificacion($p['cedula'] ?? '', $p['cedula_tipo'] ?? 'V', $p['otro_identificador'] ?? ''), $p['pagado'] ? 'Pagado' : 'Pendiente', monto((float)$p['monto'])];
 }, $pagosViviendas);
 $modalClientes = [];
 foreach ($pagosViviendas as $p) {
@@ -266,7 +266,7 @@ reporte_exportar_si_solicitado(
   <p style="color:#6B7280;"><?= $meses[$pagoMes] ?> <?= $pagoAnio ?> · <?= count($pagosViviendas) ?> vivienda(s)</p>
   <div class="table-wrap"><table data-page-size="10" data-no-tools="true"><thead><tr><th>Barrio</th><th>Calle</th><th>Casa</th><th>Propietario</th><th>Cédula</th><th>Estado</th><th>Monto</th><th>Reporte</th></tr></thead><tbody>
   <?php if (!$pagosViviendas): ?><tr><td colspan="8" style="text-align:center;color:#9CA3AF;">No hay viviendas para los filtros seleccionados.</td></tr>
-  <?php else: foreach($pagosViviendas as $p): ?><tr><td><?= htmlspecialchars($p['barrio']) ?></td><td><?= htmlspecialchars($p['calle']) ?></td><td><?= htmlspecialchars($p['numero_casa']) ?></td><td><?= htmlspecialchars($p['propietario']) ?></td><td><?php $identificacion = formato_identificacion($p['cedula'] ?? '', $p['cedula_tipo'] ?? 'V', $p['otro_identificador'] ?? ''); ?><?= $identificacion !== '' ? htmlspecialchars($identificacion) : '—' ?></td><td><?= $p['pagado'] ? 'Pagado' : 'Pendiente' ?></td><td>Bs. <?= number_format((float)$p['monto'],2) ?></td><td><button type="button" class="btn-edit cliente-reporte-btn" data-vivienda-id="<?= (int)$p['vivienda_id'] ?>">Ver reporte</button></td></tr><?php endforeach; endif; ?>
+  <?php else: foreach($pagosViviendas as $p): ?><tr><td><?= htmlspecialchars($p['barrio']) ?></td><td><?= htmlspecialchars($p['calle']) ?></td><td><?= htmlspecialchars($p['numero_casa']) ?></td><td><?= htmlspecialchars($p['propietario']) ?></td><td><?php $identificacion = formato_identificacion($p['cedula'] ?? '', $p['cedula_tipo'] ?? 'V', $p['otro_identificador'] ?? ''); ?><?= $identificacion !== '' ? htmlspecialchars($identificacion) : '—' ?></td><td><?= $p['pagado'] ? 'Pagado' : 'Pendiente' ?></td><td><?= monto((float)$p['monto']) ?></td><td><button type="button" class="btn-edit cliente-reporte-btn" data-vivienda-id="<?= (int)$p['vivienda_id'] ?>">Ver reporte</button></td></tr><?php endforeach; endif; ?>
   </tbody></table></div>
 </div>
 <div id="clienteReporteModal" class="cliente-reporte-modal" aria-hidden="true">
@@ -332,7 +332,7 @@ body.cliente-reporte-open { overflow:hidden; }
       filas.innerHTML = '<tr><td colspan="4" style="text-align:center;color:#9CA3AF;">No hay historial de pagos.</td></tr>';
     } else {
       clienteActivo.historial.forEach(function (cobro) {
-        filas.insertAdjacentHTML('beforeend', '<tr><td>' + texto(meses[Number(cobro.mes)] + ' ' + cobro.anio) + '</td><td>Bs. ' + Number(cobro.monto || 0).toFixed(2) + '</td><td>' + texto(cobro.estado) + '</td><td>' + texto(cobro.fecha_emision) + '</td></tr>');
+        filas.insertAdjacentHTML('beforeend', '<tr><td>' + texto(meses[Number(cobro.mes)] + ' ' + cobro.anio) + '</td><td>' + fmtMonto(cobro.monto || 0) + '</td><td>' + texto(cobro.estado) + '</td><td>' + texto(cobro.fecha_emision) + '</td></tr>');
       });
     }
     modal.classList.add('is-open');
@@ -349,7 +349,7 @@ body.cliente-reporte-open { overflow:hidden; }
     if (!clienteActivo) return;
     var html = '<table><tr><th>Periodo</th><th>Monto</th><th>Estado</th><th>Fecha de emisión</th></tr>';
     clienteActivo.historial.forEach(function (c) {
-      html += '<tr><td>' + meses[Number(c.mes)] + ' ' + c.anio + '</td><td>Bs. ' + Number(c.monto || 0).toFixed(2) + '</td><td>' + c.estado + '</td><td>' + (c.fecha_emision || '') + '</td></tr>';
+      html += '<tr><td>' + meses[Number(c.mes)] + ' ' + c.anio + '</td><td>' + fmtMonto(c.monto || 0) + '</td><td>' + c.estado + '</td><td>' + (c.fecha_emision || '') + '</td></tr>';
     });
     html += '</table>';
     var blob = new Blob(['\ufeff', '<html><meta charset="UTF-8"><body><h2>Reporte personal de ' + clienteActivo.propietario + '</h2>' + html + '</body></html>'], { type: 'application/vnd.ms-excel;charset=utf-8' });
@@ -406,7 +406,7 @@ $stmt = $pdo->prepare($sql);
 $stmt->execute($params);
 $morosos = $stmt->fetchAll(PDO::FETCH_ASSOC);
 $filasMorosos = array_map(static function ($m) {
-    return [$m['numero_casa'], $m['propietario'], formato_identificacion($m['cedula'] ?? '', $m['cedula_tipo'] ?? 'V', $m['otro_identificador'] ?? ''), $m['barrio'], $m['calle'], $m['meses_deuda'], number_format((float)$m['deuda_total'], 2, '.', ',')];
+    return [$m['numero_casa'], $m['propietario'], formato_identificacion($m['cedula'] ?? '', $m['cedula_tipo'] ?? 'V', $m['otro_identificador'] ?? ''), $m['barrio'], $m['calle'], $m['meses_deuda'], monto((float)$m['deuda_total'])];
 }, $morosos);
 reporte_exportar_si_solicitado(
     'casas_morosas',
@@ -454,7 +454,7 @@ reporte_exportar_si_solicitado(
           <td style="padding:10px;"><?= htmlspecialchars($m['barrio']) ?></td>
           <td style="padding:10px;"><?= htmlspecialchars($m['calle']) ?></td>
           <td style="padding:10px;"><?= $m['meses_deuda'] ?></td>
-          <td style="padding:10px; font-weight:700; color:#8A5A5A;">Bs. <?= number_format($m['deuda_total'], 2) ?></td>
+          <td style="padding:10px; font-weight:700; color:#8A5A5A;"><?= monto($m['deuda_total']) ?></td>
         </tr>
         <?php endforeach; ?>
       </tbody>
@@ -485,7 +485,7 @@ $lotesStmt = $pdo->prepare($lotesSql);
 $lotesStmt->execute($lotesParams);
 $lotes = $lotesStmt->fetchAll(PDO::FETCH_ASSOC);
 $filasLotes = array_map(static function ($l) {
-    return [$l['barrio_nombre'], $l['periodo_mes'] . '/' . $l['periodo_anio'], $l['estado'], number_format((float)$l['monto_esperado'], 2, '.', ','), number_format((float)$l['monto_total_recolectado'], 2, '.', ','), $l['numero_recibo'] ?? '', $l['fecha_envio'] ?? ''];
+    return [$l['barrio_nombre'], $l['periodo_mes'] . '/' . $l['periodo_anio'], $l['estado'], monto((float)$l['monto_esperado']), monto((float)$l['monto_total_recolectado']), $l['numero_recibo'] ?? '', $l['fecha_envio'] ?? ''];
 }, $lotes);
 reporte_exportar_si_solicitado(
     'lotes_barrio_cerrados',
@@ -529,8 +529,8 @@ reporte_exportar_si_solicitado(
           <td style="padding:10px; font-weight:700;"><?= htmlspecialchars($l['barrio_nombre']) ?></td>
           <td style="padding:10px;"><?= $meses[$l['periodo_mes']] ?> <?= $l['periodo_anio'] ?></td>
           <td style="padding:10px;"><span class="badge" style="background:<?= ($ec[$l['estado']]??'#6B7280') ?>22; color:<?= ($ec[$l['estado']]??'#6B7280') ?>;"><?= $l['estado'] ?></span></td>
-          <td style="padding:10px;">Bs. <?= number_format($l['monto_total_esperado'],2) ?></td>
-          <td style="padding:10px; font-weight:700; color:#3E5C76;">Bs. <?= number_format($l['monto_total_recolectado'],2) ?></td>
+          <td style="padding:10px;"><?= monto($l['monto_total_esperado']) ?></td>
+          <td style="padding:10px; font-weight:700; color:#3E5C76;"><?= monto($l['monto_total_recolectado']) ?></td>
           <td style="padding:10px;"><?= $l['numero_recibo'] ? htmlspecialchars($l['numero_recibo']) : '—' ?></td>
           <td style="padding:10px; font-size:12px; color:#6B7280;"><?= $l['fecha_envio'] ? date('d/m/Y', strtotime($l['fecha_envio'])) : '—' ?></td>
         </tr>
@@ -565,8 +565,8 @@ $g = $pdo->query("
 ")->fetch(PDO::FETCH_ASSOC);
 $filasGeneral = [[
     $g['activas'], $g['suspendidas'], $g['anuladas'], $g['barrios'], $g['calles'],
-    $g['usuarios'], $g['lotes_aprobados'], number_format((float)($g['total_aprobado'] ?? 0), 2, '.', ','),
-    number_format((float)($g['anual'] ?? 0), 2, '.', ',')
+    $g['usuarios'], $g['lotes_aprobados'], monto((float)($g['total_aprobado'] ?? 0)),
+    monto((float)($g['anual'] ?? 0))
 ]];
 reporte_exportar_si_solicitado(
     'resumen_general',
@@ -588,8 +588,8 @@ reporte_exportar_si_solicitado(
   <div class="card" style="text-align:center;"><div style="font-size:11px;color:#6B7280;">Calles</div><div style="font-size:28px;font-weight:800;color:#4C6E91;"><?= $g['calles'] ?></div></div>
   <div class="card" style="text-align:center;"><div style="font-size:11px;color:#6B7280;">Usuarios</div><div style="font-size:28px;font-weight:800;color:#4B5563;"><?= $g['usuarios'] ?></div></div>
   <div class="card" style="text-align:center;"><div style="font-size:11px;color:#6B7280;">Lotes Aprobados</div><div style="font-size:28px;font-weight:800;color:#3E5C76;"><?= $g['lotes_aprobados'] ?></div></div>
-  <div class="card" style="text-align:center;"><div style="font-size:11px;color:#6B7280;">Total Aprobado</div><div style="font-size:28px;font-weight:800;color:#3E5C76;">Bs. <?= number_format($g['total_aprobado']??0,0) ?></div></div>
-  <div class="card" style="text-align:center; grid-column: span 2;"><div style="font-size:11px;color:#6B7280;">Recaudación Anual (este año)</div><div style="font-size:28px;font-weight:800;color:#3E5C76;">Bs. <?= number_format($g['anual']??0,2) ?></div></div>
+  <div class="card" style="text-align:center;"><div style="font-size:11px;color:#6B7280;">Total Aprobado</div><div style="font-size:28px;font-weight:800;color:#3E5C76;"><?= monto($g['total_aprobado']??0) ?></div></div>
+  <div class="card" style="text-align:center; grid-column: span 2;"><div style="font-size:11px;color:#6B7280;">Recaudación Anual (este año)</div><div style="font-size:28px;font-weight:800;color:#3E5C76;"><?= monto($g['anual']??0) ?></div></div>
 </div>
 <?php endif; ?>
 

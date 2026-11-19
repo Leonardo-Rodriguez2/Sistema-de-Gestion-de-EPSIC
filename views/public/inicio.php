@@ -43,7 +43,7 @@ ob_start();
           <div class="card h-100 card-feature p-4 text-center">
             <div class="mb-4"><i class="fas fa-file-invoice-dollar fa-3x" style="color: #4C6E91;"></i></div>
             <h4 class="fw-bold mb-3">Cobranza y Tableros Digitales</h4>
-            <p class="text-muted">Reportes, historial de pagos y estado de deuda en línea.</p>
+            <p class="text-muted">Historial de pagos y estado de deuda en línea.</p>
           </div>
         </div>
       </div>
@@ -79,7 +79,7 @@ ob_start();
         <div class="col-lg-3 col-md-6 position-relative z-1">
           <div class="step-circle shadow-sm">4</div>
           <h5 class="fw-bold mt-4">Plataforma Online</h5>
-          <p class="text-muted small px-2">Los residentes gestionan pagos y reportes en línea.</p>
+          <p class="text-muted small px-2">Los residentes gestionan sus pagos en línea.</p>
         </div>
       </div>
     </div>
@@ -103,7 +103,7 @@ ob_start();
             <div class="col-6"><div class="p-4 bg-white bg-opacity-10 rounded-4"><i class="fas fa-shield-halved why-icon"></i><h4 class="fw-bold">100% Legal</h4><p class="small opacity-75 mb-0">Disposición final solo en rellenos sanitarios certificado.</p></div></div>
             <div class="col-6"><div class="p-4 bg-white bg-opacity-10 rounded-4"><i class="fas fa-hand-holding-dollar why-icon"></i><h4 class="fw-bold">Costos Claros</h4><p class="small opacity-75 mb-0">Sin sorpresas. Tarifas fijas estandarizadas facturadas.</p></div></div>
             <div class="col-6"><div class="p-4 bg-white bg-opacity-10 rounded-4"><i class="fas fa-seedling why-icon"></i><h4 class="fw-bold">Baja Emisión</h4><p class="small opacity-75 mb-0">Vehículos modernos con estándar y limitados en ruido.</p></div></div>
-            <div class="col-6"><div class="p-4 bg-white bg-opacity-10 rounded-4"><i class="fas fa-laptop-code why-icon"></i><h4 class="fw-bold">Alta Tecnología</h4><p class="small opacity-75 mb-0">Sistema Web para gestionar reportes de incidentes al instante.</p></div></div>
+            <div class="col-6"><div class="p-4 bg-white bg-opacity-10 rounded-4"><i class="fas fa-laptop-code why-icon"></i><h4 class="fw-bold">Alta Tecnología</h4><p class="small opacity-75 mb-0">Sistema Web para gestionar pagos y solicitudes al instante.</p></div></div>
           </div>
         </div>
       </div>

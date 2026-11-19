@@ -6,7 +6,7 @@ $user = check_dashboard_access([1]);
 $barriosStmt = $pdo->query("SELECT id, nombre FROM barrios ORDER BY nombre");
 $barrios = $barriosStmt->fetchAll(PDO::FETCH_ASSOC);
 
-$title = "Registrar Nueva Calle - EcoCusco";
+$title = "Registrar Nueva Calle - EcoReciclaje";
 $header_title = "Nueva Calle";
 $header_subtitle = "Agrega una nueva calle a cualquiera de los barrios registrados.";
 

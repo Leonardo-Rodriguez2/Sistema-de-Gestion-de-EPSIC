@@ -64,7 +64,7 @@ $fecha_pago = $cobro['fecha_confirmacion_barrio'] ?? $cobro['fecha_confirmacion_
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Recibo de Pago #<?= $cobro_id ?> - EcoCusco</title>
+  <title>Recibo de Pago #<?= $cobro_id ?> - EcoReciclaje</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body { font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; background: #F3F4F6; padding: 40px 20px; }
@@ -100,7 +100,7 @@ $fecha_pago = $cobro['fecha_confirmacion_barrio'] ?? $cobro['fecha_confirmacion_
 
   <div class="recibo">
     <div class="header">
-      <div class="sub">SISTEMA DE GESTIÓN DE RECICLAJE — EPSIC / EcoCusco</div>
+      <div class="sub">SISTEMA DE GESTIÓN DE RECICLAJE — EPSIC / EcoReciclaje</div>
       <h1>RECIBO DE PAGO</h1>
       <div style="font-size:12px; opacity:0.8; margin-top:4px;">N° <?= str_pad($cobro_id, 6, '0', STR_PAD_LEFT) ?></div>
     </div>
@@ -148,7 +148,7 @@ $fecha_pago = $cobro['fecha_confirmacion_barrio'] ?? $cobro['fecha_confirmacion_
 
       <div class="monto-box">
         <div class="label">Monto Cancelado</div>
-        <div class="amount">Bs. <?= number_format($cobro['monto'], 2) ?></div>
+        <div class="amount"><?= monto($cobro['monto']) ?></div>
       </div>
 
       <?php
@@ -173,7 +173,7 @@ $fecha_pago = $cobro['fecha_confirmacion_barrio'] ?? $cobro['fecha_confirmacion_
     </div>
 
     <div class="footer">
-      Este documento es una constancia de pago registrada en el sistema EcoCusco.<br>
+      Este documento es una constancia de pago registrada en el sistema EcoReciclaje.<br>
       Generado el <?= date('d/m/Y H:i') ?>
     </div>
   </div>

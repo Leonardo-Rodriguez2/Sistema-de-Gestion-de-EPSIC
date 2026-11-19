@@ -160,7 +160,7 @@ if ($tab === 'pendientes') {
     );
 }
 
-$title = "Exenciones de Cobro - EcoCusco";
+$title = "Exenciones de Cobro - EcoReciclaje";
 $header_title = "🛡️ Exenciones de Cobro";
 $header_subtitle = "Gestiona qué viviendas quedan exoneradas del pago mensual.";
 

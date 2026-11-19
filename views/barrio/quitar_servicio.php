@@ -28,7 +28,7 @@ $stmt = $pdo->prepare($sql);
 $stmt->execute($params);
 $viviendas = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-$title = "Quitar Servicio - EcoCusco";
+$title = "Quitar Servicio - EcoReciclaje";
 $header_title = "Suspensión Permanente";
 $header_subtitle = "Anula el servicio de viviendas con deudas críticas o por solicitud directa.";
 
@@ -111,11 +111,11 @@ ob_start();
                                 <span class="badge" style="background: <?= $serv_bg ?>; color: <?= $serv_color ?>; font-size: 10px;"><?= $v['estado_servicio'] ?></span>
                             </td>
                             <td style="padding: 12px; text-align: center;">
-                                <div style="font-weight: 800; color: #7A4F4F;">Bs. <?= number_format($v['deuda_total'] ?: 0, 2) ?></div>
+                                <div style="font-weight: 800; color: #7A4F4F;"><?= monto($v['deuda_total'] ?: 0) ?></div>
                                 <div style="font-size: 9px; color: #6B7280;">Monto a registrar</div>
                             </td>
                             <td style="padding: 12px; text-align: center;">
-                                <form method="POST" onsubmit="return confirm('¿ESTÁS SEGURO? Esta acción anulará el servicio permanentemente y registrará la deuda de Bs. <?= number_format($v['deuda_total'] ?: 0, 2) ?>.')">
+                                <form method="POST" onsubmit="return confirm('¿ESTÁS SEGURO? Esta acción anulará el servicio permanentemente y registrará la deuda de <?= monto($v['deuda_total'] ?: 0) ?>.')">
                                     <input type="hidden" name="form_type" value="ordenar_baja">
                                     <input type="hidden" name="vivienda_id" value="<?= $v['id'] ?>">
                                     <button type="submit" class="btn-primary" style="background: #9A6A6A; border:none; padding: 6px 12px; font-size: 11px;">Quitar Servicio</button>

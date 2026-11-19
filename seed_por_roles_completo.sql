@@ -148,10 +148,10 @@ INSERT INTO exenciones_cobro (vivienda_id, calle_id, barrio_id, tipo_exencion, d
 (13,2,1,'pobreza','Situación económica vulnerable - Exención temporal',1,'Aprobado',1,NOW(),NOW());
 
 INSERT INTO empresas (nombre, descripcion, contacto, materiales) VALUES
-('EcoCusco Reciclaje S.A.C.', 'Empresa dedicada al acopio, clasificación y comercialización de residuos reciclables en Cusco.', '987654321 / ventas@ecocusco.com', 'Plástico PET, Cartón, Papel, Vidrio, Aluminio'),
+('EcoReciclaje S.A.C.', 'Empresa dedicada al acopio, clasificación y comercialización de residuos reciclables.', '987654321 / ventas@ecoreciclaje.com', 'Plástico PET, Cartón, Papel, Vidrio, Aluminio'),
 ('GreenAndes SRL', 'Centro de acopio certificado con enfoque en economía circular y gestión integral.', '984123456 / contacto@greenandes.pe', 'Metal, Chatarra, Vidrio, Plástico Industrial'),
 ('Andes Circular', 'Aliado estratégico para reciclaje electrónico, RAEE y valorización.', '976543210 / operaciones@andescircular.pe', 'RAEE, Baterías, Cables, Equipos Informáticos'),
-('ReciclaCusco EIRL', 'Cooperativa de recicladores con enfoque social inclusivo.', '975432108 / info@reciclacusco.pe', 'Cartón, Papel, Plástico, Aluminio, Tetra Pak');
+('ReciclaVerde EIRL', 'Cooperativa de recicladores con enfoque social inclusivo.', '975432108 / info@reciclaverde.pe', 'Cartón, Papel, Plástico, Aluminio, Tetra Pak');
 
 INSERT INTO reportes (usuario_id, ubicacion_nombre, latitud, longitud, tipo_residuo, descripcion, cantidad, estado, fotos, fecha_reporte) VALUES
 (4,'Calle Principal - Santa Ana',-13.51800000,-71.97800000,'Plástico PET','Acumulación de botellas plásticas junto al contenedor comunitario.',15.50,'Completado','uploads/reportes/reporte_001.jpg','2026-07-01 09:15:00'),

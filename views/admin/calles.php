@@ -56,7 +56,7 @@ reporte_exportar_si_solicitado(
     'Catálogo de vías por barrio'
 );
 
-$title = "Administrar Calles - EcoCusco";
+$title = "Administrar Calles - EcoReciclaje";
 $header_title = "Gestión de Calles";
 $header_subtitle = "Configura las calles de cada barrio para una mejor organización.";
 

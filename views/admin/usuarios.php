@@ -15,7 +15,7 @@ $roles_map = [
 $roles_excluidos = [3];
 $role_name = $roles_map[$filter_rol_id] ?? "Usuarios";
 
-$title = "$role_name - EcoCusco";
+$title = "$role_name - EcoReciclaje";
 $header_title = "Gestión $role_name";
 
 // Consulta SQL optimizada

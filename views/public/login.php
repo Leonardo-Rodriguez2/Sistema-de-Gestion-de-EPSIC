@@ -69,7 +69,7 @@ ob_start();
 
     <div class="login-right">
       <div class="login-right-content">
-        <span class="login-right-tag">EPSIC · Cusco</span>
+        <span class="login-right-tag">EPSIC</span>
         <h2>Reciclaje responsable,<br>gestión transparente.</h2>
       </div>
     </div>

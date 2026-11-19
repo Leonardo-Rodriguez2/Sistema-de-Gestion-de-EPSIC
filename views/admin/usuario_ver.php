@@ -29,7 +29,7 @@ $stmt->execute([$user_id]);
 $u = $stmt->fetch(PDO::FETCH_ASSOC);
 if (!$u) die("Usuario no encontrado.");
 
-$title = "Perfil - EcoCusco";
+$title = "Perfil - EcoReciclaje";
 $header_title = "Perfil: " . $u['nombre'];
 
 // Mapeo de campos por rol

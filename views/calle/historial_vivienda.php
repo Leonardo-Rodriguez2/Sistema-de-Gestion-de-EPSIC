@@ -37,7 +37,7 @@ if ($vivienda_id > 0) {
 
 $meses_nombres = ['','Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
 
-$title = "Historial de Pagos - EcoCusco";
+$title = "Historial de Pagos - EcoReciclaje";
 $header_title = "Historial de Pagos por Vivienda";
 $header_subtitle = "Revisa el historial completo de pagos de cada vivienda de tu calle.";
 
@@ -85,7 +85,7 @@ ob_start();
         <div style="text-align:right;">
             <div style="font-size:11px; color:#6B7280;">Deuda Acumulada</div>
             <div style="font-size:22px; font-weight:800; color:<?= $deuda_total > 0 ? '#8A5A5A' : '#3E5C76' ?>;">
-                Bs. <?= number_format($deuda_total, 2) ?>
+                <?= monto($deuda_total) ?>
             </div>
         </div>
     </div>
@@ -114,7 +114,7 @@ ob_start();
                         <td style="padding:10px 14px; font-weight:600;">
                             <?= $meses_nombres[$h['mes']] ?> <?= $h['anio'] ?>
                         </td>
-                        <td style="padding:10px; font-weight:700; color:#3E5C76;">Bs. <?= number_format($h['monto'],2) ?></td>
+                        <td style="padding:10px; font-weight:700; color:#3E5C76;"><?= monto($h['monto']) ?></td>
                         <td style="padding:10px;">
                             <span style="background:<?= $h['estado']=='Pagado'?'#E9EFF4':($h['estado']=='Anulado'?'#F4EDED':'#F2EEE7') ?>; color:<?= $h['estado']=='Pagado'?'#33485C':($h['estado']=='Anulado'?'#7A4F4F':'#6E5F45') ?>; padding:3px 8px; border-radius:4px; font-size:11px; font-weight:600;">
                                 <?= $h['estado'] == 'Pagado' ? '✓ Pagado' : ($h['estado'] == 'Anulado' ? '✗ Anulado' : '⏳ Pendiente') ?>

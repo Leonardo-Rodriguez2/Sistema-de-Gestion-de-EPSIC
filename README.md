@@ -29,7 +29,7 @@
 
 ## 👤 Credenciales de Prueba
 - **Admin:** `admin@gmail.com` / `admin`
-- **Gestor:** `gestor@ecocusco.com` / `admin`
+- **Gestor:** `gestor@ecoreciclaje.com` / `admin`
 
 ---
 Desarrollado para la optimización de servicios municipales y comunitarios.

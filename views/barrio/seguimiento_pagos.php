@@ -173,7 +173,7 @@ foreach ($casas as $fila) {
         $fila['direccion'] ?? '',
         ($fila['mes'] ?? '') ? ($fila['mes'] . '/' . $fila['anio']) : 'Sin periodo',
         $estadoCobro,
-        $fila['monto'] !== null ? number_format((float)$fila['monto'], 2, '.', ',') : '',
+        $fila['monto'] !== null ? monto((float)$fila['monto']) : '',
         $comprobante,
         $fila['observaciones'] ?? '',
     ];
@@ -182,25 +182,25 @@ foreach ($casas as $fila) {
 reporte_exportar_si_solicitado(
     'seguimiento_por_casa_' . $barrio_nombre,
     'Seguimiento por Casa',
-    ['Casa', 'Propietario', 'Identificación', 'Calle', 'Dirección', 'Periodo', 'Estado', 'Monto (Bs.)', 'Comprobante', 'Observaciones'],
+    ['Casa', 'Propietario', 'Identificación', 'Calle', 'Dirección', 'Periodo', 'Estado', 'Monto (US$ / Bs.)', 'Comprobante', 'Observaciones'],
     $filasExcel,
     array_merge($filtrosMeta, [
         'Casas' => $stats['casas'],
         'Casas con pago' => $stats['pagadas'],
         'Casas con pendientes' => $stats['pendientes'],
-        'Recaudado' => 'Bs. ' . number_format($stats['recaudado'], 2, '.', ','),
-        'Saldo pendiente' => 'Bs. ' . number_format($stats['pendiente_monto'], 2, '.', ','),
+        'Recaudado' => monto($stats['recaudado']),
+        'Saldo pendiente' => monto($stats['pendiente_monto']),
     ]),
     'Listado de pagos y comprobantes por vivienda'
 );
 
-$title = "Seguimiento de Pagos - EcoCusco";
+$title = "Seguimiento de Pagos - EcoReciclaje";
 $header_title = "Seguimiento por Casa";
 $header_subtitle = "Revisa qué casas pagaron, cuáles faltan y qué evidencia se recibió.";
 
 $metaImpresion = $filtrosMeta;
 $metaImpresion['Casas'] = $stats['casas'];
-$metaImpresion['Recaudado'] = 'Bs. ' . number_format($stats['recaudado'], 2, '.', ',');
+$metaImpresion['Recaudado'] = monto($stats['recaudado']);
 
 ob_start();
 ?>
@@ -378,8 +378,8 @@ ob_start();
     </div>
     <div class="card seg-stat">
         <div class="seg-stat-label">Recaudado</div>
-        <div class="seg-stat-value" style="font-size:20px;">Bs. <?= number_format($stats['recaudado'], 2, '.', ',') ?></div>
-        <div class="seg-stat-note">Pendiente: Bs. <?= number_format($stats['pendiente_monto'], 2, '.', ',') ?></div>
+        <div class="seg-stat-value" style="font-size:20px;"><?= monto($stats['recaudado']) ?></div>
+        <div class="seg-stat-note">Pendiente: <?= monto($stats['pendiente_monto']) ?></div>
     </div>
 </div>
 
@@ -438,7 +438,7 @@ ob_start();
                                 <span class="seg-badge <?= $badgeClass ?>"><?= htmlspecialchars($estado) ?></span>
                             </td>
                             <td style="white-space:nowrap; font-weight:700;">
-                                <?= $c['monto'] !== null ? 'Bs. ' . number_format((float)$c['monto'], 2, '.', ',') : '—' ?>
+                                <?= $c['monto'] !== null ? monto((float)$c['monto']) : '—' ?>
                             </td>
                             <td>
                                 <?php if (!empty($c['comprobante_barrio']) || !empty($c['comprobante_calle'])): ?>

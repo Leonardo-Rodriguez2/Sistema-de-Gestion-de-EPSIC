@@ -105,12 +105,12 @@ foreach ($viviendas as $v) {
         $v['propietario'] ?? '',
         formato_identificacion($v['cedula'] ?? '', $v['cedula_tipo'] ?? 'V', $v['otro_identificador'] ?? ''),
         tipo_predio_etiqueta($v['tipo_predio'] ?? 'Vivienda'),
-        number_format(monto_predio_efectivo($v['tipo_predio'] ?? 'Vivienda', $v['cantidad_casas'] ?? 1, tarifas_barrio($pdo, $v['barrio_id'])), 2, '.', ''),
+        monto(monto_predio_efectivo($v['tipo_predio'] ?? 'Vivienda', $v['cantidad_casas'] ?? 1, tarifas_barrio($pdo, $v['barrio_id']))),
         $v['calle_nombre'] ?? 'Sin calle',
         $v['direccion'] ?? '',
         $v['estado_servicio'] ?? '',
         $estadoPago,
-        number_format($deuda, 2, '.', ','),
+        monto($deuda),
         !empty($v['exento_cobro']) ? 'Sí' : 'No',
     ];
 }
@@ -123,7 +123,7 @@ reporte_exportar_si_solicitado(
     'Revisión completa de viviendas y estado de pagos'
 );
 
-$title = "Viviendas del Barrio - EcoCusco";
+$title = "Viviendas del Barrio - EcoReciclaje";
 $header_title = "Gestión del Barrio";
 $header_subtitle = "Revisión completa de todas las viviendas y su estado.";
 
@@ -226,7 +226,7 @@ ob_start();
                     <span style="background:#E7EDF3; color:#4A5568; padding:1px 6px; border-radius:4px; font-size:9px; font-weight:700; margin-left:4px; display:inline-block;">EXENTA</span>
                   <?php endif; ?>
                 </div>
-                <span class="viviendas-badge" style="background: #F3F4F6; color: #374151; font-size: 10px;"><?= htmlspecialchars($v['calle_nombre'] ?? 'Bs.N') ?></span>
+                <span class="viviendas-badge" style="background: #F3F4F6; color: #374151; font-size: 10px;"><?= htmlspecialchars($v['calle_nombre'] ?? 'S/N') ?></span>
               </div>
               <div class="viviendas-meta">ID: #<?= $v['id'] ?> • <?= date('d/m/Y', strtotime($v['fecha_registro'])) ?></div>
               <div class="viviendas-info-row">
@@ -246,7 +246,7 @@ ob_start();
               </div>
               <div style="display:flex; gap:8px; align-items:center; padding:4px 0;">
                 <?php if ($deuda > 0 && !$v['exento_cobro']): ?>
-                  <span style="color:#8A5A5A; font-weight:700; font-size:12px;">Deuda: Bs. <?= number_format($deuda,2) ?></span>
+                  <span style="color:#8A5A5A; font-weight:700; font-size:12px;">Deuda: <?= monto($deuda) ?></span>
                 <?php endif; ?>
                 <button onclick="toggleHistorial(<?= $v['id'] ?>)" style="margin-left:auto; background:transparent; color:#6B7280; border:1px solid #E5E7EB; padding:3px 8px; border-radius:4px; font-size:10px; cursor:pointer;">📋 Historial</button>
               </div>
@@ -270,7 +270,7 @@ ob_start();
                     <?php foreach($historial as $h): ?>
                       <tr style="border-bottom:1px solid #F3F4F6;">
                         <td style="padding:3px;"><?= $h['mes'] ?>/<?= $h['anio'] ?></td>
-                        <td style="padding:3px; font-weight:600;">Bs. <?= number_format($h['monto'],2) ?></td>
+                        <td style="padding:3px; font-weight:600;"><?= monto($h['monto']) ?></td>
                         <td style="padding:3px;">
                           <span style="background:<?= $h['estado']=='Pagado'?'#E9EFF4':'#F4EDED' ?>; color:<?= $h['estado']=='Pagado'?'#33485C':'#7A4F4F' ?>; padding:1px 5px; border-radius:3px; font-size:9px;">
                             <?= $h['estado'] == 'Pagado' ? '✓ Pagado' : ($h['estado'] == 'Anulado' ? '✗ Anulado' : '⏳ Pendiente') ?>
@@ -318,7 +318,7 @@ ob_start();
                        <tr style="background: #ffffff; box-shadow: 0 2px 4px rgba(0,0,0,0.02); transition: 0.3s;">
                            <td style="padding: 15px; border-top-left-radius: 10px; border-bottom-left-radius: 10px; border: 1px solid #F3F4F6; border-right: none;">
                                <span style="background: #F3F4F6; color: #374151; padding: 4px 10px; border-radius: 6px; font-size: 12px; font-weight: 700;">
-                                   <?= htmlspecialchars($v['calle_nombre'] ?? 'Bs.N') ?>
+                                   <?= htmlspecialchars($v['calle_nombre'] ?? 'S/N') ?>
                                </span>
                            </td>
                            <td style="padding: 15px; border: 1px solid #F3F4F6; border-left: none; border-right: none;">
@@ -365,7 +365,7 @@ ob_start();
                                 $deuda = (float)$deudaStmt->fetchColumn();
                                 ?>
                                 <?php if ($deuda > 0 && !$v['exento_cobro']): ?>
-                                    <span style="color:#8A5A5A; font-weight:700; font-size:13px;">Bs. <?= number_format($deuda,2) ?></span>
+                                    <span style="color:#8A5A5A; font-weight:700; font-size:13px;"><?= monto($deuda) ?></span>
                                 <?php else: ?>
                                     <span style="color:#9CA3AF; font-size:12px;">—</span>
                                 <?php endif; ?>
@@ -396,7 +396,7 @@ ob_start();
                                             <?php foreach($historial as $h): ?>
                                                 <tr style="border-bottom:1px solid #F3F4F6;">
                                                     <td style="padding:3px;"><?= $h['mes'] ?>/<?= $h['anio'] ?></td>
-                                                    <td style="padding:3px; font-weight:600;">Bs. <?= number_format($h['monto'],2) ?></td>
+                                                    <td style="padding:3px; font-weight:600;"><?= monto($h['monto']) ?></td>
                                                     <td style="padding:3px;">
                                                         <span style="background:<?= $h['estado']=='Pagado'?'#E9EFF4':'#F4EDED' ?>; color:<?= $h['estado']=='Pagado'?'#33485C':'#7A4F4F' ?>; padding:1px 5px; border-radius:3px; font-size:9px;">
                                                             <?= $h['estado'] == 'Pagado' ? '✓ Pagado' : ($h['estado'] == 'Anulado' ? '✗ Anulado' : '⏳ Pendiente') ?>

@@ -6,7 +6,8 @@ $user = check_dashboard_access([1, 2]);
 $estados = ['Pendiente', 'Atendido', 'Descartado'];
 $f_estado = $_GET['estado'] ?? '';
 
-$sql = "SELECT id, representante, telefono, barrio, tipo_contrato, correo, estado, fecha
+$sql = "SELECT id, representante, telefono, barrio, tipo_contrato, correo,
+               plan, cantidad, monto_estimado_usd, detalles, estado, fecha
         FROM solicitudes_servicio";
 $params = [];
 if (in_array($f_estado, $estados, true)) {
@@ -44,23 +45,37 @@ ob_start();
                     <th style="padding:12px 16px;">Teléfono</th>
                     <th style="padding:12px 16px;">Correo</th>
                     <th style="padding:12px 16px;">Barrio</th>
-                    <th style="padding:12px 16px;">Tipo</th>
+                    <th style="padding:12px 16px;">Plan / Cantidad</th>
+                    <th style="padding:12px 16px;">Estimado</th>
                     <th style="padding:12px 16px;">Estado</th>
                     <th style="padding:12px 16px;">Acción</th>
                 </tr>
             </thead>
             <tbody>
                 <?php if (empty($solicitudes)): ?>
-                    <tr><td colspan="8" style="padding:24px; text-align:center; color:#9CA3AF;">No hay solicitudes registradas.</td></tr>
+                    <tr><td colspan="9" style="padding:24px; text-align:center; color:#9CA3AF;">No hay solicitudes registradas.</td></tr>
                 <?php else: ?>
                     <?php foreach ($solicitudes as $s): ?>
                         <tr id="solicitud-<?= (int)$s['id'] ?>" style="border-top:1px solid #F3F4F6; vertical-align:top;<?= (int)($_GET['solicitud_id'] ?? 0) === (int)$s['id'] ? 'background:#FFF7ED;' : '' ?>">
                             <td style="padding:12px 16px; white-space:nowrap;"><?= !empty($s['fecha']) ? date('d/m/Y H:i', strtotime($s['fecha'])) : '—' ?></td>
-                            <td style="padding:12px 16px;"><?= htmlspecialchars($s['representante']) ?></td>
+                            <td style="padding:12px 16px;">
+                                <strong><?= htmlspecialchars($s['representante']) ?></strong>
+                                <?php if (!empty($s['detalles'])): ?>
+                                    <div style="font-size:12px; color:#6B7280; margin-top:4px; max-width:220px;"><?= nl2br(htmlspecialchars($s['detalles'])) ?></div>
+                                <?php endif; ?>
+                            </td>
                             <td style="padding:12px 16px;"><?= htmlspecialchars($s['telefono']) ?></td>
                             <td style="padding:12px 16px;"><?= htmlspecialchars($s['correo'] ?? '—') ?></td>
                             <td style="padding:12px 16px;"><?= htmlspecialchars($s['barrio']) ?></td>
-                            <td style="padding:12px 16px;"><?= htmlspecialchars($s['tipo_contrato'] ?? '—') ?></td>
+                            <td style="padding:12px 16px;">
+                                <?= htmlspecialchars($s['plan'] ?? $s['tipo_contrato'] ?? '—') ?>
+                                <?php if (!empty($s['cantidad'])): ?>
+                                    <div style="font-size:12px; color:#6B7280; margin-top:3px;"><?= (int)$s['cantidad'] ?> unidad(es)</div>
+                                <?php endif; ?>
+                            </td>
+                            <td style="padding:12px 16px; white-space:nowrap;">
+                                <?= $s['monto_estimado_usd'] !== null ? monto($s['monto_estimado_usd']) : 'A calcular' ?>
+                            </td>
                             <td style="padding:12px 16px;">
                                 <span class="badge <?= $s['estado']==='Atendido'?'admin':($s['estado']==='Pendiente'?'gestor':'jefe') ?>"><?= htmlspecialchars($s['estado']) ?></span>
                             </td>

@@ -68,6 +68,7 @@
     <div class="menu">
         <a href="/reciclaje/index.php">Inicio</a>
         <a href="/reciclaje/views/public/servicios.php">Servicios</a>
+        <a href="/reciclaje/views/public/cotizacion.php">Cotización</a>
         <a href="/reciclaje/views/public/nosotros.php">Nosotros</a>
     </div>
     <div class="menu">

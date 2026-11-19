@@ -57,7 +57,7 @@ ob_start();
     <!-- HEADER -->
     <div style="background:linear-gradient(135deg,#111827 0%,#1F2937 60%,#33485C 100%); color:#fff; padding:35px 40px; position:relative;">
         <div style="position:absolute; right:30px; top:30px; width:80px; height:80px; border:3px solid rgba(76,110,145,0.7); border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:28px;">✅</div>
-        <div style="font-size:11px; opacity:0.7; margin-bottom:8px;">SISTEMA DE GESTIÓN DE RECICLAJE — EPSIC / EcoCusco</div>
+        <div style="font-size:11px; opacity:0.7; margin-bottom:8px;">SISTEMA DE GESTIÓN DE RECICLAJE — EPSIC / EcoReciclaje</div>
         <h1 style="margin:0; font-size:28px; font-weight:800; letter-spacing:1px;">RECIBO DE FINIQUITO</h1>
         <div style="font-size:13px; opacity:0.8; margin-top:4px;">N° <?= htmlspecialchars($recibo['numero_recibo'] ?? 'SIN NÚMERO') ?></div>
     </div>
@@ -73,7 +73,7 @@ ob_start();
                 </div>
                 <div style="background:#F9FAFB; padding:12px 14px; border-radius:8px;">
                     <label style="font-size:10px; color:#9CA3AF; font-weight:600; display:block; margin-bottom:3px; text-transform:uppercase;">Ciudad</label>
-                    <span style="font-size:14px; font-weight:700; color:#111827;"><?= htmlspecialchars($recibo['ciudad'] ?? 'Cusco') ?></span>
+                    <span style="font-size:14px; font-weight:700; color:#111827;"><?= htmlspecialchars($recibo['ciudad'] ?? '') ?></span>
                 </div>
                 <div style="background:#F9FAFB; padding:12px 14px; border-radius:8px;">
                     <label style="font-size:10px; color:#9CA3AF; font-weight:600; display:block; margin-bottom:3px; text-transform:uppercase;">Periodo de Facturación</label>
@@ -104,12 +104,12 @@ ob_start();
         <!-- MONTO TOTAL -->
         <div style="text-align:center; padding:28px; background:linear-gradient(135deg,#EEF2F6,#E9EFF4); border-radius:10px; border:2px solid #A9C0D3; margin:20px 0;">
             <div style="font-size:13px; color:#33485C; margin-bottom:6px;">MONTO TOTAL APROBADO Y RECIBIDO</div>
-            <div style="font-size:42px; font-weight:800; color:#33485C;">Bs. <?= number_format($recibo['monto_aprobado'] ?? $recibo['monto_total_recolectado'], 2) ?></div>
+            <div style="font-size:42px; font-weight:800; color:#33485C;"><?= monto($recibo['monto_aprobado'] ?? $recibo['monto_total_recolectado']) ?></div>
             <div style="font-size:12px; color:#33485C; margin-top:8px; opacity:0.8;">
-                Esperado: Bs. <?= number_format($recibo['monto_total_esperado'],2) ?> •
+                Esperado: <?= monto($recibo['monto_total_esperado']) ?> •
                 <?php $dif = $recibo['monto_total_esperado'] - ($recibo['monto_aprobado'] ?? $recibo['monto_total_recolectado']); ?>
                 <?php if($dif > 0): ?>
-                <span style="color:#7A6A4F;">Diferencia no cobrada: Bs. <?= number_format($dif,2) ?></span>
+                <span style="color:#7A6A4F;">Diferencia no cobrada: <?= monto($dif) ?></span>
                 <?php else: ?>
                 <span>Cobro completo ✅</span>
                 <?php endif; ?>
@@ -163,7 +163,7 @@ ob_start();
                         <td style="padding:8px 10px; border-bottom:1px solid #F9FAFB; text-align:center;"><?= $c['total_casas'] ?></td>
                         <td style="padding:8px 10px; border-bottom:1px solid #F9FAFB; text-align:center; color:#3E5C76; font-weight:700;"><?= $c['casas_pagadas'] ?></td>
                         <td style="padding:8px 10px; border-bottom:1px solid #F9FAFB; text-align:center; color:<?= $c['casas_morosas']>0?'#8A5A5A':'#9CA3AF' ?>; font-weight:700;"><?= $c['casas_morosas'] ?></td>
-                        <td style="padding:8px 10px; border-bottom:1px solid #F9FAFB; font-weight:800; color:#3E5C76;">Bs. <?= number_format($c['monto_recolectado'],2) ?></td>
+                        <td style="padding:8px 10px; border-bottom:1px solid #F9FAFB; font-weight:800; color:#3E5C76;"><?= monto($c['monto_recolectado']) ?></td>
                         <td style="padding:8px 10px; border-bottom:1px solid #F9FAFB; text-align:center;">
                             <?php if ($c['certificado_generado']): ?>
                                 <a href="router.php?page=certificado_calle&lote_calle_id=<?= $c['id'] ?>" target="_blank" style="display:inline-block; padding:4px 10px; background:#33485C; color:#fff; border-radius:6px; font-size:11px; font-weight:600; text-decoration:none;">📄 Ver</a>
@@ -206,7 +206,7 @@ ob_start();
                                                 <?php $identificacion = formato_identificacion($cs['cedula'] ?? '', $cs['cedula_tipo'] ?? 'V', $cs['otro_identificador'] ?? ''); ?>
                                                 <?php if ($identificacion !== ''): ?><div style="font-size:9px; color:#6B7280;">Identificación: <?= htmlspecialchars($identificacion) ?></div><?php endif; ?>
                                             </td>
-                                            <td style="padding:4px 6px; color:#3E5C76; font-weight:700;">Bs. <?= number_format($cs['monto'],2) ?></td>
+                                            <td style="padding:4px 6px; color:#3E5C76; font-weight:700;"><?= monto($cs['monto']) ?></td>
                                             <td style="padding:4px 6px; text-align:center;">
                                                 <?php if(!empty($cs['comprobante_calle'])): ?>
                                                     <a href="#" data-url="<?= htmlspecialchars($cs['comprobante_calle']) ?>" onclick="return openComprobanteModal(this)"
@@ -226,7 +226,7 @@ ob_start();
                     <?php endforeach; ?>
                     <tr style="border-top:2px solid #E5E7EB; background:#F3F4F6;">
                         <td colspan="7" style="padding:10px; font-weight:700;">TOTAL</td>
-                        <td style="padding:10px; font-weight:800; color:#33485C; font-size:15px;">Bs. <?= number_format(array_sum(array_column($calles,'monto_recolectado')),2) ?></td>
+                        <td style="padding:10px; font-weight:800; color:#33485C; font-size:15px;"><?= monto(array_sum(array_column($calles,'monto_recolectado'))) ?></td>
                     </tr>
                 </tbody>
             </table>
@@ -252,7 +252,7 @@ ob_start();
 
     <div style="background:#F9FAFB; padding:20px 40px; text-align:center; font-size:11px; color:#9CA3AF; border-top:1px solid #E5E7EB;">
         Este documento es el comprobante oficial de finiquito del ciclo de facturación.<br>
-        Generado automáticamente por el Sistema EcoCusco — <?= date('d/m/Y H:i') ?>
+        Generado automáticamente por el Sistema EcoReciclaje — <?= date('d/m/Y H:i') ?>
     </div>
 </div>
 <script>

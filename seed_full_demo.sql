@@ -50,10 +50,10 @@ ALTER TABLE roles AUTO_INCREMENT = 7;
 
 -- Barrios
 INSERT INTO barrios (nombre, ciudad, codigo_postal) VALUES
-('Barrio San Blas', 'Cusco', '08003'),
-('Santa Ana', 'Cusco', '08004'),
-('Wanchaq', 'Cusco', '08006'),
-('Santiago', 'Cusco', '08001');
+('Barrio San Blas', '', '08003'),
+('Santa Ana', '', '08004'),
+('Wanchaq', '', '08006'),
+('Santiago', '', '08001');
 
 -- Calles
 INSERT INTO calles (nombre, barrio_id) VALUES
@@ -142,10 +142,10 @@ INSERT INTO exenciones_cobro (vivienda_id, motivo, fecha_inicio, fecha_fin, esta
 
 -- Empresas
 INSERT INTO empresas (nombre, descripcion, contacto, materiales) VALUES
-('EcoCusco Reciclaje S.A.C.', 'Empresa dedicada al acopio, clasificación y comercialización de residuos reciclables en Cusco.', '987654321 / ventas@ecocusco.com', 'Plástico PET, Cartón, Papel, Vidrio, Aluminio'),
+('EcoReciclaje S.A.C.', 'Empresa dedicada al acopio, clasificación y comercialización de residuos reciclables.', '987654321 / ventas@ecoreciclaje.com', 'Plástico PET, Cartón, Papel, Vidrio, Aluminio'),
 ('GreenAndes SRL', 'Centro de acopio certificado con enfoque en economía circular.', '984123456 / contacto@greenandes.pe', 'Metal, Chatarra, Vidrio, Plástico industrial'),
 ('Andes Circular', 'Aliado estratégico para reciclaje electrónico y gestión responsable.', '976543210 / operaciones@andescircular.pe', 'RAEE, Baterías, Cables, Equipos informáticos'),
-('ReciclaCusco EIRL', 'Cooperativa de recicladores con enfoque social inclusivo.', '975432108 / info@reciclacusco.pe', 'Cartón, Papel, Plástico, Aluminio');
+('ReciclaVerde EIRL', 'Cooperativa de recicladores con enfoque social inclusivo.', '975432108 / info@reciclaverde.pe', 'Cartón, Papel, Plástico, Aluminio');
 
 -- Reportes
 INSERT INTO reportes (usuario_id, ubicacion_nombre, latitud, longitud, tipo_residuo, descripcion, cantidad, estado, fotos, fecha_reporte) VALUES

@@ -258,11 +258,11 @@ if ($modoMarcar && $barrio_id > 0) {
 $totalMarcar = count($viviendasMarcar);
 $cuotaMarcar = (float)($config['cuota_mensual'] ?: 10.00);
 
-$title          = "Lotes de Calle - EcoCusco";
+$title          = "Lotes de Calle - EcoReciclaje";
 $header_title   = "Verificación de Pagos";
 $header_subtitle = "Barrio: " . htmlspecialchars($barrio['nombre']) . " — {$meses_nombres[$mes]} {$anio}";
 if ($modoMarcar) {
-    $title = "Marcar Pagos - EcoCusco";
+    $title = "Marcar Pagos - EcoReciclaje";
     $header_title = "Marcar Pagos";
     $header_subtitle = "";
 }
@@ -482,7 +482,7 @@ ob_start();
         <div class="mp-list-head">
             <div>
                 <strong>Viviendas del barrio</strong>
-                <span><?= $totalMarcar ?> resultado<?= $totalMarcar === 1 ? '' : 's' ?> · Cuota del barrio: Bs. <?= number_format($cuotaMarcar, 2) ?></span>
+                <span><?= $totalMarcar ?> resultado<?= $totalMarcar === 1 ? '' : 's' ?> · Cuota del barrio: <?= monto($cuotaMarcar) ?></span>
             </div>
             <div class="mp-list-legend">
                 <span>💡 Usa “Registrar pago” para enviar el pago a verificación.</span>
@@ -548,7 +548,7 @@ ob_start();
                                     <?php else: ?>
                                         <span class="mp-badge mp-badge-pending">Pendiente</span>
                                     <?php endif; ?>
-                                    <div class="mp-amount">Bs. <?= number_format($montoPago, 2) ?></div>
+                                    <div class="mp-amount"><?= monto($montoPago) ?></div>
                                 </td>
                                 <td>
                                     <?php if (!empty($v['referencia_pago'])): ?>
@@ -566,7 +566,7 @@ ob_start();
                                             data-propietario="<?= htmlspecialchars($v['propietario'], ENT_QUOTES) ?>"
                                             data-casa="<?= htmlspecialchars((string)$casaNumero, ENT_QUOTES) ?>"
                                             data-calle="<?= htmlspecialchars($v['calle_nombre'], ENT_QUOTES) ?>"
-                                            data-monto="<?= htmlspecialchars(number_format($montoPago, 2), ENT_QUOTES) ?>"
+                                            data-monto="<?= htmlspecialchars((string)(float)$montoPago, ENT_QUOTES) ?>"
                                             data-periodo="<?= htmlspecialchars($meses_nombres[$mes] . ' ' . $anio, ENT_QUOTES) ?>"
                                         >Registrar pago</button>
                                     <?php elseif ($esPagado && $comprobantePago !== ''): ?>
@@ -611,7 +611,7 @@ ob_start();
 
                     <div class="mp-pay-summary">
                         <span>Monto a registrar</span>
-                        <strong id="mpMonto">Bs. 0.00</strong>
+                        <strong id="mpMonto"><?= monto(0) ?></strong>
                     </div>
 
                     <div class="mp-form-group">
@@ -676,8 +676,8 @@ ob_start();
                 casaNum.textContent = '#' + (btn.dataset.casa || 'S/N');
                 propietario.textContent = btn.dataset.propietario || '—';
                 detalle.textContent = (btn.dataset.calle || '—') + ' · ' + (btn.dataset.periodo || '—');
-                monto.textContent = 'Bs. ' + (btn.dataset.monto || '0.00');
-                submitPago.textContent = 'Confirmar pago · Bs. ' + (btn.dataset.monto || '0.00');
+                monto.textContent = fmtMonto(btn.dataset.monto || 0);
+                submitPago.textContent = 'Confirmar pago · ' + fmtMonto(btn.dataset.monto || 0);
 
                 modal.classList.add('is-open');
                 document.body.classList.add('epsic-modal-open');
@@ -863,7 +863,7 @@ endif;
                                 <span style="color:#9CA3AF;">—</span>
                             <?php endif; ?>
                         </td>
-                        <td style="padding:9px 10px; text-align:right; font-weight:700; color:#3E5C76;">Bs. <?= number_format((float)$pago['monto'], 2) ?></td>
+                        <td style="padding:9px 10px; text-align:right; font-weight:700; color:#3E5C76;"><?= monto((float)$pago['monto']) ?></td>
                         <td style="padding:9px 10px; text-align:center;">
                             <button
                                 type="button"
@@ -877,7 +877,7 @@ endif;
                                 data-telefono="<?= htmlspecialchars((string)($pago['telefono'] ?? ''), ENT_QUOTES, 'UTF-8') ?>"
                                 data-periodo="<?= htmlspecialchars($meses_nombres[(int)$pago['mes']] . ' ' . (int)$pago['anio'], ENT_QUOTES, 'UTF-8') ?>"
                                 data-referencia="<?= htmlspecialchars((string)($pago['referencia_pago'] ?: '—'), ENT_QUOTES, 'UTF-8') ?>"
-                                data-monto="<?= htmlspecialchars(number_format((float)$pago['monto'], 2, '.', ''), ENT_QUOTES, 'UTF-8') ?>"
+                                data-monto="<?= htmlspecialchars((string)(float)$pago['monto'], ENT_QUOTES, 'UTF-8') ?>"
                                 data-fecha="<?= htmlspecialchars($fechaPagoTexto, ENT_QUOTES, 'UTF-8') ?>"
                                 data-origen="<?= htmlspecialchars($origenPago, ENT_QUOTES, 'UTF-8') ?>"
                                 data-comprobante="<?= htmlspecialchars($comprobantePago, ENT_QUOTES, 'UTF-8') ?>"
@@ -906,7 +906,7 @@ endif;
             <div class="pv-summary">
                 <div>
                     <span>Monto reportado</span>
-                    <strong id="pvMonto">Bs. 0.00</strong>
+                    <strong id="pvMonto"><?= monto(0) ?></strong>
                 </div>
                 <span class="pv-status">Pendiente de verificación</span>
             </div>
@@ -1003,7 +1003,7 @@ endif;
             document.getElementById(item[0]).textContent = boton.dataset[item[1]] || '—';
         });
         document.getElementById('pvCobroId').value = boton.dataset.cobroId || '';
-        document.getElementById('pvMonto').textContent = 'Bs. ' + (boton.dataset.monto || '0.00');
+        document.getElementById('pvMonto').textContent = fmtMonto(boton.dataset.monto || 0);
 
         var comprobante = boton.dataset.comprobante || '';
         imagen.hidden = true;
@@ -1085,10 +1085,15 @@ endif;
     <form method="POST" style="display:flex; gap:6px; align-items:center; margin-left:auto;">
         <input type="hidden" name="form_type" value="actualizar_configuracion_barrio">
         <input type="hidden" name="fecha_limite_pago" value="<?= htmlspecialchars($config['fecha_limite_pago'] ?: date('Y-m-t'), ENT_QUOTES, 'UTF-8') ?>">
-        <label style="font-size:11px; color:#6B7280;">Cuota Bs.</label>
+        <input type="hidden" name="precio_bolivar" value="<?= number_format(tasa_bolivar($pdo, $barrio_id), 2, '.', '') ?>">
+        <input type="hidden" name="tasa_automatica" value="<?= (int)($config['tasa_automatica'] ?? 1) ?>">
+        <?php foreach (['precio_comercio', 'precio_tienda', 'precio_empresa', 'precio_urbanizacion', 'precio_otro', 'precio_especial'] as $campoPrecio): ?>
+            <input type="hidden" name="<?= $campoPrecio ?>" value="<?= htmlspecialchars((string)($config[$campoPrecio] ?? ($campoPrecio === 'precio_especial' ? 20 : ($config['cuota_mensual'] ?? 10))), ENT_QUOTES, 'UTF-8') ?>">
+        <?php endforeach; ?>
+        <label style="font-size:11px; color:#6B7280;">Cuota US$ / Bs.</label>
         <input type="number" step="0.01" name="cuota_mensual" value="<?= $config['cuota_mensual'] ?? 0 ?>"
             style="width:70px; padding:4px 6px; border:1px solid #D1D5DB; border-radius:4px; font-size:12px;">
-        <label style="font-size:11px; color:#6B7280;">Multa Bs.</label>
+        <label style="font-size:11px; color:#6B7280;">Multa US$ / Bs.</label>
         <input type="number" step="0.01" name="multa_renovacion" value="<?= $config['multa_renovacion'] ?? 0 ?>"
             style="width:70px; padding:4px 6px; border:1px solid #D1D5DB; border-radius:4px; font-size:12px;">
         <button type="submit" style="background:#6B7280; color:white; border:none; padding:4px 10px; border-radius:4px; font-size:11px; cursor:pointer;">Guardar</button>
@@ -1102,8 +1107,8 @@ endif;
             <strong>Lote de Barrio — <?= $loteBarrio['estado'] ?></strong>
             <div style="color:#6B7280; margin-top:2px;">
                 <?= $loteBarrio['calles_completas'] ?>/<?= $loteBarrio['total_calles'] ?> calles •
-                Esperado: Bs. <?= number_format($loteBarrio['monto_total_esperado'],2) ?> •
-                Recolectado: Bs. <?= number_format($loteBarrio['monto_total_recolectado'],2) ?>
+                Esperado: <?= monto($loteBarrio['monto_total_esperado']) ?> •
+                Recolectado: <?= monto($loteBarrio['monto_total_recolectado']) ?>
             </div>
         </div>
     </div>
@@ -1155,16 +1160,16 @@ endif;
                 <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px; font-size:12px; margin-bottom:12px; padding:10px; background:#F9FAFB; border-radius:6px;">
                     <div>
                         <div style="color:#6B7280; font-size:10px; text-transform:uppercase; font-weight:600;">Monto esperado</div>
-                        <div style="font-weight:700; color:#111827; margin-top:2px;">Bs. <?= number_format($lc['monto_esperado'],2) ?></div>
+                        <div style="font-weight:700; color:#111827; margin-top:2px;"><?= monto($lc['monto_esperado']) ?></div>
                     </div>
                     <div>
                         <div style="color:#6B7280; font-size:10px; text-transform:uppercase; font-weight:600;">Recolectado</div>
-                        <div style="font-weight:700; color:<?= $lc['monto_recolectado'] < $lc['monto_esperado']?'#8A5A5A':'#3E5C76' ?>; margin-top:2px;">Bs. <?= number_format($lc['monto_recolectado'],2) ?></div>
+                        <div style="font-weight:700; color:<?= $lc['monto_recolectado'] < $lc['monto_esperado']?'#8A5A5A':'#3E5C76' ?>; margin-top:2px;"><?= monto($lc['monto_recolectado']) ?></div>
                     </div>
                     <div>
                         <div style="color:#6B7280; font-size:10px; text-transform:uppercase; font-weight:600;">Diferencia</div>
                         <div style="font-weight:700; color:<?= $lc['monto_recolectado'] < $lc['monto_esperado']?'#8A5A5A':'#3E5C76' ?>; margin-top:2px;">
-                            <?= $lc['monto_recolectado'] >= $lc['monto_esperado'] ? '✅ Completo' : 'Bs. '.number_format($lc['monto_esperado']-$lc['monto_recolectado'],2).' faltante' ?>
+                            <?= $lc['monto_recolectado'] >= $lc['monto_esperado'] ? '✅ Completo' : monto($lc['monto_esperado']-$lc['monto_recolectado']).' faltante' ?>
                         </div>
                     </div>
                 </div>
@@ -1295,7 +1300,7 @@ endif;
                                         <?php elseif($exenta): ?>
                                             <span style="color:#9CA3AF;">Exenta</span>
                                         <?php else: ?>
-                                            Bs. <?= number_format($dl['monto'] ?? 0,2) ?>
+                                            <?= monto($dl['monto'] ?? 0) ?>
                                         <?php endif; ?>
                                     </td>
                                 </tr>
@@ -1367,15 +1372,15 @@ endif;
                 <hr style="border:none; border-top:1px solid #E5E7EB; margin:4px 0;">
                 <div style="display:flex; justify-content:space-between; padding:3px 0;">
                     <span style="color:#6B7280;">Esperado:</span>
-                    <strong>Bs. <?= number_format($totalEsp,2) ?></strong>
+                    <strong><?= monto($totalEsp) ?></strong>
                 </div>
                 <div style="display:flex; justify-content:space-between; padding:3px 0;">
                     <span style="color:#6B7280;">Recolectado:</span>
-                    <strong style="color:#3E5C76;">Bs. <?= number_format($totalRec,2) ?></strong>
+                    <strong style="color:#3E5C76;"><?= monto($totalRec) ?></strong>
                 </div>
                 <?php if($totalRec < $totalEsp): ?>
                 <div style="font-size:12px; color:#8A5A5A; padding:3px 0;">
-                    Diferencia: Bs. <?= number_format($totalEsp - $totalRec,2) ?>
+                    Diferencia: <?= monto($totalEsp - $totalRec) ?>
                 </div>
                 <?php endif; ?>
             </div>

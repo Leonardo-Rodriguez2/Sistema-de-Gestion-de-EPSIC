@@ -38,7 +38,7 @@ $loteCalleStmt = $pdo->prepare("SELECT estado FROM lotes_calle WHERE calle_id=? 
 $loteCalleStmt->execute([$calle_info['id'], $mes, $anio]);
 $lote_estado = $loteCalleStmt->fetchColumn() ?: 'Sin lote';
 
-$title = "Dashboard - EcoCusco";
+$title = "Dashboard - EcoReciclaje";
 $header_title = "Panel de Calle: " . htmlspecialchars($calle_info['nombre']);
 $header_subtitle = "Barrio " . htmlspecialchars($calle_info['barrio_nombre']) . " — Periodo actual: " . date('F Y');
 

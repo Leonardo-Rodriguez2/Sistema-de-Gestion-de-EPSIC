@@ -47,7 +47,8 @@
         editar_cobro: ['cobro_id', 'referencia_pago'],
         enviar_lote_calle: ['mes', 'anio', 'referencia_lote'],
         enviar_lote_barrio: ['periodo_mes', 'periodo_anio'],
-        actualizar_configuracion_barrio: ['cuota_mensual', 'precio_comercio', 'precio_tienda', 'precio_empresa', 'precio_urbanizacion', 'precio_otro', 'multa_renovacion', 'fecha_limite_pago'],
+        actualizar_configuracion_barrio: ['cuota_mensual', 'precio_comercio', 'precio_tienda', 'precio_empresa', 'precio_urbanizacion', 'precio_otro', 'precio_especial', 'precio_bolivar', 'multa_renovacion', 'fecha_limite_pago'],
+        actualizar_tasa_bolivar: [],
         enviar_certificado_calle: ['lote_calle_id'],
         verificar_pago_casa: ['cobro_id', 'decision'],
         procesar_solicitud: ['solicitud_id', 'estado'],
@@ -279,7 +280,7 @@
                 return;
             }
 
-            if (name === 'cuota_mensual' || name === 'multa_renovacion' || name === 'monto' || name === 'precio_comercio' || name === 'precio_tienda' || name === 'precio_empresa' || name === 'precio_urbanizacion' || name === 'precio_otro') {
+            if (name === 'cuota_mensual' || name === 'multa_renovacion' || name === 'monto' || name === 'precio_comercio' || name === 'precio_tienda' || name === 'precio_empresa' || name === 'precio_urbanizacion' || name === 'precio_otro' || name === 'precio_especial') {
                 if (type !== 'number') el.type = 'number';
                 el.setAttribute('step', '0.01');
                 el.setAttribute('min', name === 'cuota_mensual' ? '0.01' : '0');
@@ -531,7 +532,7 @@
                 return;
             }
 
-            if (name === 'cuota_mensual' || name === 'multa_renovacion' || name === 'monto' || name === 'precio_comercio' || name === 'precio_tienda' || name === 'precio_empresa' || name === 'precio_urbanizacion' || name === 'precio_otro') {
+            if (name === 'cuota_mensual' || name === 'multa_renovacion' || name === 'monto' || name === 'precio_comercio' || name === 'precio_tienda' || name === 'precio_empresa' || name === 'precio_urbanizacion' || name === 'precio_otro' || name === 'precio_especial') {
                 var monto = Number(value.replace(',', '.'));
                 var minimo = (name === 'cuota_mensual' || name.indexOf('precio_') === 0) ? 0.01 : 0;
                 if (!isFinite(monto) || monto < minimo) {

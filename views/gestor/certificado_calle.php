@@ -96,7 +96,7 @@ if (!$lote_calle_id) {
             (int)$primero['periodo_mes'] . '/' . (int)$primero['periodo_anio'],
             count($loteCertificados),
             array_sum(array_map(static function ($fila) { return (int)$fila['total_casas']; }, $loteCertificados)),
-            number_format(array_sum(array_map(static function ($fila) { return (float)$fila['monto_recolectado']; }, $loteCertificados)), 2, '.', ','),
+            monto(array_sum(array_map(static function ($fila) { return (float)$fila['monto_recolectado']; }, $loteCertificados))),
             $vistaFacturacion === 'pendientes' ? 'Pendiente' : 'Emitida',
         ];
     }
@@ -169,7 +169,7 @@ if (!$lote_calle_id) {
                         <td><?= (int)$primero['periodo_mes'] ?>/<?= (int)$primero['periodo_anio'] ?></td>
                         <td><?= count($loteCertificados) ?></td>
                         <td><?= $totalCasas ?></td>
-                        <td>Bs. <?= number_format($totalPagado, 2) ?></td>
+                        <td><?= monto($totalPagado) ?></td>
                         <td>
                             <?php if ($puedeEnviarFacturas && $enviadoBarrio): ?>
                                 <form method="POST" action="router.php?page=gestor_certificado_calle">
@@ -335,7 +335,7 @@ ob_start();
 <div class="cert invoice-document" style="max-width:850px; margin:0 auto; background:#fff; border-radius:12px; overflow:hidden; box-shadow:0 10px 40px rgba(0,0,0,0.12); font-family:'Poppins',sans-serif;">
     <!-- HEADER -->
     <div class="header invoice-header" style="background:linear-gradient(135deg,#33485C 0%,#33485C 50%,#111827 100%); color:#fff; padding:35px 40px; position:relative;">
-        <div style="font-size:11px; opacity:0.7; margin-bottom:8px;">SISTEMA DE GESTIÓN DE RECICLAJE — EPSIC / EcoCusco</div>
+        <div style="font-size:11px; opacity:0.7; margin-bottom:8px;">SISTEMA DE GESTIÓN DE RECICLAJE — EPSIC / EcoReciclaje</div>
         <h1 style="margin:0; font-size:26px; font-weight:800; letter-spacing:1px;">FACTURA DE RECAUDACIÓN</h1>
         <div style="font-size:12px; opacity:0.8; margin-top:6px;">Documento que certifica la correcta recaudación del servicio de reciclaje</div>
         <div class="numero" style="position:absolute; right:30px; top:30px; text-align:right;">
@@ -360,7 +360,7 @@ ob_start();
                 </div>
                 <div style="background:#F9FAFB; padding:12px 14px; border-radius:8px;">
                     <label style="font-size:10px; color:#9CA3AF; font-weight:600; display:block; margin-bottom:3px; text-transform:uppercase;">Ciudad</label>
-                    <span style="font-size:14px; font-weight:700; color:#111827;"><?= htmlspecialchars($lote['ciudad'] ?? 'Cusco') ?></span>
+                    <span style="font-size:14px; font-weight:700; color:#111827;"><?= htmlspecialchars($lote['ciudad'] ?? '') ?></span>
                 </div>
                 <div style="background:#F9FAFB; padding:12px 14px; border-radius:8px;">
                     <label style="font-size:10px; color:#9CA3AF; font-weight:600; display:block; margin-bottom:3px; text-transform:uppercase;">Periodo de Facturación</label>
@@ -410,15 +410,15 @@ ob_start();
                     <div style="font-size:10px; color:#6B7280; margin-top:4px; text-transform:uppercase;">Morosas</div>
                 </div>
                 <div style="text-align:center; padding:16px 8px; border-radius:10px; background:#F9FAFB; border:1px solid #E5E7EB;">
-                    <div style="font-size:28px; font-weight:800; color:#33485C;">Bs. <?= number_format($lote['monto_recolectado'], 2) ?></div>
+                    <div style="font-size:28px; font-weight:800; color:#33485C;"><?= monto($lote['monto_recolectado']) ?></div>
                     <div style="font-size:10px; color:#6B7280; margin-top:4px; text-transform:uppercase;">Recolectado</div>
                 </div>
             </div>
             <div style="border:2px solid #A9C0D3; border-radius:10px; padding:16px; background:#EEF2F6; margin:16px 0; text-align:center;">
                 <div style="font-size:12px; color:#33485C;">MONTO ESPERADO</div>
-                <div style="font-size:24px; font-weight:800; color:#33485C;">Bs. <?= number_format($lote['monto_esperado'], 2) ?></div>
+                <div style="font-size:24px; font-weight:800; color:#33485C;"><?= monto($lote['monto_esperado']) ?></div>
                 <div style="font-size:12px; color:#33485C; margin-top:4px;">
-                    Diferencia: Bs. <?= number_format($lote['monto_esperado'] - $lote['monto_recolectado'], 2) ?>
+                    Diferencia: <?= monto($lote['monto_esperado'] - $lote['monto_recolectado']) ?>
                     <?php if ($lote['alerta_deuda']): ?>
                         <span style="color:#7A6A4F;"> ⚠️ Alerta de deuda</span>
                     <?php else: ?>
@@ -487,13 +487,13 @@ ob_start();
                         </td>
                         <td style="padding:7px 10px; border-bottom:1px solid #F3F4F6; font-size:10px; color:#6B7280;"><?= htmlspecialchars($v['referencia_pago'] ?? '—') ?></td>
                         <td style="padding:7px 10px; border-bottom:1px solid #F3F4F6; text-align:right; font-weight:700;">
-                            <?php if ($v['monto']): ?>Bs. <?= number_format($v['monto'], 2) ?><?php endif; ?>
+                            <?php if ($v['monto']): ?><?= monto($v['monto']) ?><?php endif; ?>
                         </td>
                     </tr>
                     <?php $total_monto += (float)($v['monto'] ?? 0); endforeach; ?>
                     <tr style="border-top:2px solid #33485C; background:#EEF2F6;">
                         <td colspan="7" style="padding:10px; font-weight:800; text-align:right;">TOTAL RECAUDADO</td>
-                        <td style="padding:10px; font-weight:800; color:#33485C; font-size:15px; text-align:right;">Bs. <?= number_format($total_monto, 2) ?></td>
+                        <td style="padding:10px; font-weight:800; color:#33485C; font-size:15px; text-align:right;"><?= monto($total_monto) ?></td>
                     </tr>
                 </tbody>
             </table>
@@ -505,7 +505,7 @@ ob_start();
             <h3 style="font-size:11px; font-weight:700; color:#6B7280; text-transform:uppercase; letter-spacing:1px; margin:0 0 12px 0; border-bottom:2px solid #33485C; padding-bottom:6px;">Declaración de Verificación</h3>
             <div style="background:#F9FAFB; padding:16px 20px; border-radius:10px; border-left:4px solid #33485C; font-size:12px; color:#4B5563; line-height:1.8;">
                 El gestor de pagos, en virtud de las facultades conferidas por el Sistema de Gestión de Reciclaje
-                EPSIC / EcoCusco, <strong>CERTIFICA</strong> que la recaudación del servicio de reciclaje
+                EPSIC / EcoReciclaje, <strong>CERTIFICA</strong> que la recaudación del servicio de reciclaje
                 correspondiente a la calle <strong><?= htmlspecialchars($lote['calle_nombre']) ?></strong> del barrio
                 <strong><?= htmlspecialchars($lote['barrio_nombre']) ?></strong>, durante el periodo de
                 <strong><?= $meses_nombres[$lote['periodo_mes']] ?> de <?= $lote['periodo_anio'] ?></strong>,
@@ -538,7 +538,7 @@ ob_start();
 
     <div class="invoice-footer" style="background:#F9FAFB; padding:20px 40px; text-align:center; font-size:10px; color:#9CA3AF; border-top:1px solid #E5E7EB;">
         Esta factura contiene el detalle oficial de la recaudación por calle.<br>
-        Generado automáticamente por el Sistema EcoCusco — Emitido el <?= date('d/m/Y H:i') ?>
+        Generado automáticamente por el Sistema EcoReciclaje — Emitido el <?= date('d/m/Y H:i') ?>
     </div>
 </div>
 <?php

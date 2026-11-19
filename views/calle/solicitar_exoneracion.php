@@ -50,7 +50,7 @@ $tiposExencion = [
     'otro'           => 'Otro',
 ];
 
-$title = "Solicitar Exoneración - EcoCusco";
+$title = "Solicitar Exoneración - EcoReciclaje";
 $header_title = "Exoneraciones de Cobro";
 $header_subtitle = "Solicita que una vivienda quede exonerada del pago mensual.";
 

@@ -30,7 +30,7 @@ ALTER TABLE recaudaciones AUTO_INCREMENT = 1;
 
 -- Empresas recicladoras
 INSERT INTO empresas (nombre, descripcion, contacto, materiales) VALUES
-('EcoCusco Reciclaje S.A.C.', 'Empresa dedicada al acopio, clasificación y comercialización de residuos reciclables en Cusco.', '987654321 / ventas@ecocusco.com', 'Plástico PET, Cartón, Papel, Vidrio, Aluminio'),
+('EcoReciclaje S.A.C.', 'Empresa dedicada al acopio, clasificación y comercialización de residuos reciclables.', '987654321 / ventas@ecoreciclaje.com', 'Plástico PET, Cartón, Papel, Vidrio, Aluminio'),
 ('GreenAndes SRL', 'Centro de acopio certificado con enfoque en economía circular y RCDs.', '984123456 / contacto@greenandes.pe', 'Metal, Chatarra, Vidrio, Plástico industrial'),
 ('Andes Circular', 'Aliado estratégico para reciclaje electrónico y gestión responsable.', '976543210 / operaciones@andescircular.pe', 'RAEE, Baterías, Cables, Equipos informáticos');
 

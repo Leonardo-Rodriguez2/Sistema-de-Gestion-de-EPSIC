@@ -98,12 +98,12 @@ foreach ($viviendas as $v) {
         $v['propietario'] ?? '',
         formato_identificacion($v['cedula'] ?? '', $v['cedula_tipo'] ?? 'V', $v['otro_identificador'] ?? ''),
         tipo_predio_etiqueta($v['tipo_predio'] ?? 'Vivienda'),
-        number_format(monto_predio_efectivo($v['tipo_predio'] ?? 'Vivienda', $v['cantidad_casas'] ?? 1, tarifas_barrio($pdo, $v['barrio_id'])), 2, '.', ''),
+        monto(monto_predio_efectivo($v['tipo_predio'] ?? 'Vivienda', $v['cantidad_casas'] ?? 1, tarifas_barrio($pdo, $v['barrio_id']))),
         $v['calle_nombre'] ?? 'Sin calle',
         $v['barrio_nombre'] ?? '',
         $v['pago_mes_estado'] ?? 'Sin registro',
         (int)($v['deudas_pendientes'] ?? 0),
-        number_format((float)($v['deuda_total'] ?? 0), 2, '.', ','),
+        monto((float)($v['deuda_total'] ?? 0)),
         !empty($v['exento_cobro']) ? 'Sí' : 'No',
     ];
 }
@@ -116,7 +116,7 @@ reporte_exportar_si_solicitado(
     'Revisión técnica de predios para control de pagos'
 );
 
-$title = "Estado de Viviendas - EcoCusco";
+$title = "Estado de Viviendas - EcoReciclaje";
 $header_title = "Consulta de Viviendas";
 $header_subtitle = "Revisión técnica de predios para control de pagos.";
 
@@ -218,7 +218,7 @@ ob_start();
                     </td>
                     <td style="padding: 10px; text-align: center; font-weight:700;">
                         <?php if ((float)$v['deuda_total'] > 0 && !$v['exento_cobro']): ?>
-                            <span style="color:#8A5A5A;">Bs. <?= number_format((float)$v['deuda_total'],2) ?></span>
+                            <span style="color:#8A5A5A;"><?= monto((float)$v['deuda_total']) ?></span>
                         <?php else: ?>
                             <span style="color:#9CA3AF;">—</span>
                         <?php endif; ?>
@@ -245,7 +245,7 @@ ob_start();
                                     <?php foreach($historial as $h): ?>
                                         <tr style="border-bottom:1px solid #F3F4F6;">
                                             <td style="padding:3px;"><?= $h['mes'] ?>/<?= $h['anio'] ?></td>
-                                            <td style="padding:3px; font-weight:600;">Bs. <?= number_format($h['monto'],2) ?></td>
+                                            <td style="padding:3px; font-weight:600;"><?= monto($h['monto']) ?></td>
                                             <td style="padding:3px;">
                                                 <span style="background:<?= $h['estado']=='Pagado'?'#E9EFF4':'#F4EDED' ?>; color:<?= $h['estado']=='Pagado'?'#33485C':'#7A4F4F' ?>; padding:1px 5px; border-radius:3px; font-size:9px;">
                                                     <?= $h['estado'] == 'Pagado' ? '✓ Pagado' : ($h['estado'] == 'Anulado' ? '✗ Anulado' : '⏳ Pendiente') ?>

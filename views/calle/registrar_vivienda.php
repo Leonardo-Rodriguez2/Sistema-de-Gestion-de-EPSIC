@@ -2,7 +2,7 @@
 // views/calle/registrar_vivienda.php
 $user = check_dashboard_access([6]);
 
-$title = "Solicitar Registro - EcoCusco";
+$title = "Solicitar Registro - EcoReciclaje";
 $header_title = "Nueva Vivienda";
 $header_subtitle = "Completa los datos para enviar una solicitud de registro al encargado de barrio.";
 

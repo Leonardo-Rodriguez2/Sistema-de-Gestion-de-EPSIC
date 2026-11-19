@@ -7,6 +7,24 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title><?php echo $title ?? 'Dashboard - EPSIC'; ?></title>
+  <script>
+    /* Todos los importes viajan en dólares; la tasa del barrio se aplica aquí
+       para mostrar siempre el equivalente en bolívares. */
+    const TASA_BS = <?= json_encode((float)tasa_bolivar()) ?>;
+    function fmtUSD(valor) {
+      return 'US$ ' + Number(valor || 0).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+    }
+    function fmtBS(valorBs) {
+      return 'Bs. ' + Number(valorBs || 0).toLocaleString('es-VE', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+    }
+    function fmtMonto(valorUsd) {
+      return fmtUSD(valorUsd) + ' / ' + fmtBS((Number(valorUsd) || 0) * TASA_BS);
+    }
+  </script>
+  <style>
+    .cur-usd { color: #33485C; font-weight: 700; }
+    .cur-bs { color: #6B7280; font-size: .92em; }
+  </style>
   <link rel="icon" href="/reciclaje/img/logo.png?v=4" type="image/png">
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/reciclaje/assets/css/style.css">

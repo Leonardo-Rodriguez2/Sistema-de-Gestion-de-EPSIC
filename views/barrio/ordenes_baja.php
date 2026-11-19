@@ -55,7 +55,7 @@ foreach ($ordenes as $o) {
         '#' . ($v['numero_casa'] ?? ''),
         $v['propietario'] ?? '',
         formato_identificacion($v['cedula'] ?? '', $v['cedula_tipo'] ?? 'V', $v['otro_identificador'] ?? ''),
-        number_format((float)($o['monto_deuda'] ?? 0), 2, '.', ','),
+        monto((float)($o['monto_deuda'] ?? 0)),
         $o['detalles_deuda'] ?? '',
         trim(($o['solicitante_nombre'] ?? '') . ' ' . ($o['solicitante_apellido'] ?? '')),
     ];
@@ -65,11 +65,11 @@ reporte_exportar_si_solicitado(
     'Órdenes de baja pendientes',
     ['Fecha', 'Calle', 'Casa', 'Propietario', 'Identificación', 'Deuda pendiente', 'Detalles', 'Solicitante'],
     $filasOrdenes,
-    array_merge($metaOrdenes, ['Total órdenes' => count($filasOrdenes), 'Deuda total' => number_format($totalDeudaOrdenes, 2, '.', ',')]),
+    array_merge($metaOrdenes, ['Total órdenes' => count($filasOrdenes), 'Deuda total' => monto($totalDeudaOrdenes)]),
     'Retiros de servicio pendientes de confirmación'
 );
 
-$title = "Órdenes de Baja - EcoCusco";
+$title = "Órdenes de Baja - EcoReciclaje";
 $header_title = "Ejecución de Bajas";
 $header_subtitle = "Confirma el retiro del servicio para las viviendas solicitadas por los encargados de calle.";
 
@@ -77,7 +77,7 @@ ob_start();
 ?>
     <?php render_dashboard_alerts($mensaje_exito ?? null, $mensaje_error ?? null); ?>
 
-    <?= reporte_encabezado_impresion('Órdenes de baja pendientes', 'Retiros de servicio pendientes de confirmación', array_merge($metaOrdenes, ['Total órdenes' => count($ordenes), 'Deuda total' => 'S/ ' . number_format($totalDeudaOrdenes, 2, '.', ',')])) ?>
+    <?= reporte_encabezado_impresion('Órdenes de baja pendientes', 'Retiros de servicio pendientes de confirmación', array_merge($metaOrdenes, ['Total órdenes' => count($ordenes), 'Deuda total' => monto($totalDeudaOrdenes)])) ?>
     <?= reporte_botonera() ?>
 
     <form method="GET" action="router.php" class="card no-print" style="margin-bottom:18px; padding:14px 16px; display:grid; grid-template-columns:minmax(200px,1.5fr) repeat(2,minmax(140px,1fr)) auto; gap:10px; align-items:end;">
@@ -140,7 +140,7 @@ ob_start();
                                 <div style="font-size: 11px; color: #6B7280;">Casa #<?= htmlspecialchars($v['numero_casa'] ?? '#') ?> (ID: <?= $o['vivienda_id'] ?>)</div>
                             </td>
                             <td style="padding: 12px; text-align: right;">
-                                <div style="font-weight: 800; color: #7A4F4F;">S/ <?= number_format($o['monto_deuda'], 2) ?></div>
+                                <div style="font-weight: 800; color: #7A4F4F;"><?= monto($o['monto_deuda']) ?></div>
                                 <div style="font-size: 9px; color: #6B7280;"><?= htmlspecialchars($o['detalles_deuda']) ?></div>
                             </td>
                             <td style="padding: 12px; text-align: center;">

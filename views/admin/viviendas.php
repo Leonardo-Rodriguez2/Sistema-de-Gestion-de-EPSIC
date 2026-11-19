@@ -74,7 +74,7 @@ foreach ($viviendas as $v) {
         formato_identificacion($v['cedula'] ?? '', $v['cedula_tipo'] ?? 'V', $v['otro_identificador'] ?? ''),
         $v['direccion'] ?? '',
         tipo_predio_etiqueta($v['tipo_predio'] ?? 'Vivienda'),
-        number_format(monto_predio_efectivo($v['tipo_predio'] ?? 'Vivienda', $v['cantidad_casas'] ?? 1, tarifas_barrio($pdo, $v['barrio_id'])), 2, '.', ''),
+        monto(monto_predio_efectivo($v['tipo_predio'] ?? 'Vivienda', $v['cantidad_casas'] ?? 1, tarifas_barrio($pdo, $v['barrio_id']))),
         $v['barrio_nombre'] ?? '',
         $v['calle_nombre'] ?? 'Sin calle',
         trim(($v['enc_nombre'] ?? '') . ' ' . ($v['enc_apellido'] ?? '')),
@@ -91,7 +91,7 @@ reporte_exportar_si_solicitado(
     'Listado administrativo de viviendas'
 );
 
-$title = "Viviendas - EcoCusco";
+$title = "Viviendas - EcoReciclaje";
 $header_title = "Gestión de Viviendas";
 $header_subtitle = "Monitoreo y administración de predios registrados.";
 
