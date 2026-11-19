@@ -11,9 +11,7 @@ DELETE FROM lotes_calle;
 DELETE FROM lotes_barrio;
 DELETE FROM exenciones_cobro;
 DELETE FROM reportes;
-DELETE FROM solicitudes_servicio;
 DELETE FROM solicitudes_vivienda;
-DELETE FROM empresas;
 
 ALTER TABLE pagos AUTO_INCREMENT = 1;
 ALTER TABLE cobros AUTO_INCREMENT = 1;
@@ -23,9 +21,7 @@ ALTER TABLE lotes_calle AUTO_INCREMENT = 1;
 ALTER TABLE lotes_barrio AUTO_INCREMENT = 1;
 ALTER TABLE exenciones_cobro AUTO_INCREMENT = 1;
 ALTER TABLE reportes AUTO_INCREMENT = 1;
-ALTER TABLE solicitudes_servicio AUTO_INCREMENT = 1;
 ALTER TABLE solicitudes_vivienda AUTO_INCREMENT = 1;
-ALTER TABLE empresas AUTO_INCREMENT = 1;
 
 DELETE FROM detalles_encargado_calle;
 DELETE FROM detalles_encargado_barrio;
@@ -147,11 +143,6 @@ INSERT INTO recibos_finiquito (lote_barrio_id, barrio_id, periodo_mes, periodo_a
 INSERT INTO exenciones_cobro (vivienda_id, calle_id, barrio_id, tipo_exencion, descripcion, creado_por, estado, aprobado_por, fecha_creacion, fecha_revision) VALUES
 (13,2,1,'pobreza','Situación económica vulnerable - Exención temporal',1,'Aprobado',1,NOW(),NOW());
 
-INSERT INTO empresas (nombre, descripcion, contacto, materiales) VALUES
-('EcoReciclaje S.A.C.', 'Empresa dedicada al acopio, clasificación y comercialización de residuos reciclables.', '987654321 / ventas@ecoreciclaje.com', 'Plástico PET, Cartón, Papel, Vidrio, Aluminio'),
-('GreenAndes SRL', 'Centro de acopio certificado con enfoque en economía circular y gestión integral.', '984123456 / contacto@greenandes.pe', 'Metal, Chatarra, Vidrio, Plástico Industrial'),
-('Andes Circular', 'Aliado estratégico para reciclaje electrónico, RAEE y valorización.', '976543210 / operaciones@andescircular.pe', 'RAEE, Baterías, Cables, Equipos Informáticos'),
-('ReciclaVerde EIRL', 'Cooperativa de recicladores con enfoque social inclusivo.', '975432108 / info@reciclaverde.pe', 'Cartón, Papel, Plástico, Aluminio, Tetra Pak');
 
 INSERT INTO reportes (usuario_id, ubicacion_nombre, latitud, longitud, tipo_residuo, descripcion, cantidad, estado, fotos, fecha_reporte) VALUES
 (4,'Calle Principal - Santa Ana',-13.51800000,-71.97800000,'Plástico PET','Acumulación de botellas plásticas junto al contenedor comunitario.',15.50,'Completado','uploads/reportes/reporte_001.jpg','2026-07-01 09:15:00'),
@@ -171,16 +162,6 @@ INSERT INTO reportes (usuario_id, ubicacion_nombre, latitud, longitud, tipo_resi
 (7,'Calle Hatun Rumiyoc - San Blas',-13.51680000,-71.97820000,'Cartón','Cajas de delivery para acopio.',24.30,'Pendiente','uploads/reportes/reporte_015.jpg','2026-07-15 09:10:00'),
 (10,'Jr. Saphy - Wanchaq',-13.52400000,-71.96900000,'Plástico PET','Botellas PET compactadas.',18.90,'Completado','uploads/reportes/reporte_016.jpg','2026-07-16 11:05:00');
 
-INSERT INTO solicitudes_servicio (representante, telefono, barrio, tipo_contrato, correo, estado, fecha) VALUES
-('María Quispe Ccahuana','984562871','Barrio San Blas','Contrato Anual','maria.quispe@gmail.com','Pendiente','2026-07-08 10:22:00'),
-('José Condori Mamani','976843215','Santa Ana','Contrato Semestral','jose.condori@hotmail.com','Atendido','2026-07-09 14:18:00'),
-('Rosa Huamán Flores','987326548','Wanchaq','Contrato Anual','rosa.huaman@yahoo.com','Pendiente','2026-07-10 09:35:00'),
-('Carlos Sánchez Yana','965874123','Barrio San Blas','Contrato Trimestral','carlos.sanchez@gmail.com','Atendido','2026-07-11 11:47:00'),
-('Lucía Puma Ticona','974562398','Santa Ana','Contrato Anual','lucia.puma@gmail.com','Descartado','2026-07-12 16:12:00'),
-('Edgar Cárdenas Loaiza','986742159','Wanchaq','Contrato Anual','edgar.cardenas@gmail.com','Pendiente','2026-07-13 08:54:00'),
-('Juana Apaza Mamani','975863421','Santiago','Contrato Anual','juana.apaza@gmail.com','Pendiente','2026-07-14 12:26:00'),
-('Fernando Yana Ccahuana','974752318','Barrio San Blas','Contrato Semestral','fernando.yana@gmail.com','Atendido','2026-07-15 09:18:00'),
-('Gloria Mamani Flores','973641285','Santa Ana','Contrato Anual','gloria.mamani@gmail.com','Pendiente','2026-07-16 10:42:00');
 
 INSERT INTO solicitudes_vivienda (tipo, calle_id, vivienda_id, monto_deuda, detalles_deuda, propietario, cedula, numero_casa, referencia, estado, creado_por, revisado_por, fecha_creacion, fecha_revision) VALUES
 ('Alta',1,NULL,0.00,NULL,'Familia Yana Ccahuana','45678912','105','Casa con rejas verdes','Aprobado',4,5,'2026-07-04 13:55:56','2026-07-04 21:07:19'),
@@ -206,9 +187,7 @@ UNION ALL SELECT 'Lotes Calle', COUNT(*) FROM lotes_calle
 UNION ALL SELECT 'Lotes Barrio', COUNT(*) FROM lotes_barrio
 UNION ALL SELECT 'Recibos Finiquito', COUNT(*) FROM recibos_finiquito
 UNION ALL SELECT 'Reportes', COUNT(*) FROM reportes
-UNION ALL SELECT 'Solicitudes Servicio', COUNT(*) FROM solicitudes_servicio
 UNION ALL SELECT 'Solicitudes Vivienda', COUNT(*) FROM solicitudes_vivienda
-UNION ALL SELECT 'Empresas', COUNT(*) FROM empresas
 UNION ALL SELECT 'Exenciones', COUNT(*) FROM exenciones_cobro
 UNION ALL SELECT 'Encargado Calle', COUNT(*) FROM detalles_encargado_calle
 UNION ALL SELECT 'Encargado Barrio', COUNT(*) FROM detalles_encargado_barrio

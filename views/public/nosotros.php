@@ -1,56 +1,5 @@
 <?php
-// Lógica Formulario Solicitud
-require_once __DIR__ . '/../../app/config.php';
-require_once __DIR__ . '/../../autoload.php';
-require_once __DIR__ . '/../../app/validacion.php';
-
-$mensaje_form = '';
-$error_form   = '';
-
-if ($_SERVER["REQUEST_METHOD"] == "POST" && ($_POST['form_type'] ?? '') === 'solicitud') {
-    try {
-        $pdo = (new \app\models\mainModel())->conectar();
-
-        $nombre   = trim($_POST['nombre'] ?? '');
-        $telefono = trim($_POST['telefono'] ?? '');
-        $barrio   = trim($_POST['barrio'] ?? '');
-        $tipo     = trim($_POST['tipo'] ?? '');
-        $correo   = trim($_POST['correo'] ?? '');
-
-        $tiposContrato = [
-            'Comité Vecinal (Varias casas)',
-            'Empresa Privada',
-            'Condominio/Edificio',
-            'Vivienda Unifamiliar',
-        ];
-
-        $errores = [];
-        validacion_agregar_error($errores, validacion_nombre_persona($nombre, 'El nombre del representante', true));
-        validacion_agregar_error($errores, validacion_telefono($telefono, 'El teléfono', true));
-        validacion_agregar_error($errores, validacion_nombre_lugar($barrio, 'El barrio / urbanización', 2, 150, true));
-        validacion_agregar_error($errores, validacion_opcion($tipo, $tiposContrato, 'El tipo de contrato', true));
-        validacion_agregar_error($errores, validacion_email($correo, 'El correo electrónico', true));
-
-        if (!empty($errores)) {
-            throw new \Exception(implode(' ', $errores));
-        }
-
-        // Guardar el teléfono únicamente con dígitos.
-        normalizar_datos_post($_POST);
-        $telefono = $_POST['telefono'];
-
-        $stmt = $pdo->prepare(
-            "INSERT INTO solicitudes_servicio (representante, telefono, barrio, tipo_contrato, correo, estado)
-             VALUES (?, ?, ?, ?, ?, 'Pendiente')"
-        );
-        $stmt->execute([$nombre, $telefono, $barrio, $tipo, $correo]);
-        $mensaje_form = "¡Solicitud registrada correctamente! Un asesor de ventas se comunicará pronto al celular proporcionado.";
-    } catch (\Throwable $e) {
-        $error_form = $e->getMessage();
-    }
-}
-
-$title = "Nosotros | EPSIC";
+$title = "Nosotros | EcoReciclaje";
 ob_start();
 ?>
 <main>
@@ -105,7 +54,7 @@ ob_start();
                 <p style="color: var(--text-gray); font-size: 14px;">Facturación clara, sin cobros ocultos, visible en la plataforma.</p>
             </div>
         </div>
-// hola mundo
+
         <!-- Historia -->
         <div class="history-section">
             <h2 style="font-size: 32px; color: var(--primary-dark); margin-bottom: 20px;">Nuestra Historia</h2>
@@ -148,58 +97,15 @@ ob_start();
             <h2>¿Es usted jefe o encargado de un Barrio o Condominio?</h2>
             <p>Solicite precios corporativos mensuales para todas sus viviendas.</p>
             
-            <?php if(!empty($mensaje_form)): ?>
-                <div style="background: #E9EFF4; color: #33485C; padding: 15px; border-radius: 8px; margin-bottom: 20px; font-weight: 600;">
-                    <i class="fas fa-check-circle"></i> <?php echo htmlspecialchars($mensaje_form); ?>
-                </div>
-            <?php elseif(!empty($error_form)): ?>
-                <div style="background: #F7F2F2; color: #7A4F4F; padding: 15px; border-radius: 8px; margin-bottom: 20px; font-weight: 600;">
-                    <i class="fas fa-triangle-exclamation"></i> <?php echo htmlspecialchars($error_form); ?>
-                </div>
-            <?php endif; ?>
-
             <div style="background:#EEF4F8; border:1px solid #D6E2EC; border-left:5px solid #4C6E91; padding:14px 18px; border-radius:8px; margin-bottom:22px; color:#33485C; font-size:14px;">
                 <strong>¿Quieres ver un estimado antes?</strong> Usa la calculadora de cotización para conocer el monto aproximado en dólares y bolívares.
                 <a href="cotizacion.php" style="color:#4C6E91; font-weight:700; text-decoration:underline;">Calcular mi cotización</a>
             </div>
 
-            <form method="POST" action="nosotros.php">
-                <input type="hidden" name="form_type" value="solicitud">
-                <h3 style="margin-top: 0; margin-bottom: 20px; font-size: 22px;"><i class="fas fa-file-signature" style="color:var(--primary);"></i> Formulario de Solicitud de Servicio</h3>
-                
-                <div class="form-grid">
-                    <div>
-                        <label>Nombre del Representante *</label>
-                        <input type="text" name="nombre" placeholder="" required>
-                    </div>
-                    <div>
-                        <label>Teléfono Celular *</label>
-                        <input type="text" name="telefono" placeholder="" inputmode="numeric" pattern="[0-9]{7,11}" maxlength="11" minlength="7" title="Ingrese entre 7 y 11 números" required>
-                    </div>
-                    <div>
-                        <label>Barrio / Urbanización *</label>
-                        <input type="text" name="barrio" placeholder="" required>
-                    </div>
-                    <div>
-                        <label>Tipo de Contrato</label>
-                        <select name="tipo">
-                            <option>Comité Vecinal (Varias casas)</option>
-                            <option>Empresa Privada</option>
-                            <option>Condominio/Edificio</option>
-                            <option>Vivienda Unifamiliar</option>
-                        </select>
-                    </div>
-                </div>
-
-                <div style="margin-bottom: 20px; text-align: left;">
-                    <label>Correo Electrónico *</label>
-                    <input type="email" name="correo" placeholder="" required>
-                </div>
-
-                <button type="submit" class="cta-btn">Solicitar Cotización Gratuita <i class="fas fa-arrow-right"></i></button>
-            </form>
-            
-            <div style="margin-top: 25px; font-size: 14px; opacity: 0.6;">O comunícate al +51 084 254 365 o ventas@ecoreciclaje.com · Lunes a Viernes (8:00 a.m. - 6:00 p.m.)</div>
+            <div style="margin-top: 25px; font-size: 14px; opacity: 0.85; line-height: 1.8;">
+                <strong>EPSIC</strong> · Teléfono: <a href="tel:04160791814" style="color:#4C6E91;">04160791814</a> · Correo: <a href="mailto:epsiccaciqueticoporo2023@gmail.com" style="color:#4C6E91;">epsiccaciqueticoporo2023@gmail.com</a><br>
+                Ubicación: Calle 2 esquina - carrera 13, Barrio Obrero · Lunes a Viernes (8:00 a.m. - 6:00 p.m.)
+            </div>
         </div>
     </main>
 

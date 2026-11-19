@@ -5,7 +5,7 @@
     <div class="container">
       <div class="row g-4">
         <div class="col-md-4">
-          <h5 class="fw-bold text-white mb-3"><i class="fas fa-leaf text-success me-2"></i> EcoReciclaje Empresarial</h5>
+          <h5 class="fw-bold text-white mb-3"><i class="fas fa-leaf text-success me-2"></i> EPSIC · EcoReciclaje</h5>
           <p class="text-light pe-4">Transformando la recolección de basura en una cadena limpia, justa y sostenible mediante la gestión tercerizada. Contribuimos desde la base.</p>
         </div>
         <div class="col-md-2">
@@ -17,10 +17,10 @@
           </ul>
         </div>
         <div class="col-md-3">
-          <h6 class="fw-bold text-white mb-3">Contacto Comercial</h6>
-          <p class="mb-2 text-light"><i class="fas fa-envelope text-success me-2"></i> ventas@ecoreciclaje.com</p>
-          <p class="mb-2 text-light"><i class="fas fa-phone text-success me-2"></i> +51 084 254 365</p>
-          <p class="mb-2 text-light"><i class="fas fa-map-marker-alt text-success me-2"></i> Av. Cultura 1230, Perú</p>
+          <h6 class="fw-bold text-white mb-3">Contacto EPSIC</h6>
+          <p class="mb-2 text-light"><i class="fas fa-phone text-success me-2"></i> <a href="tel:04160791814" class="text-light text-decoration-none">04160791814</a></p>
+          <p class="mb-2 text-light"><i class="fas fa-envelope text-success me-2"></i> <a href="mailto:epsiccaciqueticoporo2023@gmail.com" class="text-light text-decoration-none">epsiccaciqueticoporo2023@gmail.com</a></p>
+          <p class="mb-2 text-light"><i class="fas fa-map-marker-alt text-success me-2"></i> Calle 2 esquina - carrera 13, Barrio Obrero</p>
         </div>
         <div class="col-md-3">
           <h6 class="fw-bold text-white mb-3">Portal de Afiliados</h6>
@@ -30,7 +30,7 @@
       </div>
       <hr class="mt-5 mb-4 border-secondary">
       <div class="text-center text-light small">
-        &copy; <?php echo date('Y'); ?> EcoReciclaje Holdings S.A.C. Todos los derechos reservados.
+        &copy; <?php echo date('Y'); ?> EPSIC · EcoReciclaje. Todos los derechos reservados.
       </div>
     </div>
 </footer>

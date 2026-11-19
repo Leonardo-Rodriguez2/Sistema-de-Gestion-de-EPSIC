@@ -32,22 +32,6 @@ class adminController extends mainModel {
             }
         }
 
-        // 0b. Actualizar estado de una solicitud de servicio (portal público)
-        if ($action === 'actualizar_solicitud_servicio') {
-            $solicitud_id = (int)($_POST['solicitud_id'] ?? 0);
-            $estado       = $_POST['estado'] ?? 'Pendiente';
-            if (!in_array($estado, ['Pendiente', 'Atendido', 'Descartado'], true)) {
-                $mensaje_error = "Estado de solicitud no válido.";
-            } elseif ($solicitud_id > 0) {
-                try {
-                    $this->ejecutarConsulta("UPDATE solicitudes_servicio SET estado = ? WHERE id = ?", [$estado, $solicitud_id]);
-                    $mensaje_exito = "Solicitud #{$solicitud_id} actualizada.";
-                } catch (\Exception $e) {
-                    $mensaje_error = "No se pudo actualizar la solicitud: " . $e->getMessage();
-                }
-            }
-        }
-
         // 1. Crear nuevo usuario
         if ($action === 'add_user') {
             $nombre    = trim($_POST['nombre'] ?? '');

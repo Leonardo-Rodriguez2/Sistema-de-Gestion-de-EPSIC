@@ -25,7 +25,6 @@
 
     var REQUIRED_BY_ACTION = {
         actualizar_reporte: ['reporte_id', 'estado'],
-        actualizar_solicitud_servicio: ['solicitud_id', 'estado'],
         add_user: ['nombre', 'apellido', 'email', 'rol_id'],
         edit_user: ['user_id', 'nombre', 'apellido', 'email', 'rol_id'],
         nueva_calle: ['nombre', 'barrio_id'],

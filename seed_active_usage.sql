@@ -172,15 +172,6 @@ LEFT JOIN recibos_finiquito r ON r.lote_barrio_id = lb.id
 WHERE lb.estado = 'Aprobado' AND r.id IS NULL;
 
 -- Solicitudes y actividad del portal.
-INSERT INTO solicitudes_servicio (representante, telefono, barrio, tipo_contrato, correo, estado, fecha)
-SELECT CONCAT('Cliente Demo ', n), CONCAT('98', LPAD(7000000 + n, 7, '0')),
-       sb.nombre,
-       CASE MOD(n, 3) WHEN 0 THEN 'Contrato Trimestral' WHEN 1 THEN 'Contrato Semestral' ELSE 'Contrato Anual' END,
-       CONCAT('cliente.demo', n, '@example.com'),
-       CASE MOD(n, 4) WHEN 0 THEN 'Pendiente' WHEN 1 THEN 'Atendido' WHEN 2 THEN 'Atendido' ELSE 'Descartado' END,
-       CONCAT('2026-', LPAD(MOD(n - 1, 6) + 1, 2, '0'), '-', LPAD(MOD(n - 25, 26) + 1, 2, '0'), ' 09:30:00')
-FROM (SELECT 1 n UNION ALL SELECT 2 UNION ALL SELECT 3 UNION ALL SELECT 4 UNION ALL SELECT 5 UNION ALL SELECT 6 UNION ALL SELECT 7 UNION ALL SELECT 8 UNION ALL SELECT 9 UNION ALL SELECT 10 UNION ALL SELECT 11 UNION ALL SELECT 12 UNION ALL SELECT 13 UNION ALL SELECT 14 UNION ALL SELECT 15 UNION ALL SELECT 16 UNION ALL SELECT 17 UNION ALL SELECT 18) nums
-JOIN seed_barrios sb ON sb.orden = 1 + MOD(n - 1, (SELECT COUNT(*) FROM seed_barrios));
 
 INSERT INTO reportes (usuario_id, ubicacion_nombre, latitud, longitud, tipo_residuo, descripcion, cantidad, estado, fotos, fecha_reporte)
 SELECT NULL, CONCAT('Punto ecológico ', n), -13.51 - (n / 10000), -71.97 - (n / 10000),
@@ -205,11 +196,6 @@ FROM (SELECT 1 n UNION ALL SELECT 2 UNION ALL SELECT 3 UNION ALL SELECT 4 UNION 
 JOIN seed_barrios sb ON sb.orden = 1 + MOD(n - 1, (SELECT COUNT(*) FROM seed_barrios))
 JOIN seed_calles sc ON sc.orden = 1 + MOD(n - 1, (SELECT COUNT(*) FROM seed_calles));
 
-INSERT INTO empresas (nombre, descripcion, contacto, materiales)
-SELECT CONCAT('Aliado Ambiental ', n), 'Empresa aliada para valorización y reciclaje responsable.',
-       CONCAT('98', LPAD(7200000 + n, 7, '0'), ' / aliado', n, '@example.com'),
-       CASE MOD(n, 3) WHEN 0 THEN 'Cartón, Papel' WHEN 1 THEN 'Plástico, Vidrio' ELSE 'Aluminio, Metal' END
-FROM (SELECT 1 n UNION ALL SELECT 2 UNION ALL SELECT 3 UNION ALL SELECT 4 UNION ALL SELECT 5 UNION ALL SELECT 6) nums;
 
 -- Solicitudes de vivienda con historial mixto: pendientes, aprobadas y rechazadas.
 INSERT INTO solicitudes_vivienda (
@@ -301,8 +287,5 @@ UPDATE recibos_finiquito
 SET fecha_emision = CONCAT('2026-', LPAD(MOD(id - 1, 6) + 1, 2, '0'), '-28 09:00:00')
 WHERE fecha_emision = '0000-00-00 00:00:00';
 
-UPDATE solicitudes_servicio
-SET fecha = CONCAT('2026-', LPAD(MOD(id - 1, 6) + 1, 2, '0'), '-15 09:30:00')
-WHERE fecha = '0000-00-00 00:00:00';
 
 COMMIT;

@@ -202,11 +202,6 @@ class viewsController extends viewsModel {
             $controllerClass = "app\\controllers\\adminController";
         }
 
-        // Solicitudes de servicio del portal público: bandeja compartida.
-        if ($action === 'actualizar_solicitud_servicio') {
-            $controllerClass = "app\\controllers\\adminController";
-        }
-
         // Recepción de residuos: el módulo vive fuera de las carpetas por rol.
         if ($page === 'recepcion_residuos' || in_array($action, ['registrar_recepcion_residuo', 'anular_recepcion_residuo'], true)) {
             $controllerClass = "app\\controllers\\recepcionController";

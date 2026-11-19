@@ -513,7 +513,6 @@ if (!function_exists('validar_accion_post')) {
 
         $requeridos = [
             'actualizar_reporte'            => ['reporte_id' => 'Reporte', 'estado' => 'Estado'],
-            'actualizar_solicitud_servicio' => ['solicitud_id' => 'Solicitud', 'estado' => 'Estado'],
             'add_user'                      => ['nombre' => 'Nombre', 'apellido' => 'Apellido', 'email' => 'Correo electrónico', 'rol_id' => 'Rol'],
             'edit_user'                     => ['user_id' => 'Usuario', 'nombre' => 'Nombre', 'apellido' => 'Apellido', 'email' => 'Correo electrónico', 'rol_id' => 'Rol'],
             'nueva_calle'                   => ['nombre' => 'Nombre de la calle', 'barrio_id' => 'Barrio'],
@@ -702,7 +701,6 @@ if (!function_exists('validar_accion_post')) {
         // Estados y decisiones permitidas.
         $opciones = [
             'actualizar_reporte'            => ['estado' => ['Pendiente', 'En proceso', 'Completado']],
-            'actualizar_solicitud_servicio' => ['estado' => ['Pendiente', 'Atendido', 'Descartado']],
             'procesar_solicitud'            => ['estado' => ['Aprobado', 'Rechazado']],
             'verificar_pago_casa'           => ['decision' => ['Verificado', 'Rechazado']],
         ];

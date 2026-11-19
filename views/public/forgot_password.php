@@ -9,7 +9,7 @@ ob_start();
         <i class="fas fa-key forgot-icon"></i>
         <h1>Recuperar contraseña</h1>
         <p>Esta función aún no está implementada plenamente en el sistema corporativo.</p>
-        <p class="text-muted">Por favor, contacte con el administrador del sistema o envíe un correo a soporte@ecoreciclaje.com para restablecer su acceso.</p>
+        <p class="text-muted">Por favor, contacte con el administrador del sistema o envíe un correo a epsiccaciqueticoporo2023@gmail.com para restablecer su acceso.</p>
         <div class="forgot-actions">
             <a href="/reciclaje/views/public/login.php" class="btn-back">
                 <i class="fas fa-arrow-left"></i> Volver a iniciar sesión

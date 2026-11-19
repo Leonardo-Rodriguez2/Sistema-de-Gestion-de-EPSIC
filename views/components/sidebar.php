@@ -14,9 +14,6 @@ $page = $page ?? 'dashboard';
         <ul class="nav-links" id="navLinks">
             <li><a href="router.php?page=dashboard" class="<?= $page=='dashboard'?'active':'' ?>">&#x1f4ca; Dashboard</a></li>
             <li><a href="router.php?page=notificaciones" class="<?= $page=='notificaciones'?'active':'' ?>">&#x1f514; Notificaciones<?php if (!empty($notif_count)): ?><span style="margin-left:auto;background:#8A5A5A;color:#fff;border-radius:10px;padding:1px 7px;font-size:10px;font-weight:700;flex-shrink:0;"><?= (int)$notif_count ?></span><?php endif; ?></a></li>
-            <?php if (in_array($rol_id, [1, 2], true)): ?>
-            <li><a href="router.php?page=solicitudes_servicio" class="<?= $page=='solicitudes_servicio'?'active':'' ?>">&#x1f9fe; Cotizaciones</a></li>
-            <?php endif; ?>
             <?php if ($rol_id == 3): ?>
             <li><a href="router.php?page=reportes_ciudadanos" class="<?= $page=='reportes_ciudadanos'?'active':'' ?>">&#x1f4e3; Reportes Ciudadanos</a></li>
             <?php endif; ?>

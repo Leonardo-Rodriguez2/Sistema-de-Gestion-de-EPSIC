@@ -214,20 +214,6 @@ CREATE TABLE `detalles_recolector` (
 -- --------------------------------------------------------
 
 --
--- Estructura de tabla para la tabla `empresas`
---
-
-CREATE TABLE `empresas` (
-  `id` int(11) NOT NULL,
-  `nombre` varchar(100) NOT NULL,
-  `descripcion` text DEFAULT NULL,
-  `contacto` varchar(255) NOT NULL,
-  `materiales` varchar(255) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- --------------------------------------------------------
-
---
 -- Estructura de tabla para la tabla `lotes_barrio`
 --
 
@@ -349,29 +335,6 @@ CREATE TABLE `reportes` (
   `estado` enum('Pendiente','En proceso','Completado') DEFAULT 'Pendiente',
   `fotos` varchar(255) DEFAULT NULL,
   `fecha_reporte` timestamp NULL DEFAULT current_timestamp()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- --------------------------------------------------------
-
---
--- Estructura de tabla para la tabla `solicitudes_servicio`
--- (Solicitudes de cotización enviadas desde el portal público)
---
-
-CREATE TABLE `solicitudes_servicio` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `representante` varchar(150) NOT NULL,
-  `telefono` varchar(30) NOT NULL,
-  `barrio` varchar(150) NOT NULL,
-  `tipo_contrato` varchar(100) DEFAULT NULL,
-  `plan` varchar(80) DEFAULT NULL,
-  `cantidad` int(11) DEFAULT NULL,
-  `monto_estimado_usd` decimal(10,2) DEFAULT NULL,
-  `detalles` text DEFAULT NULL,
-  `correo` varchar(150) DEFAULT NULL,
-  `estado` enum('Pendiente','Atendido','Descartado') NOT NULL DEFAULT 'Pendiente',
-  `fecha` timestamp NOT NULL DEFAULT current_timestamp(),
-  PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------
@@ -562,12 +525,6 @@ ALTER TABLE `detalles_recolector`
   ADD UNIQUE KEY `usuario_id` (`usuario_id`);
 
 --
--- Indices de la tabla `empresas`
---
-ALTER TABLE `empresas`
-  ADD PRIMARY KEY (`id`);
-
---
 -- Indices de la tabla `lotes_barrio`
 --
 ALTER TABLE `lotes_barrio`
@@ -696,12 +653,6 @@ ALTER TABLE `detalles_gestor`
 -- AUTO_INCREMENT de la tabla `detalles_recolector`
 --
 ALTER TABLE `detalles_recolector`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT de la tabla `empresas`
---
-ALTER TABLE `empresas`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --

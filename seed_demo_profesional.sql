@@ -6,8 +6,6 @@ SET time_zone = "+00:00";
 
 -- Limpiar datos demo previos si existen (mantener estructura y usuarios base)
 DELETE FROM reportes;
-DELETE FROM solicitudes_servicio;
-DELETE FROM empresas;
 DELETE FROM detalles_recolector;
 DELETE FROM detalles_gestor;
 DELETE FROM pagos;
@@ -18,8 +16,6 @@ DELETE FROM recaudaciones;
 
 -- Reset AUTO_INCREMENT
 ALTER TABLE reportes AUTO_INCREMENT = 1;
-ALTER TABLE solicitudes_servicio AUTO_INCREMENT = 1;
-ALTER TABLE empresas AUTO_INCREMENT = 1;
 ALTER TABLE detalles_recolector AUTO_INCREMENT = 1;
 ALTER TABLE detalles_gestor AUTO_INCREMENT = 1;
 ALTER TABLE pagos AUTO_INCREMENT = 1;
@@ -28,11 +24,6 @@ ALTER TABLE lotes_barrio AUTO_INCREMENT = 1;
 ALTER TABLE recibos_finiquito AUTO_INCREMENT = 1;
 ALTER TABLE recaudaciones AUTO_INCREMENT = 1;
 
--- Empresas recicladoras
-INSERT INTO empresas (nombre, descripcion, contacto, materiales) VALUES
-('EcoReciclaje S.A.C.', 'Empresa dedicada al acopio, clasificación y comercialización de residuos reciclables.', '987654321 / ventas@ecoreciclaje.com', 'Plástico PET, Cartón, Papel, Vidrio, Aluminio'),
-('GreenAndes SRL', 'Centro de acopio certificado con enfoque en economía circular y RCDs.', '984123456 / contacto@greenandes.pe', 'Metal, Chatarra, Vidrio, Plástico industrial'),
-('Andes Circular', 'Aliado estratégico para reciclaje electrónico y gestión responsable.', '976543210 / operaciones@andescircular.pe', 'RAEE, Baterías, Cables, Equipos informáticos');
 
 -- Reportes ciudadanos (para que se vean completos en reportes)
 INSERT INTO reportes (usuario_id, ubicacion_nombre, latitud, longitud, tipo_residuo, descripcion, cantidad, estado, fotos, fecha_reporte) VALUES
@@ -50,13 +41,6 @@ INSERT INTO reportes (usuario_id, ubicacion_nombre, latitud, longitud, tipo_resi
 (5, 'Calle Ruinas - Wanchaq', -13.52460000, -71.96680000, 'Metal', 'Piezas metálicas pequeñas para acopio.', 8.75, 'Completado', 'uploads/reportes/reporte_012.jpg', '2026-07-12 08:40:00');
 
 -- Solicitudes de servicio público
-INSERT INTO solicitudes_servicio (representante, telefono, barrio, tipo_contrato, correo, estado, fecha) VALUES
-('María Quispe Ccahuana', '984562871', 'Barrio San Blas', 'Contrato Anual', 'maria.quispe@gmail.com', 'Pendiente', '2026-07-08 10:22:00'),
-('José Condori Mamani', '976843215', 'Santa Ana', 'Contrato Semestral', 'jose.condori@hotmail.com', 'Atendido', '2026-07-09 14:18:00'),
-('Rosa Huamán Flores', '987326548', 'Wanchaq', 'Contrato Anual', 'rosa.huaman@yahoo.com', 'Pendiente', '2026-07-10 09:35:00'),
-('Carlos Sánchez Yana', '965874123', 'Barrio San Blas', 'Contrato Trimestral', 'carlos.sanchez@gmail.com', 'Atendido', '2026-07-11 11:47:00'),
-('Lucía Puma Ticona', '974562398', 'Santa Ana', 'Contrato Anual', 'lucia.puma@gmail.com', 'Descartado', '2026-07-12 16:12:00'),
-('Edgar Cárdenas Loaiza', '986742159', 'Wanchaq', 'Contrato Anual', 'edgar.cardenas@gmail.com', 'Pendiente', '2026-07-13 08:54:00');
 
 -- Detalles de recolector
 INSERT INTO detalles_recolector (usuario_id, dni, telefono, turno, contacto_emergencia) VALUES
@@ -94,8 +78,6 @@ COMMIT;
 
 -- Ver resumen
 SELECT 'Reportes' as tabla, COUNT(*) as total FROM reportes
-UNION ALL SELECT 'Solicitudes', COUNT(*) FROM solicitudes_servicio
-UNION ALL SELECT 'Empresas', COUNT(*) FROM empresas
 UNION ALL SELECT 'Pagos', COUNT(*) FROM pagos
 UNION ALL SELECT 'Lotes Calle', COUNT(*) FROM lotes_calle
 UNION ALL SELECT 'Lotes Barrio', COUNT(*) FROM lotes_barrio

@@ -7,12 +7,6 @@ SET time_zone = "+00:00";
 INSERT INTO exenciones_cobro (vivienda_id, calle_id, barrio_id, tipo_exencion, descripcion, creado_por, estado, aprobado_por, fecha_creacion, fecha_revision) VALUES
 (13,2,1,'pobreza','Situación económica vulnerable',1,'Aprobado',1,NOW(),NOW());
 
--- Empresas
-INSERT INTO empresas (nombre, descripcion, contacto, materiales) VALUES
-('EcoReciclaje S.A.C.', 'Empresa dedicada al acopio, clasificación y comercialización de residuos reciclables.', '987654321 / ventas@ecoreciclaje.com', 'Plástico PET, Cartón, Papel, Vidrio, Aluminio'),
-('GreenAndes SRL', 'Centro de acopio certificado con enfoque en economía circular.', '984123456 / contacto@greenandes.pe', 'Metal, Chatarra, Vidrio, Plástico industrial'),
-('Andes Circular', 'Aliado estratégico para reciclaje electrónico y gestión responsable.', '976543210 / operaciones@andescircular.pe', 'RAEE, Baterías, Cables, Equipos informáticos'),
-('ReciclaVerde EIRL', 'Cooperativa de recicladores con enfoque social inclusivo.', '975432108 / info@reciclaverde.pe', 'Cartón, Papel, Plástico, Aluminio');
 
 -- Reportes
 INSERT INTO reportes (usuario_id, ubicacion_nombre, latitud, longitud, tipo_residuo, descripcion, cantidad, estado, fotos, fecha_reporte) VALUES
@@ -32,15 +26,6 @@ INSERT INTO reportes (usuario_id, ubicacion_nombre, latitud, longitud, tipo_resi
 (NULL,'Calle Carmen Alto - San Blas',-13.51500000,-71.97890000,'Vidrio','Frascos retornables separados.',13.60,'En proceso','uploads/reportes/reporte_014.jpg','2026-07-14 14:20:00');
 
 -- Solicitudes servicio
-INSERT INTO solicitudes_servicio (representante, telefono, barrio, tipo_contrato, correo, estado, fecha) VALUES
-('María Quispe Ccahuana','984562871','Barrio San Blas','Contrato Anual','maria.quispe@gmail.com','Pendiente','2026-07-08 10:22:00'),
-('José Condori Mamani','976843215','Santa Ana','Contrato Semestral','jose.condori@hotmail.com','Atendido','2026-07-09 14:18:00'),
-('Rosa Huamán Flores','987326548','Wanchaq','Contrato Anual','rosa.huaman@yahoo.com','Pendiente','2026-07-10 09:35:00'),
-('Carlos Sánchez Yana','965874123','Barrio San Blas','Contrato Trimestral','carlos.sanchez@gmail.com','Atendido','2026-07-11 11:47:00'),
-('Lucía Puma Ticona','974562398','Santa Ana','Contrato Anual','lucia.puma@gmail.com','Descartado','2026-07-12 16:12:00'),
-('Edgar Cárdenas Loaiza','986742159','Wanchaq','Contrato Anual','edgar.cardenas@gmail.com','Pendiente','2026-07-13 08:54:00'),
-('Juana Apaza Mamani','975863421','Santiago','Contrato Anual','juana.apaza@gmail.com','Pendiente','2026-07-14 12:26:00'),
-('Fernando Yana Ccahuana','974752318','Barrio San Blas','Contrato Semestral','fernando.yana@gmail.com','Atendido','2026-07-15 09:18:00');
 
 -- Solicitudes vivienda
 INSERT INTO solicitudes_vivienda (tipo, calle_id, vivienda_id, monto_deuda, detalles_deuda, propietario, cedula, numero_casa, referencia, estado, creado_por, revisado_por, fecha_creacion, fecha_revision) VALUES
@@ -100,8 +85,6 @@ UNION ALL SELECT 'Lotes Calle', COUNT(*) FROM lotes_calle
 UNION ALL SELECT 'Lotes Barrio', COUNT(*) FROM lotes_barrio
 UNION ALL SELECT 'Recibos', COUNT(*) FROM recibos_finiquito
 UNION ALL SELECT 'Reportes', COUNT(*) FROM reportes
-UNION ALL SELECT 'Solicitudes Servicio', COUNT(*) FROM solicitudes_servicio
 UNION ALL SELECT 'Solicitudes Vivienda', COUNT(*) FROM solicitudes_vivienda
-UNION ALL SELECT 'Empresas', COUNT(*) FROM empresas
 UNION ALL SELECT 'Exenciones', COUNT(*) FROM exenciones_cobro
 UNION ALL SELECT 'Config Barrios', COUNT(*) FROM configuraciones_barrio;

@@ -110,21 +110,6 @@ class mainModel {
         $pdo->exec("UPDATE configuraciones_barrio SET fecha_limite_pago = LAST_DAY(CURDATE()) WHERE fecha_limite_pago IS NULL");
         $pdo->exec("UPDATE configuraciones_barrio SET precio_bolivar = 130.0000 WHERE precio_bolivar IS NULL OR precio_bolivar <= 0");
 
-        // --- Columnas para las cotizaciones enviadas desde el portal público ---
-        $columnasSolicitudes = [
-            ['plan',               'VARCHAR(80) DEFAULT NULL'],
-            ['cantidad',           'INT(11) DEFAULT NULL'],
-            ['monto_estimado_usd', 'DECIMAL(10,2) DEFAULT NULL'],
-            ['detalles',           'TEXT NULL'],
-        ];
-        foreach ($columnasSolicitudes as [$col, $def]) {
-            $chk = $pdo->prepare("SHOW COLUMNS FROM solicitudes_servicio LIKE ?");
-            $chk->execute([$col]);
-            if ($chk->rowCount() === 0) {
-                $pdo->exec("ALTER TABLE solicitudes_servicio ADD COLUMN `{$col}` {$def}");
-            }
-        }
-
         // --- Columnas en cobros ---
         $columnasCobros = [
             ['tipo_cobro',              'VARCHAR(30) NOT NULL DEFAULT "Servicio"'],
