@@ -5,7 +5,7 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title><?php echo $title ?? 'Dashboard - EPSIC'; ?></title>
   <script>
     /* Todos los importes viajan en dólares; la tasa del barrio se aplica aquí
@@ -199,6 +199,111 @@
         .btn-primary { width: 100%; justify-content: center; }
         div[style*="grid-template-columns:repeat(4,"],
         div[style*="grid-template-columns: repeat(4,"] { grid-template-columns: 1fr 1fr !important; }
+    }
+
+    /* ===== MÓVIL NATIVO: todo más compacto ===== */
+    @media (max-width: 768px) {
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif !important;
+            font-size: 11px !important;
+            line-height: 1.35 !important;
+            overflow-x: hidden !important;
+        }
+        .menu-toggle { display: none !important; }
+        .main { padding: 12px 10px 84px !important; padding: 12px 10px calc(84px + env(safe-area-inset-bottom)) !important; }
+        .header {
+            flex-direction: row !important; align-items: center !important;
+            justify-content: flex-end !important;
+            margin-bottom: 8px !important; padding-bottom: 8px !important;
+            border-bottom-color: #eef2f5 !important;
+        }
+        .notif-bar { gap: 2px !important; }
+        h1 { font-size: 15px !important; }
+        h2 { font-size: 14px !important; }
+        h3 { font-size: 13px !important; }
+        h4 { font-size: 12px !important; }
+        .card, .premium-form, .compact-form, .f-section { padding: 12px !important; box-shadow: none !important; }
+        .card h2, .card h3, .card h4, .panel-heading h2, .panel-heading h3 { margin-bottom: 8px !important; }
+        .main > .card, .main > .premium-form, .main > .compact-form, .main > .form-container { margin-bottom: 12px !important; }
+        .page-intro { padding: 10px 12px !important; margin-bottom: 12px !important; gap: 10px !important; }
+        .page-intro-icon { width: 28px; height: 28px; flex-basis: 28px; font-size: 14px; }
+        .page-intro strong { font-size: 12px; }
+        .page-tabs { margin-bottom: 12px !important; }
+        .page-tab { padding: 9px 11px !important; font-size: 11px; }
+        .panel-heading { margin-bottom: 10px !important; }
+        .eyebrow { font-size: 9px; }
+        .empty-state { padding: 20px 12px !important; }
+        th, td { padding: 8px 6px !important; font-size: 10.5px !important; }
+        .table-wrap table { min-width: 420px !important; }
+        .btn-primary, .btn-submit, .btn-cancel, .btn-edit, .btn { padding: 7px 10px !important; font-size: 11px !important; min-height: 34px !important; }
+        .form-group input, .form-group select, .form-group textarea { min-height: 36px !important; padding: 7px 9px !important; font-size: 11px !important; }
+        .badge, .status-pill { font-size: 9px !important; padding: 3px 6px !important; }
+        .grid { gap: 10px !important; }
+        .form-grid, .f-grid { row-gap: 12px !important; column-gap: 12px !important; }
+        .form-actions, .f-actions { margin-top: 14px !important; padding-top: 12px !important; }
+        .alert { padding: 9px 11px !important; font-size: 11px !important; margin-bottom: 10px !important; }
+        .notif-bell { font-size: 16px !important; padding: 4px 6px !important; }
+        .notif-dropdown { width: calc(100vw - 16px) !important; max-height: 70vh !important; }
+        .notif-item { padding: 9px 11px !important; }
+        .notif-icon-box { width: 30px; height: 30px; font-size: 15px; }
+        .notif-title { font-size: 12px; }
+        .notif-detail { font-size: 10px; }
+        .modal-overlay { padding: 8px !important; }
+        .modal-box { max-width: 96vw !important; }
+        .main .table-wrap + .table-wrap { margin-top: 12px; }
+    }
+    @media (max-width: 480px) {
+        body { font-size: 10.5px !important; }
+        h1 { font-size: 14px !important; }
+        .card, .premium-form, .compact-form, .f-section { padding: 10px !important; }
+        th, td { padding: 7px 5px !important; font-size: 10px !important; }
+        .btn-primary, .btn-submit, .btn-cancel, .btn-edit, .btn { font-size: 10.5px !important; min-height: 32px !important; }
+    }
+
+    /* Barra inferior nativa */
+    .mobile-tabbar {
+      display: none;
+      position: fixed; left: 0; right: 0; bottom: 0;
+      height: 62px;
+      height: calc(62px + env(safe-area-inset-bottom));
+      padding: 4px 6px;
+      padding: 4px 6px calc(4px + env(safe-area-inset-bottom));
+      background: rgba(255,255,255,.96);
+      -webkit-backdrop-filter: saturate(180%) blur(14px);
+      backdrop-filter: saturate(180%) blur(14px);
+      border-top: 1px solid #dde4e9;
+      box-shadow: 0 -2px 14px rgba(23,33,43,.07);
+      z-index: 997;
+      grid-template-columns: repeat(4, 1fr);
+      align-items: stretch;
+    }
+    @media (max-width: 768px) { .mobile-tabbar { display: grid !important; } }
+    .mobile-tab {
+      position: relative;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      gap: 2px; border: 0; background: none; cursor: pointer;
+      color: #6b7280; font-family: inherit; font-size: 10px; font-weight: 600;
+      padding: 4px 2px; -webkit-tap-highlight-color: transparent;
+    }
+    .mobile-tab .tab-icon {
+      width: 42px; height: 28px; display: flex; align-items: center; justify-content: center;
+      font-size: 20px; line-height: 1; border-radius: 9px;
+      transition: background .2s, color .2s;
+    }
+    .mobile-tab .tab-icon .sys-icon { width: 20px; height: 20px; }
+    .mobile-tab .tab-label { line-height: 1.1; white-space: nowrap; }
+    .mobile-tab.active { color: #176b87; }
+    .mobile-tab.active .tab-icon { background: #e7f1f4; color: #176b87; }
+    .mobile-tab.active::before {
+      content: ''; position: absolute; top: 0; left: 50%; transform: translateX(-50%);
+      width: 22px; height: 3px; border-radius: 0 0 3px 3px; background: #176b87;
+    }
+    .mobile-tab .tab-badge {
+      position: absolute; top: 3px; left: calc(50% + 8px);
+      min-width: 16px; height: 16px; padding: 0 4px;
+      background: #8A5A5A; color: #fff; border: 2px solid #fff;
+      font-size: 9px; font-weight: 700; line-height: 12px; border-radius: 9px;
+      display: flex; align-items: center; justify-content: center;
     }
 
     /* Modal de comprobantes */
@@ -479,21 +584,23 @@
     $notif_por_tipo[$tipo][] = $n;
   }
 
-  // Orden estable de los iconos (solo se muestran los tipos con pendientes).
+  // En la cabecera solo se muestran avisos que requieren acción: pagos, lotes,
+  // solicitudes críticas y facturación. El resto sigue disponible en "Avisos".
   $notif_orden_tipos = [
-    'solicitud_baja', 'solicitud_renovacion', 'solicitud_alta',
-    'solicitud_baja_rechazada', 'solicitud_renovacion_rechazada', 'solicitud_alta_rechazada',
-    'solicitud_servicio', 'lote_barrio', 'lote_barrio_rechazado',
-    'lote_calle', 'lote_calle_rechazado', 'exencion',
-    'facturas_por_enviar', 'certificado', 'factura_recibida',
-    'pago_por_verificar', 'pago_pendiente', 'cobro_rechazado', 'reporte_ciudadano',
-    'solicitud_rechazada', 'solicitud_gestion', 'solicitud_gestion_rechazada',
+    'pago_por_verificar', 'cobro_rechazado', 'pago_pendiente',
+    'lote_barrio', 'lote_calle', 'lote_barrio_rechazado', 'lote_calle_rechazado',
+    'solicitud_baja', 'solicitud_renovacion', 'solicitud_alta', 'solicitud_servicio',
+    'facturas_por_enviar', 'factura_recibida', 'reporte_ciudadano',
   ];
   uksort($notif_por_tipo, function ($a, $b) use ($notif_orden_tipos) {
     $ia = array_search($a, $notif_orden_tipos, true);
     $ib = array_search($b, $notif_orden_tipos, true);
     return ($ia === false ? 999 : $ia) <=> ($ib === false ? 999 : $ib);
   });
+  foreach ($notif_por_tipo as $tipo => $items) {
+    if (!in_array($tipo, $notif_orden_tipos, true)) unset($notif_por_tipo[$tipo]);
+  }
+  $notif_por_tipo = array_slice($notif_por_tipo, 0, 3, true);
   ?>
 
   <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
@@ -502,21 +609,14 @@
 
   <main class="main">
     <header class="header">
-      <div style="display: flex; align-items: center; gap: 12px;">
-        <button class="menu-toggle" id="menuToggle" onclick="toggleSidebar()" aria-label="Toggle menu">☰</button>
-        <div>
-          <h1><?php echo $header_title ?? 'Panel de Control'; ?></h1>
-          <div style="color: #6B7280; margin-top: 5px;"><?php echo $header_subtitle ?? ''; ?></div>
-        </div>
-      </div>
-      <div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap; justify-content:flex-end;">
-        <div class="notif-bar">
+      <button class="menu-toggle" id="menuToggle" onclick="toggleSidebar()" aria-label="Abrir menú">☰</button>
+      <div class="notif-bar">
           <?php if(empty($notif_por_tipo)): ?>
             <div class="notif-wrap">
               <button class="notif-bell" onclick="toggleNotif(event, 'vacio')" title="Notificaciones">🔔</button>
               <div class="notif-dropdown" id="notifDropdown-vacio">
                 <div class="notif-dropdown-header"><span>Notificaciones</span></div>
-                <div class="notif-empty">✅ No tienes pendientes</div>
+                <div class="notif-empty">✅ No tienes avisos importantes</div>
                 <a href="router.php?page=notificaciones" class="notif-footer" onclick="cerrarNotif()">Ir al centro de notificaciones →</a>
               </div>
             </div>
@@ -565,10 +665,6 @@
               </div>
             <?php endforeach; ?>
           <?php endif; ?>
-        </div>
-        <div class="user-info">
-          <?php echo $user_greeting ?? 'Hola'; ?>, <strong><?php echo htmlspecialchars($user['nombre']); ?></strong>
-        </div>
       </div>
     </header>
 
@@ -588,6 +684,8 @@
       </div>
     </div>
   </main>
+
+  <nav class="mobile-tabbar" id="mobileTabbar" aria-label="Navegación principal móvil"></nav>
 
   <script>
   function toggleSidebar() {
@@ -653,6 +751,81 @@
       cerrarNotif();
     }
   });
+  </script>
+
+  <script>
+  // Barra inferior móvil: construye los accesos desde el mismo menú del sidebar,
+  // así respeta automáticamente el rol y las páginas activas.
+  (function(){
+    var navLinks = document.getElementById('navLinks');
+    var bar = document.getElementById('mobileTabbar');
+    if (!navLinks || !bar) return;
+
+    var rol = <?= (int)($user['rol_id'] ?? 0) ?>;
+    var pageActual = <?= json_encode($page ?? '') ?>;
+    var notifCount = <?= (int)($notif_count ?? 0) ?>;
+
+    function paginaDeHref(href){
+      var m = (href || '').match(/[?&]page=([^&]+)/);
+      if (!m) return '';
+      try { return decodeURIComponent(m[1]); } catch(e) { return m[1]; }
+    }
+    function activo(t){
+      if (t.sub) {
+        var g = navLinks.querySelector('.has-sub[data-sub="' + t.sub + '"]');
+        return !!(g && g.querySelector('a.active'));
+      }
+      return t.href ? paginaDeHref(t.href) === pageActual : false;
+    }
+
+    var tabs = [{ label:'Inicio', icon:'📊', href:'router.php?page=dashboard' }];
+    if (rol === 1) tabs.push({ label:'Gestión', icon:'🏢', sub:'a-barrios' });
+    else if (rol === 2) tabs.push({ label:'Lotes', icon:'📋', href:'router.php?page=revisar_lotes' });
+    else if (rol === 3) tabs.push({ label:'Reportar', icon:'📣', href:'router.php?page=reportes_ciudadanos' });
+    else if (rol === 5) tabs.push({ label:'Pagos', icon:'💰', sub:'b-pagos' });
+    else if (rol === 6) tabs.push({ label:'Pagos', icon:'💰', sub:'c-pagos' });
+    tabs.push({ label:'Avisos', icon:'🔔', href:'router.php?page=notificaciones', badge: notifCount });
+    tabs.push({ label:'Menú', icon:'☰', sub:null });
+
+    tabs.forEach(function(t){ t.active = activo(t); });
+
+    bar.innerHTML = tabs.map(function(t, i){
+      var badge = t.badge ? '<span class="tab-badge">' + (t.badge > 99 ? '99+' : t.badge) + '</span>' : '';
+      return '<button type="button" class="mobile-tab' + (t.active ? ' active' : '') + '" data-index="' + i + '" aria-label="' + t.label + '">' +
+               '<span class="tab-icon">' + t.icon + '</span>' +
+               '<span class="tab-label">' + t.label + '</span>' + badge +
+             '</button>';
+    }).join('');
+
+    function abrirHoja(subId){
+      var sidebar = document.getElementById('sidebar');
+      if (!sidebar) return;
+      if (!sidebar.classList.contains('open') && typeof toggleSidebar === 'function') toggleSidebar();
+      var grupo = subId ? navLinks.querySelector('.has-sub[data-sub="' + subId + '"]') : null;
+      if (grupo) {
+        if (!grupo.classList.contains('open') && typeof tSub === 'function') tSub(grupo.querySelector('a'));
+        setTimeout(function(){ grupo.scrollIntoView({block:'center', behavior:'smooth'}); }, 280);
+      } else {
+        setTimeout(function(){ navLinks.scrollTop = 0; }, 280);
+      }
+    }
+
+    bar.addEventListener('click', function(e){
+      var btn = e.target.closest('.mobile-tab');
+      if (!btn) return;
+      var t = tabs[Number(btn.getAttribute('data-index'))];
+      if (!t) return;
+      if (t.href) { window.location.href = t.href; return; }
+      abrirHoja(t.sub);
+    });
+
+    document.addEventListener('keydown', function(e){
+      if (e.key === 'Escape') {
+        var sidebar = document.getElementById('sidebar');
+        if (sidebar && sidebar.classList.contains('open') && typeof toggleSidebar === 'function') toggleSidebar();
+      }
+    });
+  })();
   </script>
   <script src="/reciclaje/assets/js/system-modal.js"></script>
   <script src="/reciclaje/assets/js/table-pagination.js"></script>

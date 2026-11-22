@@ -218,6 +218,47 @@ $page = $page ?? 'dashboard';
 .sidebar-footer{padding:8px 16px;border-top:1px solid #111827}
 .logout{display:flex;padding:7px 12px;color:#888;text-decoration:none;border-radius:0;font-size:12px}
 .logout:hover{background:#202f3b;color:#eee}
+
+/* ===== MÓVIL: el menú lateral pasa a ser una hoja inferior nativa ===== */
+@media(max-width:768px){
+    .sidebar{
+        top:auto; bottom:0; left:0; right:0;
+        width:100%; height:auto; max-height:84vh;
+        transform:translateY(105%);
+        transition:transform .32s cubic-bezier(.32,.72,0,1);
+        border-radius:18px 18px 0 0 !important;
+        box-shadow:0 -10px 34px rgba(0,0,0,.28);
+        overflow:hidden;
+        padding-bottom:env(safe-area-inset-bottom);
+        z-index:999;
+    }
+    .sidebar.open{transform:translateY(0)}
+    .sidebar-header{
+        position:relative; justify-content:center;
+        padding:14px 48px 10px;
+    }
+    .sidebar-header::before{
+        content:''; position:absolute; top:6px; left:50%;
+        transform:translateX(-50%); width:38px; height:4px;
+        background:#4a5b68; border-radius:4px;
+    }
+    .sidebar-close{
+        display:flex !important; position:absolute; right:12px; top:10px;
+        width:30px; height:30px; background:#253542; color:#cfd8df;
+        border-radius:8px !important; font-size:14px;
+    }
+    .brand-name{font-size:16px}
+    .brand-logo{width:26px;height:26px}
+    .sidebar-search{padding:10px 14px}
+    .sidebar-search input{min-height:38px;font-size:13px;border-radius:8px !important}
+    .nav-menu{padding:2px 0 6px;min-height:0}
+    .sep{padding:10px 16px 4px}
+    .nav-links a{padding:12px 16px;font-size:13px;border-left-width:3px}
+    .arr{font-size:9px}
+    .sub a{padding-left:40px!important;font-size:12px!important}
+    .sidebar-footer{padding:8px 14px calc(10px + env(safe-area-inset-bottom))}
+    .logout{padding:10px 12px;font-size:13px;border-radius:8px !important;justify-content:center}
+}
 </style>
 
 <script>

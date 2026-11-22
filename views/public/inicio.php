@@ -60,7 +60,7 @@ ob_start();
         <h2 class="fw-bold" style="color: #2A3B4A;">¿Cómo empezar a trabajar con nosotros?</h2>
       </div>
       <div class="row text-center g-4 position-relative">
-        <div class="d-none d-lg-block" style="position:absolute; top:40px; left:16%; right:16%; height:3px; background:#E5E7EB; z-index:0;"></div>
+        <div class="d-none d-lg-block" style="position:absolute; top:40px; left:16%; width:68%; height:3px; background:#E5E7EB; z-index:0;"></div>
         <div class="col-lg-3 col-md-6 position-relative z-1">
           <div class="step-circle shadow-sm">1</div>
           <h5 class="fw-bold mt-4">Contacto y Auditoría</h5>
